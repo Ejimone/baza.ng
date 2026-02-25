@@ -1,6 +1,6 @@
 # Baza.ng Mobile App — Development Status
 
-> Last updated: 2026-02-25 (Phase 4 complete)
+> Last updated: 2026-02-25 (Phase 5 complete)
 
 ---
 
@@ -293,16 +293,53 @@ Built the main home screen (Intent Gate) that users see after authentication. Di
 
 ---
 
-### Phase 5: Shopping Modes — NOT STARTED
+### Phase 5: Shopping Modes — COMPLETE
 
-- [ ] **Stock Up** — Bundle list + BundleCard + navigate to BundleDetail
-- [ ] **Bundle Detail** — Item list with per-item QtyControl, add-to-cart
-- [ ] **Cook a Meal** — Meal pack list + MealPackCard + navigate to MealPackDetail
-- [ ] **Meal Pack Detail** — Plate adjustment, ingredient removal, add-to-cart
-- [ ] **Ready to Eat** — Grid of ready-eat items with BottomSheet detail popup
-- [ ] **Snacks & Drinks** — Grid view with category filter tabs (Snacks, Breads, Drinks)
-- [ ] **Shop Your List** — SearchBar + category filter + ProductCard grid
-- [ ] **Help Me Decide** — AI chat interface, product recommendation cards
+Built all 8 shopping mode screens, 4 card components, and 3 shared UI components. All screens fetch real data from the live API — zero mock data. Cart interactions go through `useCart` hook / `cartStore`.
+
+**New shared UI components (3 files):**
+
+- `components/ui/QtyControl.tsx` — Reusable quantity stepper with `value`, `onIncrement`, `onDecrement`, `min`, `max`, `accentColor`, `small` props. Two sizes (default 32px, small 26px). Buttons disabled at bounds. Dynamic accent color for per-mode theming.
+- `components/ui/SearchBar.tsx` — Search input with clear button, auto-focus on mount, wired for the Shop Your List screen. Uses `restockMode` styles.
+- `components/ui/BottomSheet.tsx` — Reusable modal overlay with backdrop press-to-close and rounded top corners. Used by Ready to Eat popup detail.
+
+**New card components (4 files):**
+
+- `components/cards/BundleCard.tsx` — Renders bundle emoji, name, item count + savings %, description, base price, "IN CART" badge. Dynamic bg/border from `bundle.color`.
+- `components/cards/MealPackCard.tsx` — Renders meal pack emoji, name, cook time + plates, description, price, "ADDED" badge. Dynamic color from `pack.color`.
+- `components/cards/SnackCard.tsx` — 48%-width card for 2-column grid. Two states: "ADD" button (qty=0) or inline stepper (qty>0). Decrement shows "×" at qty=1 (remove).
+- `components/cards/ProductCard.tsx` — Restock item row with emoji thumb, name, brand, total-when-in-cart, unit price, "ADD" button or stepper.
+
+**Screen implementations (8 files):**
+
+- `app/(app)/modes/stockup.tsx` — **Stock Up**: Fetches bundles from `GET /v1/products/bundles`. ScrollView of BundleCard components. Tapping navigates to bundle detail. Loading/empty/error states. FloatingCart.
+- `app/(app)/modes/stockup/[id].tsx` — **Bundle Detail**: Reads `id` from params, finds bundle. Local editable items array with per-item QtyControl (min/max from API). Items at qty=0 shown at 35% opacity. Footer: retail price (strikethrough), member price (savings applied), "ADD TO CART" button. Creates CartItem with `itemType: "bundle"` and `BundleMeta`.
+- `app/(app)/modes/cookmeal.tsx` — **Cook a Meal**: Fetches meal packs from `GET /v1/products/mealpacks`. MealPackCard list. Tapping navigates to detail. Loading/empty/error states.
+- `app/(app)/modes/cookmeal/[id].tsx` — **Meal Pack Detail**: Plate selector (QtyControl, 1-12). All ingredients scale by `perPlate * plates`. Toggle to remove ingredients with "×" button. Removed items shown dimmed with strikethrough. Price scales by ratio. Creates CartItem with `itemType: "mealpack"` and `MealPackMeta { plates, removedItems }`.
+- `app/(app)/modes/readyeat.tsx` — **Ready to Eat**: Fetches from `GET /v1/products/readyeat`. List with inline stepper (ADD/qty). Popup detail modal on tap: hero emoji, time badge, kitchen, description, tags, old price (strikethrough), price, "ORDER THIS" / "ADDED" button. Creates CartItem with `itemType: "readyeat"`.
+- `app/(app)/modes/snacks.tsx` — **Snacks & Drinks**: Fetches from `GET /v1/products/snacks`. Category filter bar (All/Snacks/Breads/Drinks). 2-column grid of SnackCard components. Direct cart sync on qty change. Creates CartItem with `itemType: "snack"`.
+- `app/(app)/modes/shoplist.tsx` — **Shop Your List**: Fetches from `GET /v1/products/restock`. SearchBar (auto-focus, debounced 400ms). Category filter from API response. Re-fetches on category/query change. ProductCard list. Creates CartItem with `itemType: "product"` and `productId`.
+- `app/(app)/modes/chat.tsx` — **Help Me Decide**: Uses `POST /v1/support/message` for real AI replies. Loads existing thread on mount via `GET /v1/support/thread`. Message bubbles (user right, AI left). Typing indicator while waiting. Quick reply buttons. KeyboardAvoidingView for iOS. Auto-scroll on new messages.
+
+**Modified files (1):**
+
+- `app/(app)/modes/_layout.tsx` — Added `contentStyle: { backgroundColor: "#060d07" }` to match dark theme.
+
+**Data flow (zero mock data):**
+
+- All product data: fetched via `useProducts` hook → `services/products.ts` → live API
+- Cart state: managed by `useCart` hook → `stores/cartStore.ts` (Zustand)
+- Support chat: `services/support.ts` → `GET /v1/support/thread` + `POST /v1/support/message`
+- All prices in kobo, displayed via `formatPrice()` from `utils/format.ts`
+
+- [x] **Stock Up** — Bundle list + BundleCard + navigate to BundleDetail
+- [x] **Bundle Detail** — Item list with per-item QtyControl, add-to-cart
+- [x] **Cook a Meal** — Meal pack list + MealPackCard + navigate to MealPackDetail
+- [x] **Meal Pack Detail** — Plate adjustment, ingredient removal, add-to-cart
+- [x] **Ready to Eat** — List with inline stepper + popup detail modal
+- [x] **Snacks & Drinks** — 2-column grid with category filter tabs
+- [x] **Shop Your List** — SearchBar + category filter + debounced search + ProductCard list
+- [x] **Help Me Decide** — AI chat interface with real backend responses
 
 ---
 
@@ -461,17 +498,15 @@ baza.ng/
 
 ## Next Step
 
-**Phase 5: Shopping Modes** — Build all 6 shopping mode screens. Each mode fetches products from the live API and allows users to add items to cart.
+**Phase 6: Cart and Checkout** — Build the cart screen with item list, quantity controls, order notes, wallet balance check, and checkout flow (wallet payment + Paystack fallback).
 
 **Recommended order:**
-1. Stock Up screen (`app/(app)/modes/stockup.tsx`) — bundle list → BundleCard → navigate to BundleDetail
-2. Bundle Detail screen (`app/(app)/modes/stockup/[id].tsx`) — item list with per-item QtyControl, add-to-cart
-3. Cook a Meal screen (`app/(app)/modes/cookmeal.tsx`) — meal pack list → MealPackCard → navigate to MealPackDetail
-4. Meal Pack Detail (`app/(app)/modes/cookmeal/[id].tsx`) — plate adjustment, ingredient toggle, add-to-cart
-5. Ready to Eat screen (`app/(app)/modes/readyeat.tsx`) — grid with popup detail modal
-6. Snacks & Drinks screen (`app/(app)/modes/snacks.tsx`) — grid with category filter tabs
-7. Shop Your List screen (`app/(app)/modes/shoplist.tsx`) — search + category filter + product grid
-8. Help Me Decide screen (`app/(app)/modes/chat.tsx`) — AI chat interface
+1. Cart screen (`app/(app)/cart.tsx`) — item list with qty controls, remove, subtotal, delivery, order note input
+2. Wallet balance bar — shows balance with sufficient/insufficient styling
+3. FundPrompt component (`components/ui/FundPrompt.tsx`) — bottom sheet for wallet top-up when balance is low
+4. Checkout flow — wallet deduction via `POST /v1/orders/create`, order confirmation feedback
+5. Paystack card payment fallback — WebView for `authorizationUrl`, verify via `GET /v1/wallet/verify-topup`
+6. FloatingCart — enhance for persistent visibility across all shopping mode screens
 
 ---
 
