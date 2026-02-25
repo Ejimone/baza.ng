@@ -128,8 +128,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        serif: ['"DM Serif Display"', "Georgia", "serif"],
-        mono: ["SpaceMono", "monospace"],
+        serif: ["DMSerifDisplay_400Regular"],
+        mono: ["SpaceMono_400Regular"],
       },
       spacing: {
         status: "52px",

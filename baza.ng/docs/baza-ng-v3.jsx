@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 
@@ -1924,7 +1924,7 @@ function AuthScreen({ onAuth }) {
 
       <div style={{ fontSize:13,color:"#4a6a4a",textAlign:"center",lineHeight:1.8,marginBottom:48 }}>
         The smarter way to stock your kitchen.<br/>
-        <span style={{ color:"#2a4a2a" }}>Members-only pricing. Delivered.</span>
+        <span style={{ color:"#2a4a2a" }}>Market pricing. Delivered to your doorstep.</span>
       </div>
 
       <button onClick={()=>setMode("signup")} style={{

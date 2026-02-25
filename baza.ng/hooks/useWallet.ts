@@ -3,7 +3,7 @@ import { useWalletStore } from "../stores/walletStore";
 import * as walletService from "../services/wallet";
 import { formatPrice } from "../utils/format";
 import { WALLET_POLL_INTERVAL_MS } from "../utils/constants";
-import type { WalletTransaction, TopupInitResponse, Pagination } from "../types";
+import type { WalletTransaction, WalletAccountResponse, TopupInitResponse, Pagination } from "../types";
 
 export function useWallet() {
   const {
@@ -70,6 +70,30 @@ export function useWallet() {
     [],
   );
 
+  const [account, setAccount] = useState<WalletAccountResponse | null>(null);
+  const [isLoadingAccount, setIsLoadingAccount] = useState(false);
+
+  const fetchAccount = useCallback(async () => {
+    setIsLoadingAccount(true);
+    setError(null);
+    try {
+      const data = await walletService.getAccount();
+      setAccount(data);
+      if (data.accountNumber) {
+        setWalletInfo({
+          balance: data.walletBalance,
+          accountNumber: data.accountNumber,
+          bankName: data.bankName,
+          accountName: data.accountName,
+        });
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error ?? "Failed to load account details");
+    } finally {
+      setIsLoadingAccount(false);
+    }
+  }, [setWalletInfo]);
+
   // Polling: call startPolling() when wallet screen mounts, stopPolling() on unmount
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -97,9 +121,12 @@ export function useWallet() {
     transactions,
     txPagination,
     isLoadingTx,
+    account,
+    isLoadingAccount,
     error,
     refreshBalance,
     fetchTransactions,
+    fetchAccount,
     initTopup,
     verifyTopup,
     startPolling,

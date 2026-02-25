@@ -1,6 +1,6 @@
 # Baza.ng Mobile App — Development Status
 
-> Last updated: 2026-02-25 (Phase 7 complete)
+> Last updated: 2026-02-25 (Phase 10 — Wallet Screen complete)
 
 ---
 
@@ -9,12 +9,12 @@
 | Test Suite         | Result                 | Notes                                                                                                       |
 | ------------------ | ---------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `test_runner.py`   | PASS (19/20 endpoints) | All endpoints working. Order create returned 400 (INSUFFICIENT_BALANCE) — expected with low wallet balance. |
-| `test_paystack.py` | PASS (6/6 tests)       | Paystack config, wallet balance, topup init, verify flows all working.                                      |
+| `test_paystack.py` | PASS (8/8 tests)       | Paystack config, wallet balance, wallet account (DVA), transactions, topup init, verify flows all working.  |
 | `UserFlow.py`      | NOT RUN                | Requires interactive OTP input. Verified manually via test_runner.py which covers the same endpoints.       |
 
 **API Base URL:** `https://baza-chi.vercel.app/v1`
 
-**Last tested:** 2026-02-25 (re-verified before Phase 7 build — all results consistent)
+**Last tested:** 2026-02-25 (re-verified before Phase 10 build — all results consistent)
 
 ### Verified Endpoints
 
@@ -463,19 +463,201 @@ Built the full order history list and order detail screens, the OrderCard compon
 
 ---
 
-### Phase 8: Profile and Settings — NOT STARTED
+### Phase 8: Profile and Settings — COMPLETE
 
-- [ ] Profile screen with WalletCard (balance, account number, copy)
-- [ ] Navigation to settings screens
-- [ ] Notifications screen (toggle preferences)
-- [ ] Delivery Address screen (add, edit, delete, set default)
-- [ ] Refer a Friend screen (share code, view stats)
-- [ ] Support Chat screen (AI chat with message history)
-- [ ] Account Settings screen (name, email, phone change, password)
+Built the full Profile hub screen with wallet integration and all 5 settings sub-screens: Notifications, Delivery Address, Refer a Friend, Support Chat, and Account Settings. Created the missing user service layer for profile/address/notification API calls. All data fetched from live API — zero mock data.
+
+**New files (2):**
+
+- `services/user.ts` — User service with 7 functions:
+  - `updateProfile(payload)` → `PUT /v1/user/profile`
+  - `updateNotifications(prefs)` → `PUT /v1/user/notifications`
+  - `getAddresses()` → `GET /v1/user/addresses/`
+  - `createAddress(payload)` → `POST /v1/user/addresses/create`
+  - `updateAddress(id, payload)` → `PUT /v1/user/addresses/:id`
+  - `setDefaultAddress(id)` → `PATCH /v1/user/addresses/:id/default`
+  - `deleteAddress(id)` → `DELETE /v1/user/addresses/:id/delete`
+
+**Modified files (1):**
+
+- `app/(app)/settings/_layout.tsx` — Added `contentStyle: { backgroundColor: "#060d07" }` to match dark theme
+
+**Implemented screens (6 files — all replaced from placeholders):**
+
+- `app/(app)/profile.tsx` — **Profile Screen**: Central hub with:
+  - Header: back button, avatar (user first initial), name (serif font), member since year
+  - WalletCard component: live balance from API, "TOP UP WALLET" button
+  - DVA account box: Providus Bank account number, COPY button (expo-clipboard)
+  - Navigation rows: My Orders (with count), Notifications, Delivery Address, Refer a Friend, Contact Support — each navigates to respective screen
+  - Settings section: Account Settings row
+  - Sign Out button: calls `useAuth().logout()` (clears cart, tokens, navigates to auth)
+  - Top-up bottom sheet: 5 amount buttons (₦5K–₦100K), DVA transfer box, confirm → Paystack WebBrowser → verify
+
+- `app/(app)/settings/notifications.tsx` — **Notifications Screen**:
+  - 5 toggle rows: Order updates, Rider on the way, Member deals, Restock reminders, Weekly digest
+  - Custom toggle pill matching prototype (not native Switch)
+  - On toggle: optimistically updates UI, calls `PUT /v1/user/notifications`, syncs authStore
+  - Reverts on API failure
+  - Push notifications notice box at bottom
+
+- `app/(app)/settings/address.tsx` — **Delivery Address Screen** (blue-tinted theme):
+  - Address cards: icon (🏠/🏢), label, address text, landmark, DEFAULT badge or SET DEFAULT button
+  - Set default: calls `PATCH /v1/user/addresses/:id/default`, updates list in-place
+  - Long press to delete: confirmation Alert, calls `DELETE /v1/user/addresses/:id/delete`
+  - "+ ADD NEW ADDRESS" button opens bottom sheet form
+  - Form: label, address, landmark inputs, SAVE/CANCEL buttons
+  - Pull-to-refresh
+  - Loading state on mount
+
+- `app/(app)/settings/refer.tsx` — **Refer a Friend Screen** (amber-tinted theme):
+  - Perk cards (2-col grid): "YOU GET ₦2,000" / "FRIEND GETS ₦1,000"
+  - Referral code box: code from `GET /v1/referral/stats`, COPY button (expo-clipboard)
+  - Share invite: phone input + SEND button uses `Share.share()` with invite message
+  - Referral list: from API `referrals[]` with name, check/pending status
+  - Disclaimer text at bottom
+
+- `app/(app)/settings/support.tsx` — **Support Chat Screen** (blue-dark theme):
+  - Header: robot avatar (green dot if human joined), dynamic title/status text
+  - Message bubbles: user (right, orange tint), AI (left, green tint), human agent (left, blue tint), system (centered)
+  - Flagged message labels
+  - Typing indicator: 3-dot display while waiting for AI reply
+  - Quick reply buttons: shown only on first message
+  - Input bar: TextInput + send button, KeyboardAvoidingView for iOS
+  - On mount: loads thread from `GET /v1/support/thread`
+  - On send: `POST /v1/support/message`, updates flagged/humanJoined states
+
+- `app/(app)/settings/account.tsx` — **Account Settings Screen**:
+  - Name field (pre-filled, editable)
+  - Email field (pre-filled, editable)
+  - Phone field (read-only, dimmed, hint to contact support)
+  - SAVE CHANGES button: calls `PUT /v1/user/profile`, updates authStore, shows "✓ CHANGES SAVED"
+  - Validation: name required
+
+**Wallet components (2 files — replaced from placeholders):**
+
+- `components/wallet/WalletCard.tsx` — Reusable wallet balance display: large serif balance, "AVAILABLE BALANCE" label, "TOP UP WALLET" button. Used by Profile screen.
+- `components/wallet/TransactionItem.tsx` — Reusable transaction row: amount (green/red by type), type label, description, date. Built for future wallet history.
+
+**Data flow (zero mock data):**
+
+- Profile: `useWallet().refreshBalance()` + `useOrders().fetchOrders()` + `authStore.user`
+- Notifications: `authStore.user.notifications` (read) + `PUT /v1/user/notifications` (write)
+- Addresses: full CRUD via `services/user.ts` → `GET/POST/PUT/PATCH/DELETE /v1/user/addresses/*`
+- Referral: `GET /v1/referral/stats` via `services/referral.ts`
+- Support: `GET /v1/support/thread` + `POST /v1/support/message` via `services/support.ts`
+- Account: `authStore.user` (read) + `PUT /v1/user/profile` via `services/user.ts` (write)
+- Paystack top-up: `initTopup()` → WebBrowser → `verifyTopup()` → balance updated
+
+- [x] Profile screen with WalletCard (balance, account number, copy)
+- [x] Navigation to all settings screens
+- [x] Top-up bottom sheet with Paystack flow
+- [x] Notifications screen (5 toggle rows with live API save)
+- [x] Delivery Address screen (list, add, set default, delete)
+- [x] Refer a Friend screen (code, copy, share, referral list)
+- [x] Support Chat screen (AI chat with flagging, typing indicator, quick replies)
+- [x] Account Settings screen (name, email, save)
+- [x] Sign out flow
+- [x] User service layer (`services/user.ts`)
+- [x] WalletCard and TransactionItem components
 
 ---
 
-### Phase 9: Polish — NOT STARTED
+### Phase 9a: Font Fix — COMPLETE
+
+Fixed font loading so that DM Serif Display (headlines) and SpaceMono (body/labels) actually render instead of falling back to system defaults. The fonts were referenced in config but never loaded at runtime.
+
+**Dependencies added:**
+
+- `@expo-google-fonts/dm-serif-display` — provides `DMSerifDisplay_400Regular` (.ttf asset + named export)
+- `@expo-google-fonts/space-mono` — provides `SpaceMono_400Regular` (.ttf asset + named export)
+
+**Modified files (7):**
+
+- `app/_layout.tsx` — Added `useFonts()` call to load both fonts in parallel with auth init. Added `SplashScreen.preventAutoHideAsync()` at module scope and `SplashScreen.hideAsync()` via `onLayout` callback once both fonts and auth are ready. App renders nothing (keeps splash screen) until both complete.
+- `constants/theme.ts` — Updated `fonts.serif` from `"DMSerifDisplay"` to `"DMSerifDisplay_400Regular"`, `fonts.mono` from `"SpaceMono"` to `"SpaceMono_400Regular"`.
+- `tailwind.config.js` — Updated `fontFamily.serif` from `['"DM Serif Display"', "Georgia", "serif"]` to `["DMSerifDisplay_400Regular"]`, `fontFamily.mono` from `["SpaceMono", "monospace"]` to `["SpaceMono_400Regular"]`. This makes NativeWind `font-serif` and `font-mono` classes resolve to the loaded fonts.
+- `app/(app)/index.tsx` — Updated 2 inline `fontFamily: "SpaceMono"` → `"SpaceMono_400Regular"`
+- `app/(app)/modes/readyeat.tsx` — Updated inline `fontFamily: "SpaceMono"` → `"SpaceMono_400Regular"`
+- `app/(app)/modes/cookmeal/[id].tsx` — Updated inline `fontFamily: "SpaceMono"` → `"SpaceMono_400Regular"`
+- `app/(app)/modes/stockup/[id].tsx` — Updated inline `fontFamily: "SpaceMono"` → `"SpaceMono_400Regular"`
+
+**How it works:**
+
+1. `useFonts()` from `expo-font` loads both `.ttf` assets from the Google Fonts packages
+2. `SplashScreen` stays visible until fonts are loaded AND auth is initialized
+3. NativeWind classes `font-serif` / `font-mono` (used 100+ times across `styles/index.ts`) now resolve to the correct loaded font names
+4. Inline `fontFamily` references in 4 screen files also point to the correct loaded names
+5. No changes needed in `styles/index.ts` — it already used `font-serif` and `font-mono` throughout
+
+- [x] Install `@expo-google-fonts/dm-serif-display` and `@expo-google-fonts/space-mono`
+- [x] Load fonts in `app/_layout.tsx` with `useFonts` + SplashScreen gate
+- [x] Update font name strings in `constants/theme.ts`
+- [x] Update font family arrays in `tailwind.config.js`
+- [x] Fix inline `fontFamily` references in 4 screen files (5 occurrences)
+
+---
+
+### Phase 10: Wallet Screen & Payment Completion — COMPLETE
+
+Built a dedicated wallet screen with full transaction history, DVA account details, Paystack card top-up flow, balance polling, and navigation from home header and profile. Re-verified all API endpoints via test scripts before building. All data fetched from live API — zero mock data.
+
+**API Re-verification (pre-build):**
+
+- `test_runner.py`: 19/20 PASS (order create = INSUFFICIENT_BALANCE expected)
+- `test_paystack.py`: 8/8 PASS (paystack-config, wallet/balance, wallet/account, wallet/transactions, topup init, verify-pending, verify-bogus, verify-no-ref)
+
+**New files (1):**
+
+- `app/(app)/wallet.tsx` — **Wallet Screen**: Full dedicated wallet experience with:
+  - Large serif balance display with "BAZA WALLET" label
+  - Two action buttons: "TOP UP" (opens Paystack card flow) and "COPY ACCT NO." (copies DVA number)
+  - DVA account details box: account number, bank name, account name, COPY button (expo-clipboard)
+  - Transaction history: FlatList of TransactionItem components fetched from `GET /v1/wallet/transactions`
+  - Pagination: infinite scroll via `onEndReached` when `hasNext` is true
+  - Pull-to-refresh: RefreshControl on the FlatList, refreshes balance + transactions
+  - Balance polling: 10-second interval via `useWallet().startPolling()` on mount, stopped on unmount
+  - Top-up bottom sheet: quick amount selector (₦5K, ₦10K, ₦20K, ₦50K), DVA transfer box as alternative, confirm → Paystack WebBrowser → verify → balance + transactions refresh
+  - Loading state: ActivityIndicator while first-loading transactions
+  - Empty state: "NO TRANSACTIONS YET" with "Top up your wallet to get started" subtitle
+  - Back button navigation
+
+**Modified files (5):**
+
+- `types/index.ts` — Added `WalletAccountResponse` interface for `GET /v1/wallet/account` (accountNumber, bankName, accountName, assigned, walletBalance)
+- `services/wallet.ts` — Added `getAccount()` function calling `GET /v1/wallet/account` for DVA provisioning status
+- `hooks/useWallet.ts` — Added `fetchAccount()` function, `account` state, `isLoadingAccount` state. On fetch, syncs account info (accountNumber, bankName, accountName) back to walletStore.
+- `components/layout/Header.tsx` — Made the "WALLET BALANCE" / balance amount area tappable, navigating to `/(app)/wallet`
+- `components/wallet/WalletCard.tsx` — Made the card tappable to navigate to `/(app)/wallet` (top-up button remains independently tappable)
+- `styles/index.ts` — Added full `walletScreen` style export (50+ class strings) covering balance section, account box, transaction list, top-up sheet, empty/loading states
+
+**Data flow (zero mock data):**
+
+- Balance: `GET /v1/wallet/balance` via `useWallet().refreshBalance()` on mount + 10s polling
+- Account details: `GET /v1/wallet/account` via `useWallet().fetchAccount()` on mount
+- Transactions: `GET /v1/wallet/transactions?page=N&limit=50` via `useWallet().fetchTransactions()`
+- Top-up: `POST /v1/wallet/topup` → opens `authorizationUrl` in WebBrowser → `GET /v1/wallet/verify-topup` → balance + transactions refreshed
+- Clipboard: `expo-clipboard` for DVA account number copy
+
+**Navigation paths to wallet screen:**
+
+- Home header: tap "WALLET BALANCE" area → `/(app)/wallet`
+- Profile screen: tap WalletCard component → `/(app)/wallet`
+
+- [x] Re-verify all API endpoints (test_runner.py: 19/20, test_paystack.py: 8/8)
+- [x] Add `WalletAccountResponse` type to `types/index.ts`
+- [x] Add `getAccount()` to `services/wallet.ts` for DVA provisioning
+- [x] Add `fetchAccount()` to `hooks/useWallet.ts` with account state
+- [x] Add `walletScreen` styles to `styles/index.ts`
+- [x] Create `app/(app)/wallet.tsx` with balance, DVA, transactions, top-up
+- [x] Wire navigation from Header (home) and WalletCard (profile) to wallet screen
+- [x] Transaction history with `TransactionItem` component (previously unused, now active)
+- [x] Pull-to-refresh on wallet screen
+- [x] Balance polling (10s interval) while wallet screen is open
+- [x] Top-up bottom sheet with Paystack card flow + DVA transfer alternative
+
+---
+
+### Phase 9b: Polish — NOT STARTED
 
 - [ ] Loading states (LoadingSpinner on all data-fetching screens)
 - [ ] Empty states (EmptyState component for no data)
@@ -484,7 +666,6 @@ Built the full order history list and order detail screens, the OrderCard compon
 - [ ] Pull-to-refresh on list screens
 - [ ] Keyboard handling and avoidance
 - [ ] Dark theme consistency across all screens
-- [ ] Typography with DM Serif Display for headlines
 - [ ] Safe area handling (status bar, bottom safe area)
 
 ---
@@ -513,6 +694,7 @@ baza.ng/
 │       ├── _layout.tsx
 │       ├── index.tsx
 │       ├── cart.tsx
+│       ├── wallet.tsx
 │       ├── orders.tsx
 │       ├── orders/[id].tsx
 │       ├── profile.tsx
@@ -572,7 +754,8 @@ baza.ng/
 │   ├── orders.ts
 │   ├── wallet.ts
 │   ├── referral.ts
-│   └── support.ts
+│   ├── support.ts
+│   └── user.ts
 ├── hooks/
 │   ├── useAuth.ts
 │   ├── useCart.ts
@@ -594,15 +777,22 @@ baza.ng/
 
 ## Next Step
 
-**Phase 8: Profile and Settings** — Build the profile screen and all settings sub-screens.
+**Phase 9b: Polish** — Add loading/empty/error states, animations, pull-to-refresh, keyboard handling, and dark theme consistency across all screens.
 
 **Recommended order:**
-1. Profile screen (`app/(app)/profile.tsx`) — WalletCard with balance + account number + copy, navigation rows to settings screens, top-up sheet
-2. Notifications screen (`app/(app)/settings/notifications.tsx`) — toggle switches for each notification preference (orders, delivery, deals, reminders, newsletter)
-3. Delivery Address screen (`app/(app)/settings/address.tsx`) — list addresses, add new, edit, delete, set default
-4. Refer a Friend screen (`app/(app)/settings/refer.tsx`) — share referral code, view referral stats and list
-5. Support Chat screen (`app/(app)/settings/support.tsx`) — AI chat with message history (reuse chat patterns from Help Me Decide mode)
-6. Account Settings screen (`app/(app)/settings/account.tsx`) — name, email, phone change, sign out
+1. Loading states — ensure all data-fetching screens show LoadingSpinner component
+2. Empty states — ensure all list screens show EmptyState component when no data
+3. Error handling — add retry logic and user-friendly error messages across all screens
+4. Animations — fadeUp, slideUp, scaleIn, cartBump per prototype design spec
+5. Pull-to-refresh — ensure all list screens have RefreshControl
+6. Keyboard handling — KeyboardAvoidingView on all input screens
+7. Dark theme consistency — verify all screens match the dark theme colors
+8. Safe area handling — verify status bar and bottom safe area padding
+
+**Other future phases (not started):**
+- WebSocket integration for real-time wallet credit notifications (bank transfer auto-credit)
+- Paystack Inline payment method for direct order payment (paystack_inline flow)
+- Order payment verification endpoint integration (`GET /v1/orders/verify-payment`)
 
 ---
 

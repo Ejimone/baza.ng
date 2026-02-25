@@ -6,8 +6,10 @@ import {
   Pressable,
   ActivityIndicator,
   RefreshControl,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
 import { intentGateBalance as s } from "../../styles";
 import Header from "../../components/layout/Header";
 import ModeCard from "../../components/cards/ModeCard";
@@ -132,11 +134,45 @@ export default function IntentGateScreen() {
 }
 
 function TopUpSheet({ onClose }: { onClose: () => void }) {
-  const { formattedBalance, accountNumber, bankName, accountName } =
-    useWallet();
+  const {
+    accountNumber,
+    bankName,
+    accountName,
+    initTopup,
+    verifyTopup,
+    refreshBalance,
+  } = useWallet();
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const quickAmounts = [500000, 1000000, 2000000, 5000000];
+
+  const handleConfirm = async () => {
+    if (!selectedAmount) return;
+    setIsProcessing(true);
+    try {
+      const { authorizationUrl, reference } = await initTopup(selectedAmount);
+      await WebBrowser.openBrowserAsync(authorizationUrl, {
+        dismissButtonStyle: "close",
+        presentationStyle: WebBrowser.WebBrowserPresentationStyle.FORM_SHEET,
+      });
+      const result = await verifyTopup(reference);
+      if (result.status === "success") {
+        await refreshBalance();
+      } else {
+        Alert.alert("Top-up Pending", "Your balance will update shortly.");
+        await refreshBalance();
+      }
+      onClose();
+    } catch (err: any) {
+      Alert.alert(
+        "Top-up Failed",
+        err.response?.data?.error ?? "Please try again.",
+      );
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <View className={s.topUpSheet}>
@@ -144,15 +180,7 @@ function TopUpSheet({ onClose }: { onClose: () => void }) {
       <View className={s.topUpSheetInner}>
         <View className={s.topUpHandle} />
         <Text className={s.topUpLabel}>FUND YOUR WALLET</Text>
-        <Text className={s.topUpTitle}>Transfer to your account</Text>
-
-        <View className={s.topUpAcctBox}>
-          <Text className={s.topUpAcctLabel}>ACCOUNT NUMBER</Text>
-          <Text className={s.topUpAcctNumber}>{accountNumber ?? "—"}</Text>
-          <Text className={s.topUpAcctBank}>
-            {bankName ?? "Providus Bank"} · {accountName ?? "Baza NG Ltd"}
-          </Text>
-        </View>
+        <Text className={s.topUpTitle}>How much?</Text>
 
         <View className={s.topUpGrid}>
           {quickAmounts.map((amount) => (
@@ -173,7 +201,7 @@ function TopUpSheet({ onClose }: { onClose: () => void }) {
               <Text
                 style={{
                   color: selectedAmount === amount ? "#4caf7d" : "#5a8a5a",
-                  fontFamily: "SpaceMono",
+                  fontFamily: "SpaceMono_400Regular",
                   fontSize: 13,
                 }}
               >
@@ -183,31 +211,48 @@ function TopUpSheet({ onClose }: { onClose: () => void }) {
           ))}
         </View>
 
+        {accountNumber && (
+          <View className={s.topUpAcctBox}>
+            <Text className={s.topUpAcctLabel}>OR TRANSFER TO</Text>
+            <Text className={s.topUpAcctNumber}>{accountNumber}</Text>
+            <Text className={s.topUpAcctBank}>
+              {bankName ?? "Providus Bank"} · {accountName ?? "Baza NG Ltd"}
+            </Text>
+          </View>
+        )}
+
         <Pressable
           className={s.topUpConfirmBtn}
           style={{
             backgroundColor: selectedAmount ? "#4caf7d" : "#1a2a1c",
+            alignItems: "center",
           }}
+          onPress={handleConfirm}
+          disabled={!selectedAmount || isProcessing}
         >
-          <Text
-            style={{
-              color: selectedAmount ? "#000" : "#2a3a2a",
-              textAlign: "center",
-              fontFamily: "SpaceMono",
-              fontSize: 11,
-              fontWeight: "bold",
-              letterSpacing: 2,
-            }}
-          >
-            {selectedAmount
-              ? `TRANSFER ${formatPrice(selectedAmount)}`
-              : "SELECT AMOUNT"}
-          </Text>
+          {isProcessing ? (
+            <ActivityIndicator color="#000" size="small" />
+          ) : (
+            <Text
+              style={{
+                color: selectedAmount ? "#000" : "#2a3a2a",
+                textAlign: "center",
+                fontFamily: "SpaceMono_400Regular",
+                fontSize: 11,
+                fontWeight: "bold",
+                letterSpacing: 2,
+              }}
+            >
+              {selectedAmount
+                ? `CONFIRM ${formatPrice(selectedAmount)}`
+                : "SELECT AMOUNT"}
+            </Text>
+          )}
         </Pressable>
 
         <Pressable onPress={onClose}>
           <Text className={s.topUpCancelBtn} style={{ textAlign: "center" }}>
-            Cancel
+            CANCEL
           </Text>
         </Pressable>
       </View>

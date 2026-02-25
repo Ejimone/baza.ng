@@ -1,18 +1,18 @@
-import { View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
+import { Pressable, Text, View } from "react-native";
 import { authScreen as s } from "../../styles";
 
 export default function WelcomeScreen() {
   return (
     <View className={s.welcomeContainer}>
-      <Text className={s.welcomeTagline}>MEMBERS ONLY · LAGOS</Text>
-      <Text className={s.welcomeLogo}>baza</Text>
-      <Text className={s.welcomeDot}>.ng</Text>
+      {/* <Text className={s.welcomeTagline}>MEMBERS ONLY · LAGOS</Text> */}
+      <Text className={s.welcomeLogo}>baza.ng</Text>
+      {/* <Text className={s.welcomeDot}>.ng</Text> */}
 
       <Text className={s.welcomeDesc}>
         The smarter way to stock your kitchen.{"\n"}
         <Text className={s.welcomeDescHint}>
-          Members-only pricing. Delivered.
+        Market pricing. Delivered to your doorstep
         </Text>
       </Text>
 

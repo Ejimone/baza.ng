@@ -7,7 +7,7 @@ export const TOKEN_REFRESH_BUFFER_MS = 60_000;
 
 export const WALLET_POLL_INTERVAL_MS = 10_000;
 
-export const OTP_LENGTH = 4;
+export const OTP_LENGTH = 6;
 export const OTP_EXPIRY_SECONDS = 300;
 export const OTP_RESEND_COOLDOWN_SECONDS = 60;
 
@@ -90,7 +90,7 @@ export const SHOPPING_MODES: ModeConfig[] = [
   },
   {
     key: "chat",
-    title: "Help Me Decide",
+    title: "Help Me Decide (AI COMING SOON)",
     subtitle: "AI picks for you",
     emoji: "💬",
     color: "#4caf7d",

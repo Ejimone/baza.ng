@@ -16,6 +16,9 @@ Usage:
 
   NOTE: This script does NOT actually charge a card. It tests:
     - GET /v1/wallet/paystack-config → returns public key
+    - GET /v1/wallet/balance → current wallet balance
+    - GET /v1/wallet/account → DVA bank account details (auto-provisions)
+    - GET /v1/wallet/transactions → wallet transaction history
     - POST /v1/wallet/topup → initialises a Paystack transaction (server-init flow)
     - GET /v1/wallet/verify-topup?reference=xxx → verifies payment status
 """
@@ -77,11 +80,43 @@ def test_wallet_balance():
     print(f"    balance: {body['balance']} kobo (₦{body['balance'] / 100:,.2f})")
 
 
-# ── 3. Server-init topup (Flow B) ──────────────────────────────────────────
+# ── 3. Wallet Account (DVA) ─────────────────────────────────────────────────
+
+def test_wallet_account():
+    r = requests.get(f"{BASE}/v1/wallet/account", headers=HEADERS, timeout=30)
+    assert r.status_code == 200, f"expected 200 got {r.status_code}: {r.text}"
+    body = r.json()
+    assert "accountNumber" in body, f"response missing accountNumber: {body}"
+    assert "bankName" in body, f"response missing bankName: {body}"
+    assert "accountName" in body, f"response missing accountName: {body}"
+    assert "assigned" in body, f"response missing assigned: {body}"
+    assert "walletBalance" in body, f"response missing walletBalance: {body}"
+    print(f"    accountNumber: {body['accountNumber']}")
+    print(f"    bankName: {body['bankName']}")
+    print(f"    accountName: {body['accountName']}")
+    print(f"    assigned: {body['assigned']}")
+    print(f"    walletBalance: {body['walletBalance']} kobo (₦{body['walletBalance'] / 100:,.2f})")
+
+
+# ── 4. Wallet Transactions ──────────────────────────────────────────────────
+
+def test_wallet_transactions():
+    r = requests.get(f"{BASE}/v1/wallet/transactions", headers=HEADERS, timeout=15)
+    assert r.status_code == 200, f"expected 200 got {r.status_code}: {r.text}"
+    body = r.json()
+    assert "transactions" in body, f"response missing transactions: {body}"
+    assert isinstance(body["transactions"], list), f"transactions should be a list: {body}"
+    print(f"    transaction count: {len(body['transactions'])}")
+    if body["transactions"]:
+        txn = body["transactions"][0]
+        print(f"    latest: {txn.get('type', '?')} {txn.get('amount', '?')} kobo — {txn.get('description', '')}")
+
+
+# ── 5. Server-init topup (Flow B) ──────────────────────────────────────────
 
 topup_reference = None
 
-def test_topup_init():
+def test_topup_init():  # noqa: C901
     global topup_reference
     r = requests.post(
         f"{BASE}/v1/wallet/topup",
@@ -100,7 +135,7 @@ def test_topup_init():
     print(f"    reference: {topup_reference}")
 
 
-# ── 4. Verify (will fail since no payment was made — expected) ──────────────
+# ── 6. Verify (will fail since no payment was made — expected) ──────────────
 
 def test_verify_pending():
     if not topup_reference:
@@ -119,7 +154,7 @@ def test_verify_pending():
     )
 
 
-# ── 5. Verify with bogus reference (should handle gracefully) ──────────────
+# ── 7. Verify with bogus reference (should handle gracefully) ──────────────
 
 def test_verify_bogus():
     r = requests.get(
@@ -135,7 +170,7 @@ def test_verify_bogus():
     )
 
 
-# ── 6. Verify without reference param ──────────────────────────────────────
+# ── 8. Verify without reference param ──────────────────────────────────────
 
 def test_verify_no_ref():
     r = requests.get(
@@ -155,10 +190,12 @@ if __name__ == "__main__":
 
     step("1. GET paystack-config", test_paystack_config)
     step("2. GET wallet/balance", test_wallet_balance)
-    step("3. POST wallet/topup (server-init)", test_topup_init)
-    step("4. GET verify-topup (pending — expect fail)", test_verify_pending)
-    step("5. GET verify-topup (bogus reference)", test_verify_bogus)
-    step("6. GET verify-topup (no reference)", test_verify_no_ref)
+    step("3. GET wallet/account (DVA details)", test_wallet_account)
+    step("4. GET wallet/transactions", test_wallet_transactions)
+    step("5. POST wallet/topup (server-init)", test_topup_init)
+    step("6. GET verify-topup (pending — expect fail)", test_verify_pending)
+    step("7. GET verify-topup (bogus reference)", test_verify_bogus)
+    step("8. GET verify-topup (no reference)", test_verify_no_ref)
 
     print(f"\n{'═' * 50}")
     print(f"  Results: {passed} passed, {failed} failed")

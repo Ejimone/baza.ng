@@ -239,6 +239,14 @@ export interface TopupVerifyResponse {
   walletBalance: number;
 }
 
+export interface WalletAccountResponse {
+  accountNumber: string;
+  bankName: string;
+  accountName: string;
+  assigned: boolean;
+  walletBalance: number;
+}
+
 export interface PaystackConfig {
   publicKey: string;
 }

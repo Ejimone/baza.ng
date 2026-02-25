@@ -182,7 +182,7 @@ export default function BundleDetailScreen() {
             style={{
               color: activeItems.length > 0 ? "#000" : "#2a3a2a",
               textAlign: "center",
-              fontFamily: "SpaceMono",
+              fontFamily: "SpaceMono_400Regular",
               fontSize: 11,
               fontWeight: "bold",
               letterSpacing: 2,

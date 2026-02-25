@@ -1,8 +1,8 @@
-import { View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
-import { intentGateBalance as s } from "../../styles";
+import { Pressable, Text, View } from "react-native";
 import { useWallet } from "../../hooks/useWallet";
 import { useAuthStore } from "../../stores/authStore";
+import { intentGateBalance as s } from "../../styles";
 
 interface HeaderProps {
   onTopUpPress?: () => void;
@@ -17,7 +17,7 @@ export default function Header({ onTopUpPress }: HeaderProps) {
 
   return (
     <View className={s.topBar}>
-      <View>
+      <Pressable onPress={() => router.push("/(app)/wallet" as any)}>
         <Text className={s.walletLabel}>WALLET BALANCE</Text>
         <View className={s.balanceRow}>
           <Text className={s.balanceAmount}>{formattedBalance}</Text>
@@ -25,8 +25,8 @@ export default function Header({ onTopUpPress }: HeaderProps) {
             <Text className={s.topUpText}>TOP UP</Text>
           </Pressable>
         </View>
-        <Text className={s.availableLabel}>available</Text>
-      </View>
+        <Text className={s.availableLabel}>AVAILABLE</Text>
+      </Pressable>
 
       <Pressable
         className={s.avatarButton}

@@ -70,6 +70,7 @@
 - Updated `API_USAGE.md` with complete endpoint documentation matching the live API contract, including cURL examples, request/response shapes, error codes, deployment instructions, and pagination convention.
 
 ### Real-time Updates & WebSocket Infrastructure
+
 - Added **Django Channels** + **Daphne** ASGI server for WebSocket support.
 - Added **Redis** via `django-redis` as the session backend and cache backend for high-throughput request processing.
 - Configured **`channels_redis`** channel layer for WebSocket pub/sub messaging.
@@ -88,6 +89,7 @@
 - ASGI entrypoint (`config/asgi.py`) upgraded to `ProtocolTypeRouter` with HTTP + WebSocket protocol handling.
 
 ### Paystack Payment Integration
+
 - Created **PaystackService** (`wallet/paystack.py`) — service layer for Paystack REST API:
   - `initialize_transaction()` — starts a payment and returns `authorization_url`.
   - `verify_transaction()` — verifies payment status by reference.
@@ -104,6 +106,7 @@
 - Updated `requirements.txt` with new dependencies: `channels`, `channels-redis`, `daphne`, `django-redis`, `redis`.
 
 ### High-Throughput Scaling (2500+ Concurrent Requests)
+
 - **Upstash Redis integration** — configured `UPSTASH_REDIS_URL` (TCP/TLS endpoint) for `django-redis` cache and `channels-redis` channel layer. Existing `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` (HTTP REST API) kept for OTP service and rate limiting.
 - **Redis-backed sessions** — `SESSION_ENGINE` set to `django.contrib.sessions.backends.cache` backed by Upstash Redis. Eliminates DB queries for session reads, enabling thousands of concurrent auth'd requests.
 - **Redis connection pooling** — `BlockingConnectionPool` with `max_connections=50`, socket timeouts, and `RETRY_ON_TIMEOUT` for resilient high-concurrency Redis access.
@@ -119,6 +122,7 @@
 - **Structured logging** — Added `LOGGING` config with formatters for production observability.
 
 ### Paystack Inline Payment Gateway
+
 - **Added `GET /v1/wallet/paystack-config`** endpoint — returns Paystack public key so the frontend can initialise Paystack Inline without hard-coding keys.
 - **Refactored `GET /v1/wallet/verify-topup`** to support **two payment flows**:
   - **Flow A (Paystack Inline):** Frontend opens Paystack popup directly with the public key → user pays → frontend sends reference to backend → backend verifies with Paystack API and credits wallet. No pre-existing WalletTransaction needed.
@@ -129,6 +133,7 @@
 - Updated `API_USAGE.md` with complete Paystack Inline integration guide, including frontend JS code examples and webhook setup instructions.
 
 ### Complete Order Payment System
+
 - **Three payment modes** for order checkout:
   - **`wallet`** — Deducts from user's wallet balance. Order is CONFIRMED immediately. Returns updated wallet balance.
   - **`paystack`** — Backend initialises a Paystack transaction. Returns `authorizationUrl`, `accessCode`, and `reference`. Order stays PENDING until verified.
@@ -140,6 +145,27 @@
 - **Added auto-generated account number on signup** — `generate_account_number()` creates a unique 10-digit number. `UserManager.create_user()` auto-assigns one if not provided.
 - **Added resilient WebSocket broadcasting** — order and product signals now catch Redis connection failures gracefully (logged as warnings) instead of crashing the request.
 - **Created `docs/payment-system.md`** — comprehensive frontend integration guide with React code examples for all 3 payment flows, API reference, error codes, and webhook documentation.
+
+### Dedicated Virtual Account (DVA) — Bank Transfer Wallet Funding
+
+- **Paystack DVA integration** — every customer gets a real bank account number (via Paystack Dedicated Virtual Accounts) so they can fund their wallet by bank transfer from any bank.
+- **Added DVA methods to `PaystackService`** (`wallet/paystack.py`): `create_customer()`, `create_dedicated_account()`, `assign_dedicated_account()`, `fetch_dedicated_account()`.
+- **Added DVA service layer** (`wallet/dva_service.py`): `provision_dva_for_user()` — two-step flow: create Paystack customer → create DVA. Idempotent, non-blocking on failure.
+- **Added Paystack DVA fields to User model**: `paystack_customer_code`, `paystack_dva_id`, `paystack_dva_account_number`, `paystack_dva_account_name`, `paystack_dva_bank_name`, `paystack_dva_bank_slug`, `paystack_dva_assigned`.
+- **Auto-provision DVA on signup/login** — triggered in `otp_verify` after user creation or for existing users without a DVA. Non-blocking (login still succeeds if Paystack is down).
+- **`GET /v1/wallet/account`** — returns dedicated virtual account details (account number, bank name, account name, assignment status). If DVA not yet provisioned, attempts on-the-fly provisioning.
+- **Webhook handlers for DVA events**:
+  - `charge.success` with `channel: "dedicated_nuban"` → credits user wallet (`CREDIT_TRANSFER` type). User identified by `customer_code`.
+  - `dedicatedaccount.assign.success` → stores DVA details on user record.
+  - `dedicatedaccount.assign.failed` → logged as warning.
+- **Management command** `python manage.py provision_dvas` — batch-provision DVAs for existing users. Supports `--dry-run`, `--user-id`, `--delay`.
+- **Admin panel** — DVA fields shown in collapsible "Paystack DVA" fieldset on user detail page; `paystack_dva_assigned` column in user list.
+- **`PAYSTACK_DVA_PREFERRED_BANK`** env var — defaults to `"test-bank"` for testing; set to `"wema-bank"` or `"titan-paystack"` for production.
+- **Created `docs/dva-bank-transfer.md`** — frontend integration guide with React examples, API reference, webhook event table, and testing instructions.
+- **Updated `docs/payment-system.md`** — added bank transfer as a wallet funding method.
+
+- Added wallet account (DVA) and transaction history tests to `test_paystack.py` (steps 3-4).
+- Updated `docs/payment-system.md` testing checklist with DVA account and transaction cURL commands.
 
 ## Next
 

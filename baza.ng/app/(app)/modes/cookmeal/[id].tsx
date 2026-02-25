@@ -231,7 +231,7 @@ export default function MealPackDetailScreen() {
             style={{
               color: "#000",
               textAlign: "center",
-              fontFamily: "SpaceMono",
+              fontFamily: "SpaceMono_400Regular",
               fontSize: 11,
               fontWeight: "bold",
               letterSpacing: 2,

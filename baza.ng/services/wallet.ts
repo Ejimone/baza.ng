@@ -2,6 +2,7 @@ import api from "./api";
 import type {
   WalletBalance,
   WalletTransaction,
+  WalletAccountResponse,
   TopupInitResponse,
   TopupVerifyResponse,
   PaystackConfig,
@@ -42,5 +43,10 @@ export async function verifyTopup(
   const { data } = await api.get("/wallet/verify-topup", {
     params: { reference },
   });
+  return data;
+}
+
+export async function getAccount(): Promise<WalletAccountResponse> {
+  const { data } = await api.get("/wallet/account");
   return data;
 }
