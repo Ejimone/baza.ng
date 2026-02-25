@@ -3,7 +3,6 @@ import { useAuthStore } from "../stores/authStore";
 import { useCartStore } from "../stores/cartStore";
 import * as authService from "../services/auth";
 import type { OtpVerifyPayload } from "../services/auth";
-import { setRefreshToken, deleteRefreshToken } from "../utils/storage";
 import { router } from "expo-router";
 
 export function useAuth() {
@@ -59,7 +58,6 @@ export function useAuth() {
       // Logout API call may fail if token expired — proceed anyway
     }
     clearCart();
-    await deleteRefreshToken();
     storeLogout();
     router.replace("/(auth)");
   }, [storeLogout, clearCart]);

@@ -2,6 +2,10 @@
 
 ## Completed
 
+- Updated home header wallet balance interaction: tapping the amount no longer navigates to wallet; only the `TOP UP` button is actionable and opens the top-up sheet directly.
+- Implemented auth session bootstrap persistence on app reload by always attempting `/auth/refresh` at startup, then hydrating user state from `/user/me` when refresh succeeds.
+- Cleaned auth client flow to remove unused local refresh-token storage dependency from frontend logout/bootstrap path.
+
 - Reviewed `docs/` and project prototype files before backend setup.
 - Initialized Django project in current directory (`config` project package).
 - Scaffolded backend apps: `authentication`, `users`, `addresses`, `products`, `orders`, `wallet`, `webhooks`, `referrals`, `support`.

@@ -17,7 +17,7 @@ export default function Header({ onTopUpPress }: HeaderProps) {
 
   return (
     <View className={s.topBar}>
-      <Pressable onPress={() => router.push("/(app)/wallet" as any)}>
+      <View>
         <Text className={s.walletLabel}>WALLET BALANCE</Text>
         <View className={s.balanceRow}>
           <Text className={s.balanceAmount}>{formattedBalance}</Text>
@@ -26,7 +26,7 @@ export default function Header({ onTopUpPress }: HeaderProps) {
           </Pressable>
         </View>
         <Text className={s.availableLabel}>AVAILABLE</Text>
-      </Pressable>
+      </View>
 
       <Pressable
         className={s.avatarButton}

@@ -8,7 +8,6 @@ import * as SplashScreen from "expo-splash-screen";
 import { DMSerifDisplay_400Regular } from "@expo-google-fonts/dm-serif-display";
 import { SpaceMono_400Regular } from "@expo-google-fonts/space-mono";
 import { useAuthStore } from "../stores/authStore";
-import { getRefreshToken } from "../utils/storage";
 import * as authService from "../services/auth";
 
 SplashScreen.preventAutoHideAsync();
@@ -26,21 +25,18 @@ export default function RootLayout() {
   useEffect(() => {
     (async () => {
       try {
-        const refreshToken = await getRefreshToken();
-        if (refreshToken) {
-          const { accessToken } = await authService.refreshToken();
-          setAccessToken(accessToken);
-          const { default: api } = await import("../services/api");
-          const { data: user } = await api.get("/user/me");
-          login(user, accessToken);
-        }
+        const { accessToken } = await authService.refreshToken();
+        setAccessToken(accessToken);
+        const { default: api } = await import("../services/api");
+        const { data: user } = await api.get("/user/me");
+        login(user, accessToken);
       } catch {
-        // Refresh failed or no token — user stays on auth screen
+        // Refresh failed or no valid session — user stays on auth screen
       } finally {
         setAuthReady(true);
       }
     })();
-  }, []);
+  }, [login, setAccessToken]);
 
   const onLayoutRootView = useCallback(async () => {
     if (fontsLoaded && authReady) {
