@@ -1,9 +1,216 @@
-import { View, Text } from "react-native";
+import { useEffect, useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  ActivityIndicator,
+  RefreshControl,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { intentGateBalance as s } from "../../styles";
+import Header from "../../components/layout/Header";
+import ModeCard from "../../components/cards/ModeCard";
+import FloatingCart from "../../components/ui/FloatingCart";
+import { useWallet } from "../../hooks/useWallet";
+import { useOrders } from "../../hooks/useOrders";
+import { useAuthStore } from "../../stores/authStore";
+import { SHOPPING_MODES } from "../../utils/constants";
+import { getGreeting, formatPrice, formatDate } from "../../utils/format";
+import { colors } from "../../constants/theme";
 
 export default function IntentGateScreen() {
+  const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+  const { refreshBalance } = useWallet();
+  const { orders, fetchOrders, isLoading: isLoadingOrders } = useOrders();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const greeting = getGreeting();
+  const firstName = user?.name?.split(" ")[0] ?? "";
+
+  const activeOrder = orders.find(
+    (o) =>
+      o.status === "PENDING" ||
+      o.status === "CONFIRMED" ||
+      o.status === "PREPARING" ||
+      o.status === "DISPATCHED"
+  );
+
+  useEffect(() => {
+    refreshBalance();
+    fetchOrders(1, 5);
+  }, []);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([refreshBalance(), fetchOrders(1, 5)]);
+    setRefreshing(false);
+  }, [refreshBalance, fetchOrders]);
+
+  const [showTopUp, setShowTopUp] = useState(false);
+
   return (
-    <View style={{ flex: 1 }}>
-      <Text>Intent Gate Screen</Text>
+    <View className={s.container}>
+      <Header onTopUpPress={() => setShowTopUp(true)} />
+
+      <View className={s.greeting}>
+        <Text className={s.greetingTime}>
+          {greeting.toUpperCase().replace(" ", "  ")}
+        </Text>
+        <Text className={s.greetingTitle}>
+          What are we{"\n"}getting you, {firstName}?
+        </Text>
+      </View>
+
+      <ScrollView
+        className={s.scrollBody}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 100 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.accent.green}
+          />
+        }
+      >
+        {activeOrder && (
+          <Pressable
+            className={s.orderCard}
+            onPress={() =>
+              router.push(`/(app)/orders/${activeOrder.id}` as any)
+            }
+          >
+            <View className={s.orderIcon}>
+              <Text style={{ fontSize: 16 }}>📦</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text className={s.orderLabel}>ACTIVE ORDER</Text>
+              <Text className={s.orderTitle}>
+                {activeOrder.items
+                  .slice(0, 2)
+                  .map((i) => `${i.emoji} ${i.name}`)
+                  .join(", ")}
+                {activeOrder.items.length > 2
+                  ? ` +${activeOrder.items.length - 2}`
+                  : ""}
+              </Text>
+              {activeOrder.eta && (
+                <Text className={s.orderEta}>{activeOrder.eta}</Text>
+              )}
+            </View>
+            <View style={{ alignItems: "flex-end" }}>
+              <Text
+                className={s.orderStatus}
+                style={{
+                  color:
+                    colors.status[
+                      activeOrder.status as keyof typeof colors.status
+                    ] ?? colors.accent.amber,
+                }}
+              >
+                {activeOrder.status}
+              </Text>
+              <Text className={s.orderView}>View →</Text>
+            </View>
+          </Pressable>
+        )}
+
+        <View className={s.modeList}>
+          {SHOPPING_MODES.map((mode) => (
+            <ModeCard key={mode.key} mode={mode} />
+          ))}
+        </View>
+      </ScrollView>
+
+      <FloatingCart />
+
+      {showTopUp && <TopUpSheet onClose={() => setShowTopUp(false)} />}
+    </View>
+  );
+}
+
+function TopUpSheet({ onClose }: { onClose: () => void }) {
+  const { formattedBalance, accountNumber, bankName, accountName } =
+    useWallet();
+  const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
+
+  const quickAmounts = [500000, 1000000, 2000000, 5000000];
+
+  return (
+    <View className={s.topUpSheet}>
+      <Pressable style={{ flex: 1 }} onPress={onClose} />
+      <View className={s.topUpSheetInner}>
+        <View className={s.topUpHandle} />
+        <Text className={s.topUpLabel}>FUND YOUR WALLET</Text>
+        <Text className={s.topUpTitle}>Transfer to your account</Text>
+
+        <View className={s.topUpAcctBox}>
+          <Text className={s.topUpAcctLabel}>ACCOUNT NUMBER</Text>
+          <Text className={s.topUpAcctNumber}>{accountNumber ?? "—"}</Text>
+          <Text className={s.topUpAcctBank}>
+            {bankName ?? "Providus Bank"} · {accountName ?? "Baza NG Ltd"}
+          </Text>
+        </View>
+
+        <View className={s.topUpGrid}>
+          {quickAmounts.map((amount) => (
+            <Pressable
+              key={amount}
+              style={{
+                width: "48%",
+                paddingVertical: 13,
+                alignItems: "center",
+                backgroundColor:
+                  selectedAmount === amount ? "#4caf7d18" : "transparent",
+                borderWidth: 1,
+                borderColor:
+                  selectedAmount === amount ? "#4caf7d66" : "#1a2a1c",
+              }}
+              onPress={() => setSelectedAmount(amount)}
+            >
+              <Text
+                style={{
+                  color: selectedAmount === amount ? "#4caf7d" : "#5a8a5a",
+                  fontFamily: "SpaceMono",
+                  fontSize: 13,
+                }}
+              >
+                {formatPrice(amount)}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        <Pressable
+          className={s.topUpConfirmBtn}
+          style={{
+            backgroundColor: selectedAmount ? "#4caf7d" : "#1a2a1c",
+          }}
+        >
+          <Text
+            style={{
+              color: selectedAmount ? "#000" : "#2a3a2a",
+              textAlign: "center",
+              fontFamily: "SpaceMono",
+              fontSize: 11,
+              fontWeight: "bold",
+              letterSpacing: 2,
+            }}
+          >
+            {selectedAmount
+              ? `TRANSFER ${formatPrice(selectedAmount)}`
+              : "SELECT AMOUNT"}
+          </Text>
+        </Pressable>
+
+        <Pressable onPress={onClose}>
+          <Text className={s.topUpCancelBtn} style={{ textAlign: "center" }}>
+            Cancel
+          </Text>
+        </Pressable>
+      </View>
     </View>
   );
 }

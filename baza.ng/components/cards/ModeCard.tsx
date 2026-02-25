@@ -1,9 +1,38 @@
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
+import { useRouter } from "expo-router";
+import { intentGateBalance as s } from "../../styles";
+import type { ModeConfig } from "../../utils/constants";
 
-export default function ModeCard() {
+interface ModeCardProps {
+  mode: ModeConfig;
+}
+
+export default function ModeCard({ mode }: ModeCardProps) {
+  const router = useRouter();
+
   return (
-    <View>
-      <Text>ModeCard</Text>
-    </View>
+    <Pressable
+      className={s.modeButton}
+      style={{ backgroundColor: mode.bg, borderColor: `${mode.color}22` }}
+      onPress={() => router.push(mode.route as any)}
+    >
+      <View
+        className={s.modeIcon}
+        style={{ backgroundColor: `${mode.color}15`, borderRadius: 0 }}
+      >
+        <Text style={{ fontSize: 22 }}>{mode.emoji}</Text>
+      </View>
+
+      <View style={{ flex: 1 }}>
+        <Text className={s.modeTitle}>{mode.title}</Text>
+        <Text className={s.modeDesc} style={{ color: `${mode.color}88` }}>
+          {mode.subtitle}
+        </Text>
+      </View>
+
+      <Text className={s.modeChevron} style={{ color: `${mode.color}55` }}>
+        →
+      </Text>
+    </Pressable>
   );
 }

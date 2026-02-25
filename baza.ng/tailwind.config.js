@@ -1,0 +1,167 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./app/**/*.{js,jsx,ts,tsx}",
+    "./components/**/*.{js,jsx,ts,tsx}",
+    "./styles/**/*.{js,jsx,ts,tsx}",
+  ],
+  presets: [require("nativewind/preset")],
+  theme: {
+    extend: {
+      colors: {
+        baza: {
+          DEFAULT: "#080f09",
+          dark: "#050805",
+          darker: "#030503",
+          card: "#0d1a0f",
+          input: "#0d1a0f",
+          green: "#4caf7d",
+          amber: "#f5a623",
+          red: "#e85c3a",
+          purple: "#c77dff",
+          blue: "#6ec6ff",
+          orange: "#ff7043",
+          yellow: "#ffe082",
+        },
+        mode: {
+          stockup: "#070e08",
+          cookmeal: "#080a04",
+          readyeat: "#0a0600",
+          snacks: "#0c0714",
+          shoplist: "#070a12",
+          chat: "#080a0f",
+        },
+        txt: {
+          primary: "#f0f0e8",
+          secondary: "#d0e0d0",
+          body: "#c0d8c0",
+          muted: "#3a5a3a",
+          dim: "#2a4a2a",
+          ghost: "#1a2a1a",
+        },
+        border: {
+          baza: "#1a2a1c",
+          dim: "#0f1a10",
+        },
+        stockup: {
+          bg: "#070e08",
+          muted: "#3a5c3a",
+          back: "#3a5c3a",
+        },
+        cookmeal: {
+          bg: "#080a04",
+          muted: "#4a6a3a",
+          back: "#7a8a4a",
+        },
+        readyeat: {
+          bg: "#0a0600",
+          border: "#1a0a00",
+          muted: "#4a2a1a",
+          back: "#7a3a1a",
+        },
+        snacks: {
+          bg: "#0c0714",
+          card: "#100818",
+          border: "#1a0a2a",
+          muted: "#3a1a5a",
+          back: "#6a3a9a",
+        },
+        shoplist: {
+          bg: "#070a12",
+          card: "#0d1220",
+          border: "#1a2540",
+          muted: "#2a4060",
+          back: "#3a5a8a",
+        },
+        chat: {
+          bg: "#080a0f",
+          card: "#0d1220",
+          border: "#1a2540",
+        },
+        cart: {
+          bg: "#050805",
+          border: "#0a100a",
+        },
+        orders: {
+          bg: "#050a06",
+          border: "#0a120a",
+          card: "#0a120a",
+        },
+        profile: {
+          bg: "#060c07",
+        },
+        notif: {
+          bg: "#070c08",
+        },
+        address: {
+          bg: "#070a0c",
+          card: "#080c10",
+          active: "#0a1220",
+          border: "#1a2540",
+          muted: "#2a4060",
+          back: "#3a5a7a",
+          accent: "#6ec6ff",
+        },
+        refer: {
+          bg: "#0a0a08",
+          card: "#0f0f08",
+          border: "#2a2a14",
+          muted: "#4a4a2a",
+          dim: "#3a3a1a",
+          text: "#5a5a3a",
+          back: "#7a7a3a",
+        },
+        auth: {
+          bg: "#060d07",
+        },
+        support: {
+          bg: "#07090f",
+          border: "#0f1220",
+          card: "#0d1a2a",
+          accent: "#3a5a8a",
+        },
+        acct: {
+          bg: "#060d07",
+        },
+        fund: {
+          bg: "#080f09",
+        },
+      },
+      fontFamily: {
+        serif: ['"DM Serif Display"', "Georgia", "serif"],
+        mono: ["SpaceMono", "monospace"],
+      },
+      spacing: {
+        status: "52px",
+        safe: "40px",
+        "safe-lg": "44px",
+        "safe-xl": "48px",
+        cart: "80px",
+      },
+      letterSpacing: {
+        "tight-1": "-3px",
+        "tight-half": "-1px",
+        "tight-sm": "-0.8px",
+        "tight-xs": "-0.5px",
+        "tight-2xs": "-0.3px",
+        "tight-3xs": "-0.2px",
+        "wide-xs": "0.05em",
+        "wide-sm": "0.1em",
+        "wide-md": "0.15em",
+        "wide-lg": "0.2em",
+        "wide-xl": "0.25em",
+        "wide-2xl": "0.3em",
+        "wide-3xl": "0.4em",
+      },
+      fontSize: {
+        "2xs": ["8px", { lineHeight: "1" }],
+        "3xs": ["9px", { lineHeight: "1" }],
+        xxs: ["10px", { lineHeight: "1" }],
+      },
+      borderRadius: {
+        sheet: "20px",
+      },
+    },
+  },
+  plugins: [],
+};

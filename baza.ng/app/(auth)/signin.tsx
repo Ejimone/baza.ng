@@ -1,9 +1,90 @@
-import { View, Text } from "react-native";
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+} from "react-native";
+import { router } from "expo-router";
+import { useAuth } from "../../hooks/useAuth";
+import { authScreen as s } from "../../styles";
 
 export default function SignInScreen() {
+  const [phone, setPhone] = useState("");
+  const { requestOtp, isLoading, error, clearError } = useAuth();
+
+  const isValid = phone.replace(/\s/g, "").length >= 8;
+
+  const handleSendCode = async () => {
+    if (!isValid || isLoading) return;
+    clearError();
+    try {
+      await requestOtp(phone.replace(/\s/g, ""));
+      router.push({
+        pathname: "/(auth)/otp",
+        params: { phone: phone.replace(/\s/g, ""), mode: "signin" },
+      });
+    } catch {
+      // error state is set by the hook
+    }
+  };
+
   return (
-    <View style={{ flex: 1 }}>
-      <Text>Sign In Screen</Text>
-    </View>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      className={s.signinContainer}
+    >
+      <View className={s.signinHeader}>
+        <Pressable onPress={() => router.back()}>
+          <Text className={s.signinBack}>← BACK</Text>
+        </Pressable>
+        <Text className={s.signinLabel}>WELCOME BACK</Text>
+        <Text className={s.signinTitle}>Sign in</Text>
+      </View>
+
+      <View className={s.signinForm}>
+        <Text className={s.signinFieldLabel}>PHONE NUMBER</Text>
+        <TextInput
+          value={phone}
+          onChangeText={setPhone}
+          placeholder="+234 800 000 0000"
+          placeholderTextColor="#2a4a2a"
+          keyboardType="phone-pad"
+          autoFocus
+          className={s.signinInput}
+        />
+
+        {error ? (
+          <Text className="text-3xs text-baza-red tracking-wide-sm mb-4">
+            {error}
+          </Text>
+        ) : null}
+
+        <Pressable
+          onPress={handleSendCode}
+          className={`${s.signinSubmitBtn} ${isValid ? s.signinSubmitActive : s.signinSubmitInactive}`}
+          disabled={!isValid || isLoading}
+        >
+          <Text
+            className={`text-[11px] tracking-wide-2xl font-mono font-bold text-center ${isValid ? "text-black" : "text-[#2a3a2a]"}`}
+          >
+            {isLoading ? "SENDING..." : "SEND CODE"}
+          </Text>
+        </Pressable>
+
+        <Text className={s.signinSwitch}>
+          Don't have an account?{" "}
+          <Text
+            onPress={() => router.replace("/(auth)/signup")}
+            className={s.signinSwitchLink}
+          >
+            SIGN UP
+          </Text>
+        </Text>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
