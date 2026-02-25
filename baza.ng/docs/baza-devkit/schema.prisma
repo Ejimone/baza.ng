@@ -1,0 +1,310 @@
+// Baza.ng — Prisma Schema
+// Database: PostgreSQL 15
+// ORM: Prisma 5.x
+//
+// Run: npx prisma migrate dev --name init
+// Seed: npx ts-node prisma/seed.ts
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTH + USER
+// ─────────────────────────────────────────────────────────────────────────────
+
+model User {
+  id               String   @id @default(cuid())
+  name             String
+  phone            String   @unique
+  email            String?  @unique
+  passwordHash     String?  // null for OTP-only users
+  memberSince      DateTime @default(now())
+
+  // Wallet
+  walletBalance    Int      @default(0)  // stored in kobo (₦1 = 100 kobo)
+  accountNumber    String?  @unique      // Paystack DVA account number
+  bankName         String?  @default("Providus Bank")
+  accountName      String?  @default("Baza NG Ltd")
+
+  // Referral
+  referralCode     String   @unique @default(cuid())
+  referredBy       String?  // referral code of the person who referred them
+  referralCredits  Int      @default(0)  // total earned from referrals in kobo
+
+  // Preferences
+  notifOrders      Boolean  @default(true)
+  notifDelivery    Boolean  @default(true)
+  notifDeals       Boolean  @default(true)
+  notifReminders   Boolean  @default(false)
+  notifNewsletter  Boolean  @default(false)
+
+  // Relations
+  orders           Order[]
+  addresses        Address[]
+  walletTxns       WalletTransaction[]
+  supportMessages  SupportMessage[]
+  refreshTokens    RefreshToken[]
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([phone])
+  @@index([referralCode])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ADDRESSES
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Address {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label     String   // "Home", "Office", etc.
+  address   String   // Full street address
+  landmark  String?
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PRODUCTS
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Stock Up bundles (e.g. "Breakfast Bundle", "Protein Pack")
+model Bundle {
+  id          String       @id
+  name        String
+  emoji       String
+  description String
+  basePrice   Int          // in kobo
+  savings     Int          // percentage discount
+  color       String
+  tags        String[]
+  isActive    Boolean      @default(true)
+  items       BundleItem[]
+  createdAt   DateTime     @default(now())
+}
+
+model BundleItem {
+  id         String @id @default(cuid())
+  bundleId   String
+  bundle     Bundle @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product @relation(fields: [productId], references: [id])
+  defaultQty Int    @default(1)
+  minQty     Int    @default(0)
+  maxQty     Int    @default(5)
+
+  @@index([bundleId])
+}
+
+// Individual products (used in bundles, restock, etc.)
+model Product {
+  id         String       @id
+  name       String
+  brand      String
+  emoji      String
+  price      Int          // unit price in kobo
+  category   String       // "Grains", "Protein", "Cooking", etc.
+  isActive   Boolean      @default(true)
+  bundleItems BundleItem[]
+  orderItems  OrderItem[]
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  @@index([category])
+}
+
+// Cook a Meal packs (e.g. "Jollof Pack")
+model MealPack {
+  id          String         @id
+  name        String
+  emoji       String
+  description String
+  baseTime    Int            // cook time in minutes
+  basePlates  Int            // default number of plates
+  basePrice   Int            // in kobo
+  color       String
+  isActive    Boolean        @default(true)
+  ingredients MealIngredient[]
+  createdAt   DateTime       @default(now())
+}
+
+model MealIngredient {
+  id            String   @id @default(cuid())
+  mealPackId    String
+  mealPack      MealPack @relation(fields: [mealPackId], references: [id], onDelete: Cascade)
+  name          String
+  emoji         String
+  unit          String   // "cups", "pcs", "tbsp", etc.
+  perPlate      Float    // quantity per plate
+  pricePerPlate Int      // cost per plate in kobo
+
+  @@index([mealPackId])
+}
+
+// Ready to Eat items (from local kitchens)
+model ReadyEatItem {
+  id         String   @id
+  name       String
+  kitchen    String
+  emoji      String
+  price      Int      // base price in kobo (per plate)
+  oldPrice   Int?     // original price before member discount
+  deliveryTime String  // "20–35 min"
+  tags       String[]
+  description String
+  color      String
+  isActive   Boolean  @default(true)
+  orderItems  OrderItem[]
+  createdAt  DateTime @default(now())
+}
+
+// Snacks & Drinks items
+model SnackItem {
+  id         String   @id
+  name       String
+  emoji      String
+  price      Int      // in kobo
+  category   String   // "Snacks", "Breads", "Drinks"
+  tag        String
+  color      String
+  isActive   Boolean  @default(true)
+  orderItems  OrderItem[]
+  createdAt  DateTime @default(now())
+
+  @@index([category])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ORDERS
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Order {
+  id          String      @id @default(cuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  items       OrderItem[]
+  total       Int         // in kobo
+  note        String?     // rider/kitchen note
+  status      OrderStatus @default(CONFIRMED)
+  eta         String?     // "Tomorrow by 10am"
+  addressId   String?     // delivery address used
+
+  // Wallet transaction that paid for this
+  walletTxnId String?     @unique
+  walletTxn   WalletTransaction? @relation(fields: [walletTxnId], references: [id])
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([userId])
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  DISPATCHED
+  DELIVERED
+  CANCELLED
+}
+
+model OrderItem {
+  id           String   @id @default(cuid())
+  orderId      String
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  // One of these will be set depending on item type
+  productId    String?
+  product      Product? @relation(fields: [productId], references: [id])
+  readyEatId   String?
+  readyEatItem ReadyEatItem? @relation(fields: [readyEatId], references: [id])
+  snackId      String?
+  snackItem    SnackItem? @relation(fields: [snackId], references: [id])
+
+  // Flexible fields for all item types
+  itemType     String   // "product" | "bundle" | "mealpack" | "readyeat" | "snack"
+  name         String   // snapshot of name at time of order
+  emoji        String
+  qty          Int
+  unitPrice    Int      // in kobo at time of order
+  totalPrice   Int      // qty * unitPrice in kobo
+  meta         Json?    // for bundles: {items: [...customized]}, for mealpack: {plates, removedItems}
+
+  @@index([orderId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WALLET
+// ─────────────────────────────────────────────────────────────────────────────
+
+model WalletTransaction {
+  id          String          @id @default(cuid())
+  userId      String
+  user        User            @relation(fields: [userId], references: [id])
+  amount      Int             // in kobo, always positive
+  type        WalletTxnType
+  reference   String          @unique // Paystack reference or internal ref
+  description String?
+  order       Order?          // set if type is DEBIT
+
+  createdAt   DateTime        @default(now())
+
+  @@index([userId])
+  @@index([reference])
+}
+
+enum WalletTxnType {
+  CREDIT_TRANSFER    // bank transfer via DVA
+  CREDIT_CARD        // card payment via Paystack standard
+  CREDIT_REFERRAL    // earned from referral
+  DEBIT_ORDER        // deducted for an order
+  DEBIT_REFUND       // reversed order
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SUPPORT CHAT
+// ─────────────────────────────────────────────────────────────────────────────
+
+model SupportMessage {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  text        String
+  sender      MessageSender
+  flagged     Boolean  @default(false)  // AI flagged for human review
+  humanJoined Boolean  @default(false)  // human agent joined this thread
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
+
+enum MessageSender {
+  USER
+  AI
+  HUMAN_AGENT
+  SYSTEM
+}
