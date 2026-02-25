@@ -1,6 +1,6 @@
 import { View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
-import { intentGateBalance as s } from "../../styles";
+import { floatingCart as s } from "../../styles";
 import { useCart } from "../../hooks/useCart";
 
 export default function FloatingCart() {
@@ -11,19 +11,24 @@ export default function FloatingCart() {
 
   return (
     <Pressable
-      className={s.stickyCart}
+      className={s.button}
       onPress={() => router.push("/(app)/cart")}
     >
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-        <Text className={s.stickyCartIcon}>🛒</Text>
+      <View className={s.iconWrap}>
+        <View className={s.cartIcon}>
+          <Text style={{ fontSize: 18 }}>🛒</Text>
+          <View className={s.badge}>
+            <Text className={s.badgeText}>{count}</Text>
+          </View>
+        </View>
         <View>
-          <Text className={s.stickyCartTitle}>
-            {count} ITEM{count !== 1 ? "S" : ""}
+          <Text className={s.label}>CART</Text>
+          <Text className={s.sub}>
+            {count} item{count !== 1 ? "s" : ""} · {formattedTotal}
           </Text>
-          <Text className={s.stickyCartSub}>{formattedTotal}</Text>
         </View>
       </View>
-      <Text className={s.stickyCartCheckout}>CHECKOUT →</Text>
+      <Text className={s.chevron}>›</Text>
     </Pressable>
   );
 }

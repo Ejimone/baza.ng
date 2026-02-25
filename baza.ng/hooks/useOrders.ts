@@ -15,7 +15,7 @@ export function useOrders() {
       setError(null);
       try {
         const data = await ordersService.getOrders(page, limit, status);
-        setOrders(data.orders);
+        setOrders((prev) => (page === 1 ? data.orders : [...prev, ...data.orders]));
         setPagination(data.pagination);
       } catch (err: any) {
         setError(err.response?.data?.error ?? "Failed to load orders");

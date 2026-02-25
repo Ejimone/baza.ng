@@ -1,6 +1,6 @@
 # Baza.ng Mobile App — Development Status
 
-> Last updated: 2026-02-25 (Phase 5 complete)
+> Last updated: 2026-02-25 (Phase 7 complete)
 
 ---
 
@@ -14,7 +14,7 @@
 
 **API Base URL:** `https://baza-chi.vercel.app/v1`
 
-**Last tested:** 2026-02-25 (re-verified before Phase 2 build — all results consistent)
+**Last tested:** 2026-02-25 (re-verified before Phase 7 build — all results consistent)
 
 ### Verified Endpoints
 
@@ -343,27 +343,123 @@ Built all 8 shopping mode screens, 4 card components, and 3 shared UI components
 
 ---
 
-### Phase 6: Cart and Checkout — NOT STARTED
+### Phase 6: Cart and Checkout — COMPLETE
 
-- [ ] Cart screen with item list and quantity controls
-- [ ] Cart total calculation (kobo)
-- [ ] Order note input
-- [ ] Wallet balance check before checkout
-- [ ] Payment method selection (Wallet / Paystack)
-- [ ] Wallet payment flow (instant deduction)
-- [ ] Paystack Inline payment flow (WebView popup)
-- [ ] Order confirmation feedback
-- [ ] FloatingCart button (persistent on shopping screens)
+Built the full cart screen with item management, wallet balance check, order creation via live API, FundPrompt modal with Paystack top-up flow, and order confirmation UI. Zero mock data — all transactions go through the live backend.
+
+**Dependencies added:**
+
+- `expo-clipboard` — for copying DVA account number in FundPrompt
+
+**Implemented/Modified files (3):**
+
+- `app/(app)/cart.tsx` — **Cart Screen**: Full checkout experience with:
+  - Header with back button and "Cart" title
+  - Wallet balance bar: green when sufficient (`bg-[#0a1a0c]`), red when insufficient (`bg-[#1a0a0a]`) with "TOP UP" button
+  - Cart items list: emoji, name, itemType label (with qty multiplier), price, remove "x" button per item
+  - Empty state: "CART IS EMPTY" centered message
+  - Footer: subtotal row, "FREE" delivery row, order note TextInput (multiline), checkout button
+  - Checkout button: "CONFIRM ORDER" (green) when balance >= total, "FUND WALLET - NEED {shortfall} MORE" (red) when insufficient
+  - Checkout flow: calls `POST /v1/orders/create` via `useOrders().createOrder()` with payload from `cartItemsToOrderItems()`, updates wallet balance from response, clears cart, shows success state
+  - Success state: checkmark, "ORDER CONFIRMED", ETA from API response, "BACK TO HOME" button
+  - Error handling: catches INSUFFICIENT_BALANCE (opens FundPrompt), ITEM_UNAVAILABLE and other errors (Alert)
+  - Loading state: ActivityIndicator on checkout button while processing
+
+- `components/ui/FundPrompt.tsx` — **Fund Prompt Modal**: Bottom sheet overlay for wallet top-up with:
+  - "INSUFFICIENT BALANCE" header with shortfall amount
+  - DVA account details box (account number, bank name) with "COPY" button via `expo-clipboard`
+  - Quick top-up grid: 4 amounts (N5,000 / N10,000 / N20,000 / N50,000) as selectable buttons
+  - Confirm button: disabled until amount selected, calls `POST /v1/wallet/topup` via `useWallet().initTopup()`, opens Paystack `authorizationUrl` via `expo-web-browser`, then verifies payment via `GET /v1/wallet/verify-topup`
+  - Cancel button to dismiss
+  - Loading state during payment processing
+  - Error handling with Alert on failure
+
+- `components/ui/FloatingCart.tsx` — **FloatingCart update**: Switched from `intentGateBalance` styles to dedicated `floatingCart` styles. Now shows cart icon with green count badge, "CART" label, item count + total summary, and chevron. Same show/hide logic (hidden when cart empty).
+
+**Data flow (zero mock data):**
+
+- Cart state: `useCart` hook → `cartStore` (Zustand) — items, total (kobo), count, removeItem, clear
+- Wallet balance: `useWallet` hook → `walletStore` → `GET /v1/wallet/balance`
+- Order creation: `useOrders().createOrder()` → `POST /v1/orders/create` — server deducts wallet, returns order + new balance
+- Paystack top-up: `initTopup()` → `POST /v1/wallet/topup` → opens `authorizationUrl` in browser → `verifyTopup()` → `GET /v1/wallet/verify-topup` → balance updated
+- Clipboard: `expo-clipboard` for DVA account number copy
+
+- [x] Cart screen with item list and remove controls
+- [x] Cart total calculation (kobo via cartStore)
+- [x] Order note input (multiline TextInput)
+- [x] Wallet balance check before checkout (green/red balance bar)
+- [x] Wallet payment flow (order creation deducts from wallet)
+- [x] Paystack card top-up flow (initTopup → WebBrowser → verifyTopup)
+- [x] FundPrompt with DVA account details and quick amounts
+- [x] Order confirmation feedback (success state with ETA)
+- [x] FloatingCart updated with dedicated styles
 
 ---
 
-### Phase 7: Orders — NOT STARTED
+### Phase 7: Orders — COMPLETE
 
-- [ ] Order history list with OrderCard components
-- [ ] Status badges (PENDING, CONFIRMED, PREPARING, DISPATCHED, DELIVERED, CANCELLED)
-- [ ] Pagination support
-- [ ] Order detail screen with full item breakdown
-- [ ] ETA display
+Built the full order history list and order detail screens, the OrderCard component, and upgraded the LoadingSpinner and EmptyState shared UI components. All data fetched from live API — zero mock data. Pagination with infinite scroll, pull-to-refresh, status filter tabs, and a visual order progress tracker.
+
+**Dependencies added:** none (all existing deps suffice)
+
+**Implemented/Modified files (6):**
+
+- `app/(app)/orders.tsx` — **Orders List Screen**: Full order history with:
+  - Header with back button and "Orders" title
+  - Status filter tabs: ALL, ACTIVE (CONFIRMED), PREPARING, EN ROUTE (DISPATCHED), DELIVERED, CANCELLED — horizontal scroll, green highlight on active
+  - FlatList of OrderCard components with pull-to-refresh (RefreshControl)
+  - Infinite scroll pagination: auto-loads next page when scrolling near bottom (onEndReached)
+  - Loading state: LoadingSpinner with "LOADING ORDERS" message on first load
+  - Error state: error message with RETRY button
+  - Empty state: "NO ORDERS YET. YOUR HISTORY WILL APPEAR HERE."
+  - Filter changes reset to page 1 and re-fetch
+
+- `app/(app)/orders/[id].tsx` — **Order Detail Screen**: Full single-order view with:
+  - Header with "← ORDERS" back button and "Order Detail" title
+  - Status card: order ID (truncated + uppercased), status badge with color, creation date
+  - Visual progress tracker: 4-step dot+line indicator (CONFIRMED → PREPARING → DISPATCHED → DELIVERED), steps light up green as reached
+  - Cancelled orders: red banner "THIS ORDER WAS CANCELLED" instead of progress tracker
+  - ETA card: 📦 icon with "ESTIMATED DELIVERY" label and ETA text (hidden for cancelled)
+  - Items list: each item in its own card with emoji, name, itemType label, qty multiplier, total price, unit price for multi-qty
+  - Order note: styled note card with 💬 icon (hidden if no note)
+  - Total section: subtotal, "FREE" delivery, bordered total paid row
+  - "← BACK TO ORDERS" button at bottom
+  - Loading/error/retry states
+
+- `components/cards/OrderCard.tsx` — **OrderCard Component**: Reusable pressable card with:
+  - Header row: order ID (truncated) + date on left, status badge (colored ● dot + label) + total on right
+  - Items section: first 3 items with emoji + name + qty, "+N MORE ITEMS" overflow indicator
+  - Order note: styled inline note with 💬 prefix (when present)
+  - ETA: 📦 prefix with delivery estimate (when present)
+  - All styles from `ordersScreen` style definitions in `styles/index.ts`
+  - Tapping navigates to order detail via `onPress(id)` callback
+
+- `components/ui/LoadingSpinner.tsx` — **LoadingSpinner Component** (upgraded from placeholder): ActivityIndicator with optional message text, configurable color and size. Used by orders screens for loading states.
+
+- `components/ui/EmptyState.tsx` — **EmptyState Component** (upgraded from placeholder): Centered title + optional subtitle with dark muted styling. Used by orders list for empty state.
+
+- `hooks/useOrders.ts` — **useOrders Hook Update**: Fixed pagination support — `fetchOrders()` now appends results on page > 1 instead of replacing, enabling infinite scroll. Page 1 resets the list.
+
+**Data flow (zero mock data):**
+
+- Orders list: `GET /v1/orders/?page=N&limit=20&status=X` via `useOrders().fetchOrders()` → live API
+- Order detail: `GET /v1/orders/:id` via `useOrders().fetchOrder(id)` → live API
+- Status colors: mapped from `colors.status` in `constants/theme.ts` per OrderStatus enum
+- All prices in kobo, displayed via `formatPrice()` from `utils/format.ts`
+- Dates displayed via `formatDate()` (relative time: "Just now", "5m ago", "2d ago", etc.)
+
+- [x] Order history list with OrderCard components
+- [x] Status filter tabs (ALL, ACTIVE, PREPARING, EN ROUTE, DELIVERED, CANCELLED)
+- [x] Status badges with per-status colors (PENDING amber, CONFIRMED green, PREPARING blue, DISPATCHED purple, DELIVERED green, CANCELLED red)
+- [x] Infinite scroll pagination (auto-load on scroll, page append)
+- [x] Pull-to-refresh on orders list
+- [x] Order detail screen with full item breakdown (emoji, name, type, qty, prices)
+- [x] Visual order progress tracker (4-step dot+line indicator)
+- [x] ETA display on both list cards and detail screen
+- [x] Order note display
+- [x] Loading, empty, and error states with retry
+- [x] LoadingSpinner component (upgraded from placeholder)
+- [x] EmptyState component (upgraded from placeholder)
 
 ---
 
@@ -498,15 +594,15 @@ baza.ng/
 
 ## Next Step
 
-**Phase 6: Cart and Checkout** — Build the cart screen with item list, quantity controls, order notes, wallet balance check, and checkout flow (wallet payment + Paystack fallback).
+**Phase 8: Profile and Settings** — Build the profile screen and all settings sub-screens.
 
 **Recommended order:**
-1. Cart screen (`app/(app)/cart.tsx`) — item list with qty controls, remove, subtotal, delivery, order note input
-2. Wallet balance bar — shows balance with sufficient/insufficient styling
-3. FundPrompt component (`components/ui/FundPrompt.tsx`) — bottom sheet for wallet top-up when balance is low
-4. Checkout flow — wallet deduction via `POST /v1/orders/create`, order confirmation feedback
-5. Paystack card payment fallback — WebView for `authorizationUrl`, verify via `GET /v1/wallet/verify-topup`
-6. FloatingCart — enhance for persistent visibility across all shopping mode screens
+1. Profile screen (`app/(app)/profile.tsx`) — WalletCard with balance + account number + copy, navigation rows to settings screens, top-up sheet
+2. Notifications screen (`app/(app)/settings/notifications.tsx`) — toggle switches for each notification preference (orders, delivery, deals, reminders, newsletter)
+3. Delivery Address screen (`app/(app)/settings/address.tsx`) — list addresses, add new, edit, delete, set default
+4. Refer a Friend screen (`app/(app)/settings/refer.tsx`) — share referral code, view referral stats and list
+5. Support Chat screen (`app/(app)/settings/support.tsx`) — AI chat with message history (reuse chat patterns from Help Me Decide mode)
+6. Account Settings screen (`app/(app)/settings/account.tsx`) — name, email, phone change, sign out
 
 ---
 
