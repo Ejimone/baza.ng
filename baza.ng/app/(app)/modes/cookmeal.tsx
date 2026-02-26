@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
     ActivityIndicator,
     Pressable,
@@ -8,18 +8,16 @@ import {
     View,
 } from "react-native";
 import MealPackCard from "../../../components/cards/MealPackCard";
-import AddMoreItemsSheet from "../../../components/ui/AddMoreItemsSheet";
 import FloatingCart from "../../../components/ui/FloatingCart";
 import { colors } from "../../../constants/theme";
 import { useCart } from "../../../hooks/useCart";
 import { useProducts } from "../../../hooks/useProducts";
-import { addMoreButton, tonightMode as s } from "../../../styles";
+import { tonightMode as s } from "../../../styles";
 
 export default function CookMealScreen() {
   const router = useRouter();
   const { mealPacks, isLoading, error, fetchMealPacks } = useProducts();
   const { isInCart } = useCart();
-  const [showAddMore, setShowAddMore] = useState(false);
 
   useEffect(() => {
     fetchMealPacks();
@@ -100,25 +98,10 @@ export default function CookMealScreen() {
               isInCart={isInCart(pack.id)}
             />
           ))}
-
-          <Pressable
-            className={addMoreButton.wrapper}
-            style={{ borderColor: "#7a8a4a55" }}
-            onPress={() => setShowAddMore(true)}
-          >
-            <Text className={addMoreButton.text} style={{ color: "#7a8a4a" }}>
-              + ADD MORE ITEMS
-            </Text>
-          </Pressable>
         </ScrollView>
       )}
 
       <FloatingCart />
-
-      <AddMoreItemsSheet
-        visible={showAddMore}
-        onClose={() => setShowAddMore(false)}
-      />
     </View>
   );
 }
