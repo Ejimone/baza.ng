@@ -1,13 +1,18 @@
-import { useState, useCallback } from "react";
+import { router } from "expo-router";
+import { useCallback, useState } from "react";
+import type { OtpVerifyPayload } from "../services/auth";
+import * as authService from "../services/auth";
 import { useAuthStore } from "../stores/authStore";
 import { useCartStore } from "../stores/cartStore";
-import * as authService from "../services/auth";
-import type { OtpVerifyPayload } from "../services/auth";
-import { router } from "expo-router";
 
 export function useAuth() {
-  const { user, isAuthenticated, login, logout: storeLogout, updateUser } =
-    useAuthStore();
+  const {
+    user,
+    isAuthenticated,
+    login,
+    logout: storeLogout,
+    updateUser,
+  } = useAuthStore();
   const clearCart = useCartStore((s) => s.clear);
 
   const [isLoading, setIsLoading] = useState(false);

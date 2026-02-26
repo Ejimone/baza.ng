@@ -1,14 +1,14 @@
-import "../global.css";
-import { useEffect, useState, useCallback } from "react";
-import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import { View, ActivityIndicator } from "react-native";
-import { useFonts } from "expo-font";
-import * as SplashScreen from "expo-splash-screen";
 import { DMSerifDisplay_400Regular } from "@expo-google-fonts/dm-serif-display";
 import { SpaceMono_400Regular } from "@expo-google-fonts/space-mono";
-import { useAuthStore } from "../stores/authStore";
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
+import { useCallback, useEffect, useState } from "react";
+import { ActivityIndicator, View } from "react-native";
+import "../global.css";
 import * as authService from "../services/auth";
+import { useAuthStore } from "../stores/authStore";
 
 SplashScreen.preventAutoHideAsync();
 

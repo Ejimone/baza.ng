@@ -25,7 +25,7 @@ export default function Header({ onTopUpPress }: HeaderProps) {
             <Text className={s.topUpText}>TOP UP</Text>
           </Pressable>
         </View>
-        <Text className={s.availableLabel}>AVAILABLE</Text>
+        {/* <Text className={s.availableLabel}>AVAILABLE</Text> */}
       </View>
 
       <Pressable

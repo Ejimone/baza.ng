@@ -1,19 +1,19 @@
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
   ActivityIndicator,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { readyEatMode as s, readyEatMode } from "../../../styles";
-import { useProducts } from "../../../hooks/useProducts";
-import { useCart } from "../../../hooks/useCart";
 import FloatingCart from "../../../components/ui/FloatingCart";
-import { formatPrice } from "../../../utils/format";
 import { colors } from "../../../constants/theme";
+import { useCart } from "../../../hooks/useCart";
+import { useProducts } from "../../../hooks/useProducts";
+import { readyEatMode, readyEatMode as s } from "../../../styles";
 import type { ReadyEatItem } from "../../../types";
+import { formatPrice } from "../../../utils/format";
 
 export default function ReadyEatScreen() {
   const router = useRouter();
@@ -50,23 +50,42 @@ export default function ReadyEatScreen() {
       </View>
 
       {isLoading && readyEat.length === 0 ? (
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
           <ActivityIndicator color={colors.accent.red} size="small" />
         </View>
       ) : error && readyEat.length === 0 ? (
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
           <Text style={{ color: "#4a2a1a", fontSize: 11, letterSpacing: 1 }}>
             {error}
           </Text>
           <Pressable onPress={fetchReadyEat} style={{ marginTop: 16 }}>
-            <Text style={{ color: colors.accent.green, fontSize: 11, letterSpacing: 1 }}>
+            <Text
+              style={{
+                color: colors.accent.green,
+                fontSize: 11,
+                letterSpacing: 1,
+              }}
+            >
               RETRY
             </Text>
           </Pressable>
         </View>
       ) : readyEat.length === 0 ? (
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <Text style={{ color: "#4a2a1a", fontSize: 11, letterSpacing: 1, textAlign: "center" }}>
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
+          <Text
+            style={{
+              color: "#4a2a1a",
+              fontSize: 11,
+              letterSpacing: 1,
+              textAlign: "center",
+            }}
+          >
             NO READY-TO-EAT ITEMS YET.{"\n"}CHECK BACK SOON.
           </Text>
         </View>
@@ -131,7 +150,13 @@ export default function ReadyEatScreen() {
                       handleAdd(item);
                     }}
                   >
-                    <Text style={{ color: item.color, fontSize: 10, letterSpacing: 1 }}>
+                    <Text
+                      style={{
+                        color: item.color,
+                        fontSize: 10,
+                        letterSpacing: 1,
+                      }}
+                    >
                       ADD
                     </Text>
                   </Pressable>
@@ -143,14 +168,19 @@ export default function ReadyEatScreen() {
                     >
                       <Pressable
                         className={s.stepperBtn}
-                        style={{ backgroundColor: qty === 1 ? "#2a0a0a" : item.color + "12" }}
+                        style={{
+                          backgroundColor:
+                            qty === 1 ? "#2a0a0a" : item.color + "12",
+                        }}
                         onPress={(e) => {
                           e.stopPropagation?.();
                           if (qty === 1) removeItem(item.id);
                           else updateQty(item.id, qty - 1);
                         }}
                       >
-                        <Text style={{ color: qty === 1 ? "#e85c3a" : item.color }}>
+                        <Text
+                          style={{ color: qty === 1 ? "#e85c3a" : item.color }}
+                        >
                           {qty === 1 ? "×" : "−"}
                         </Text>
                       </Pressable>
@@ -166,7 +196,10 @@ export default function ReadyEatScreen() {
                         <Text style={{ color: item.color }}>+</Text>
                       </Pressable>
                     </View>
-                    <Text className={s.stepperLabel} style={{ color: item.color + "88" }}>
+                    <Text
+                      className={s.stepperLabel}
+                      style={{ color: item.color + "88" }}
+                    >
                       {formatPrice(item.price * qty)}
                     </Text>
                   </View>
@@ -310,4 +343,3 @@ function ReadyEatPopup({
     </View>
   );
 }
-

@@ -44,6 +44,15 @@ export interface ModeConfig {
 
 export const SHOPPING_MODES: ModeConfig[] = [
   {
+    key: "shoplist",
+    title: "Shop Your List",
+    subtitle: "Search and build your own",
+    emoji: "📝",
+    color: "#6ec6ff",
+    bg: "#000d1a",
+    route: "/(app)/modes/shoplist",
+  },
+  {
     key: "stockup",
     title: "Stock Up",
     subtitle: "Pre-built bundles, one tap",
@@ -78,15 +87,6 @@ export const SHOPPING_MODES: ModeConfig[] = [
     color: "#c77dff",
     bg: "#0d0019",
     route: "/(app)/modes/snacks",
-  },
-  {
-    key: "shoplist",
-    title: "Shop Your List",
-    subtitle: "Search and build your own",
-    emoji: "📝",
-    color: "#6ec6ff",
-    bg: "#000d1a",
-    route: "/(app)/modes/shoplist",
   },
   {
     key: "chat",
