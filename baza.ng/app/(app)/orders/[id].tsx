@@ -1,18 +1,14 @@
-import { useEffect } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-} from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { useOrders } from "../../../hooks/useOrders";
-import { colors } from "../../../constants/theme";
-import { ORDER_STATUS_LABELS } from "../../../utils/constants";
-import { formatPrice, formatDate } from "../../../utils/format";
-import type { OrderStatus } from "../../../types";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState, useCallback } from "react";
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import ScreenWrapper from "../../../components/layout/ScreenWrapper";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
+import { colors } from "../../../constants/theme";
+import { useOrders } from "../../../hooks/useOrders";
+import * as ordersService from "../../../services/orders";
+import type { Order, OrderStatus } from "../../../types";
+import { ORDER_STATUS_LABELS } from "../../../utils/constants";
+import { formatDate, formatPrice } from "../../../utils/format";
 
 const STATUS_STEPS: OrderStatus[] = [
   "CONFIRMED",
@@ -25,10 +21,23 @@ export default function OrderDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { currentOrder, isLoading, error, fetchOrder } = useOrders();
+  const [pastOrders, setPastOrders] = useState<Order[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   useEffect(() => {
     if (id) fetchOrder(id);
   }, [id, fetchOrder]);
+
+  useEffect(() => {
+    (async () => {
+      setLoadingHistory(true);
+      try {
+        const data = await ordersService.getOrders(1, 10);
+        setPastOrders(data.orders);
+      } catch {}
+      setLoadingHistory(false);
+    })();
+  }, []);
 
   if (isLoading && !currentOrder) {
     return (
@@ -88,7 +97,11 @@ export default function OrderDetailScreen() {
 
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 40 }}
+        contentContainerStyle={{
+          paddingHorizontal: 24,
+          paddingTop: 16,
+          paddingBottom: 40,
+        }}
       >
         {/* Status & ID header */}
         <View className="bg-[#0a120a] border border-[#1a2a1c] p-4 mb-3">
@@ -106,7 +119,10 @@ export default function OrderDetailScreen() {
                 className="text-[9px] tracking-[0.2em] font-mono font-bold"
                 style={{ color: statusColor }}
               >
-                {"● " + (ORDER_STATUS_LABELS[order.status] ?? order.status).toUpperCase()}
+                {"● " +
+                  (
+                    ORDER_STATUS_LABELS[order.status] ?? order.status
+                  ).toUpperCase()}
               </Text>
               <Text className="text-[9px] text-[#2a4a2a] tracking-[0.15em] font-mono mt-1">
                 {formatDate(order.createdAt)}
@@ -120,8 +136,17 @@ export default function OrderDetailScreen() {
               {STATUS_STEPS.map((step, idx) => {
                 const reached = currentStepIdx >= idx;
                 const stepColor = reached ? statusColor : "#1a2a1c";
+                const lineReached = currentStepIdx > idx;
+                const lineColor = lineReached ? statusColor : "#1a2a1c";
                 return (
-                  <View key={step} className="flex-1 flex-row items-center">
+                  <View
+                    key={step}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      flex: idx < STATUS_STEPS.length - 1 ? 1 : undefined,
+                    }}
+                  >
                     <View
                       className="w-2 h-2 rounded-full"
                       style={{ backgroundColor: stepColor }}
@@ -129,10 +154,7 @@ export default function OrderDetailScreen() {
                     {idx < STATUS_STEPS.length - 1 && (
                       <View
                         className="flex-1 h-[1px]"
-                        style={{
-                          backgroundColor:
-                            currentStepIdx > idx ? statusColor : "#1a2a1c",
-                        }}
+                        style={{ backgroundColor: lineColor }}
                       />
                     )}
                   </View>
@@ -226,7 +248,9 @@ export default function OrderDetailScreen() {
               ORDER NOTE
             </Text>
             <Text className="text-[10px] text-[#3a5c3a] leading-relaxed tracking-[0.05em] font-mono">
-              {"💬 \""}{order.note}{"\""}
+              {'💬 "'}
+              {order.note}
+              {'"'}
             </Text>
           </View>
         ) : null}
@@ -261,6 +285,92 @@ export default function OrderDetailScreen() {
             </Text>
           </View>
         </View>
+
+        {/* Order History */}
+        <View className="mt-4 mb-3">
+          <Text className="text-[9px] text-[#2a4a2a] tracking-[0.2em] font-mono mb-2">
+            ORDER HISTORY
+          </Text>
+          {loadingHistory ? (
+            <View className="py-4 items-center">
+              <ActivityIndicator size="small" color={colors.accent.green} />
+            </View>
+          ) : pastOrders.filter((o) => o.id !== order.id).length === 0 ? (
+            <View className="bg-[#0a120a] border border-[#1a2a1c] p-4 items-center">
+              <Text className="text-[10px] text-[#2a4a2a] tracking-[0.15em] font-mono">
+                NO OTHER ORDERS YET
+              </Text>
+            </View>
+          ) : (
+            pastOrders
+              .filter((o) => o.id !== order.id)
+              .map((pastOrder) => {
+                const pastStatusColor =
+                  colors.status[pastOrder.status as OrderStatus] ?? colors.accent.green;
+                return (
+                  <Pressable
+                    key={pastOrder.id}
+                    className="bg-[#0a120a] border border-[#1a2a1c] p-3.5 px-4 mb-[6px]"
+                    onPress={() => router.push(`/(app)/orders/${pastOrder.id}` as any)}
+                  >
+                    <View className="flex-row justify-between items-start mb-2">
+                      <View>
+                        <Text className="text-[10px] text-[#f5f5f0] tracking-[0.1em] font-mono">
+                          {pastOrder.id.slice(0, 13).toUpperCase()}
+                        </Text>
+                        <Text className="text-[9px] text-[#2a4a2a] tracking-[0.1em] font-mono mt-[2px]">
+                          {formatDate(pastOrder.createdAt)}
+                        </Text>
+                      </View>
+                      <View style={{ alignItems: "flex-end" }}>
+                        <Text
+                          className="text-[9px] tracking-[0.15em] font-mono font-bold"
+                          style={{ color: pastStatusColor }}
+                        >
+                          {"● " +
+                            (
+                              ORDER_STATUS_LABELS[pastOrder.status] ?? pastOrder.status
+                            ).toUpperCase()}
+                        </Text>
+                        <Text className="text-[11px] text-[#f5f5f0] font-mono mt-[2px]">
+                          {formatPrice(pastOrder.total)}
+                        </Text>
+                      </View>
+                    </View>
+                    <View className="flex-row flex-wrap gap-1">
+                      {pastOrder.items.slice(0, 3).map((item, idx) => (
+                        <Text
+                          key={idx}
+                          className="text-[9px] text-[#3a5c3a] tracking-[0.05em] font-mono"
+                        >
+                          {item.emoji} {item.name}
+                          {idx < Math.min(pastOrder.items.length, 3) - 1 ? "," : ""}
+                        </Text>
+                      ))}
+                      {pastOrder.items.length > 3 && (
+                        <Text className="text-[9px] text-[#2a4a2a] tracking-[0.1em] font-mono">
+                          +{pastOrder.items.length - 3} more
+                        </Text>
+                      )}
+                    </View>
+                  </Pressable>
+                );
+              })
+          )}
+        </View>
+
+        {/* View all orders */}
+        <Pressable
+          onPress={() => router.push("/(app)/orders" as any)}
+          className="py-3 border border-[#1a2a1c] items-center mb-2"
+        >
+          <Text
+            className="text-[10px] tracking-[0.2em] font-mono"
+            style={{ color: colors.accent.green }}
+          >
+            VIEW ALL ORDERS
+          </Text>
+        </Pressable>
 
         {/* Back to orders button */}
         <Pressable

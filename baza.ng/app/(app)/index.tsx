@@ -1,25 +1,25 @@
-import { useEffect, useState, useCallback } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  ActivityIndicator,
-  RefreshControl,
-  Alert,
-} from "react-native";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { intentGateBalance as s } from "../../styles";
-import Header from "../../components/layout/Header";
+import { useCallback, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import ModeCard from "../../components/cards/ModeCard";
+import Header from "../../components/layout/Header";
 import FloatingCart from "../../components/ui/FloatingCart";
-import { useWallet } from "../../hooks/useWallet";
-import { useOrders } from "../../hooks/useOrders";
-import { useAuthStore } from "../../stores/authStore";
-import { SHOPPING_MODES } from "../../utils/constants";
-import { getGreeting, formatPrice, formatDate } from "../../utils/format";
 import { colors } from "../../constants/theme";
+import { useOrders } from "../../hooks/useOrders";
+import { useWallet } from "../../hooks/useWallet";
+import { useAuthStore } from "../../stores/authStore";
+import { intentGateBalance as s } from "../../styles";
+import { SHOPPING_MODES } from "../../utils/constants";
+import { formatPrice, getGreeting } from "../../utils/format";
 
 export default function IntentGateScreen() {
   const router = useRouter();
@@ -36,7 +36,7 @@ export default function IntentGateScreen() {
       o.status === "PENDING" ||
       o.status === "CONFIRMED" ||
       o.status === "PREPARING" ||
-      o.status === "DISPATCHED"
+      o.status === "DISPATCHED",
   );
 
   useEffect(() => {
@@ -60,9 +60,7 @@ export default function IntentGateScreen() {
         <Text className={s.greetingTime}>
           {greeting.toUpperCase().replace(" ", "  ")}
         </Text>
-        <Text className={s.greetingTitle}>
-          What are we{"\n"}doing today?
-        </Text>
+        <Text className={s.greetingTitle}>What are we{"\n"}doing today?</Text>
       </View>
 
       <ScrollView
