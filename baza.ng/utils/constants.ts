@@ -91,7 +91,7 @@ export const SHOPPING_MODES: ModeConfig[] = [
   {
     key: "chat",
     title: "Help me decide",
-    subtitle: "CHAT WITH OUR ASSISTANT",
+    subtitle: "AI(COMING SOON)",
     emoji: "💬",
     color: "#4caf7d",
     bg: "#0d1a0f",
