@@ -1,5 +1,4 @@
-import { DMSerifDisplay_400Regular } from "@expo-google-fonts/dm-serif-display";
-import { SpaceMono_400Regular } from "@expo-google-fonts/space-mono";
+import { NotoSerif_400Regular } from "@expo-google-fonts/noto-serif";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -18,8 +17,7 @@ export default function RootLayout() {
   const setAccessToken = useAuthStore((s) => s.setAccessToken);
 
   const [fontsLoaded] = useFonts({
-    DMSerifDisplay_400Regular,
-    SpaceMono_400Regular,
+    NotoSerif_400Regular,
   });
 
   useEffect(() => {

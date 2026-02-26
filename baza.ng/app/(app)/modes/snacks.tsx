@@ -1,20 +1,20 @@
-import { useEffect, useState, useCallback } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  ActivityIndicator,
-} from "react-native";
 import { useRouter } from "expo-router";
-import { snacksDrinksMode as s } from "../../../styles";
-import { useProducts } from "../../../hooks/useProducts";
-import { useCart } from "../../../hooks/useCart";
+import { useCallback, useEffect, useState } from "react";
+import {
+    ActivityIndicator,
+    Pressable,
+    ScrollView,
+    Text,
+    View,
+} from "react-native";
 import SnackCard from "../../../components/cards/SnackCard";
 import FloatingCart from "../../../components/ui/FloatingCart";
-import { SNACK_CATEGORIES } from "../../../utils/constants";
 import { colors } from "../../../constants/theme";
+import { useCart } from "../../../hooks/useCart";
+import { useProducts } from "../../../hooks/useProducts";
+import { snacksDrinksMode as s } from "../../../styles";
 import type { SnackItem } from "../../../types";
+import { SNACK_CATEGORIES } from "../../../utils/constants";
 
 export default function SnacksScreen() {
   const router = useRouter();
@@ -52,7 +52,7 @@ export default function SnacksScreen() {
         updateQty(item.id, clamped);
       }
     },
-    [addItem, updateQty, removeItem, getItemQty]
+    [addItem, updateQty, removeItem, getItemQty],
   );
 
   return (
@@ -83,6 +83,7 @@ export default function SnacksScreen() {
                   color: activeCat === cat ? "#c77dff" : "#4a2a6a",
                   fontSize: 9,
                   letterSpacing: 1,
+                  fontFamily: "NotoSerif_400Regular",
                 }}
               >
                 {cat}
@@ -93,23 +94,51 @@ export default function SnacksScreen() {
       </ScrollView>
 
       {isLoading && snacks.length === 0 ? (
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
           <ActivityIndicator color={colors.accent.purple} size="small" />
         </View>
       ) : error && snacks.length === 0 ? (
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <Text style={{ color: "#3a1a5a", fontSize: 11, letterSpacing: 1 }}>
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
+          <Text
+            style={{
+              color: "#3a1a5a",
+              fontSize: 11,
+              letterSpacing: 1,
+              fontFamily: "NotoSerif_400Regular",
+            }}
+          >
             {error}
           </Text>
           <Pressable onPress={() => fetchSnacks()} style={{ marginTop: 16 }}>
-            <Text style={{ color: colors.accent.green, fontSize: 11, letterSpacing: 1 }}>
+            <Text
+              style={{
+                color: colors.accent.green,
+                fontSize: 11,
+                letterSpacing: 1,
+                fontFamily: "NotoSerif_400Regular",
+              }}
+            >
               RETRY
             </Text>
           </Pressable>
         </View>
       ) : filtered.length === 0 ? (
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <Text style={{ color: "#3a1a5a", fontSize: 11, letterSpacing: 1, textAlign: "center" }}>
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
+          <Text
+            style={{
+              color: "#3a1a5a",
+              fontSize: 11,
+              letterSpacing: 1,
+              textAlign: "center",
+              fontFamily: "NotoSerif_400Regular",
+            }}
+          >
             {snacks.length === 0
               ? "NO SNACKS AVAILABLE YET.\nCHECK BACK SOON."
               : "NOTHING IN THIS CATEGORY."}

@@ -171,6 +171,17 @@
 - Added wallet account (DVA) and transaction history tests to `test_paystack.py` (steps 3-4).
 - Updated `docs/payment-system.md` testing checklist with DVA account and transaction cURL commands.
 
+### Font Consistency — Noto Serif Only
+
+- **Switched to single-font system**: Noto Serif (`NotoSerif_400Regular`) is now the only font used across the entire app — headlines, titles, prices, labels, buttons, descriptions, stepper controls, everything.
+- Installed `@expo-google-fonts/noto-serif` package.
+- Updated `app/_layout.tsx` to import and load `NotoSerif_400Regular` (removed DM Serif Display and SpaceMono imports).
+- Updated `tailwind.config.js`: both `font-serif` and `font-mono` now map to `NotoSerif_400Regular`.
+- Updated `constants/theme.ts` font entries to `NotoSerif_400Regular`.
+- Replaced all 34 inline `fontFamily: "SpaceMono_400Regular"` references across 13 source files with `"NotoSerif_400Regular"`.
+- **Fixed core stylesheet** (`styles/index.ts`): All ~150+ text style classes have explicit `font-mono` or `font-serif` (both resolve to Noto Serif).
+- **Root cause**: React Native does not cascade `fontFamily` from parent `<View>` to child `<Text>` (unlike CSS). Every `<Text>` element must explicitly declare its font via `className` or inline `style`.
+
 ## Next
 
 1. **Set Paystack webhook URL** in Paystack Dashboard → Settings → API Keys & Webhooks → `https://baza-chi.vercel.app/v1/webhooks/paystack`

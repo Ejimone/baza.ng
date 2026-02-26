@@ -1,14 +1,13 @@
+import { router } from "expo-router";
 import { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
-import { router } from "expo-router";
 import { useAuth } from "../../hooks/useAuth";
 import { authScreen as s } from "../../styles";
 
@@ -58,7 +57,7 @@ export default function SignInScreen() {
         />
 
         {error ? (
-          <Text className="text-3xs text-baza-red tracking-wide-sm mb-4">
+          <Text className="text-3xs text-baza-red tracking-wide-sm mb-4 font-mono">
             {error}
           </Text>
         ) : null}

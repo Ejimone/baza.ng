@@ -1,22 +1,22 @@
+import * as Clipboard from "expo-clipboard";
+import { useRouter } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
 import { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  ActivityIndicator,
-  Alert,
+    ActivityIndicator,
+    Alert,
+    Pressable,
+    ScrollView,
+    Text,
+    View,
 } from "react-native";
-import { useRouter } from "expo-router";
-import * as Clipboard from "expo-clipboard";
-import * as WebBrowser from "expo-web-browser";
-import { useAuth } from "../../hooks/useAuth";
-import { useWallet } from "../../hooks/useWallet";
-import { useOrders } from "../../hooks/useOrders";
-import { formatPrice, formatDate } from "../../utils/format";
-import { profileScreen as s } from "../../styles/index";
 import ScreenWrapper from "../../components/layout/ScreenWrapper";
 import WalletCard from "../../components/wallet/WalletCard";
+import { useAuth } from "../../hooks/useAuth";
+import { useOrders } from "../../hooks/useOrders";
+import { useWallet } from "../../hooks/useWallet";
+import { profileScreen as s } from "../../styles/index";
+import { formatPrice } from "../../utils/format";
 
 const TOP_UP_AMOUNTS = [500000, 1000000, 2000000, 5000000, 10000000];
 
@@ -86,7 +86,10 @@ export default function ProfileScreen() {
     {
       icon: "📦",
       label: "My Orders",
-      sub: orders.length === 0 ? "NO ORDERS YET" : `${orders.length} ORDER${orders.length !== 1 ? "S" : ""}`,
+      sub:
+        orders.length === 0
+          ? "NO ORDERS YET"
+          : `${orders.length} ORDER${orders.length !== 1 ? "S" : ""}`,
       route: "/(app)/orders",
     },
     {
@@ -123,23 +126,18 @@ export default function ProfileScreen() {
         </Pressable>
         <View className={s.avatarRow}>
           <View className={s.avatar}>
-            <Text className="text-[22px]">
+            <Text className="text-[22px] font-serif">
               {user?.name ? user.name.charAt(0).toUpperCase() : "🌿"}
             </Text>
           </View>
           <View>
             <Text className={s.userName}>{user?.name ?? "Member"}</Text>
-            <Text className={s.memberSince}>
-              MEMBER SINCE {memberYear}
-            </Text>
+            <Text className={s.memberSince}>MEMBER SINCE {memberYear}</Text>
           </View>
         </View>
       </View>
 
-      <ScrollView
-        className={s.scrollBody}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView className={s.scrollBody} showsVerticalScrollIndicator={false}>
         <WalletCard balance={balance} onTopUp={() => setShowTopUp(true)} />
 
         {/* DVA Account Box */}
@@ -293,7 +291,10 @@ export default function ProfileScreen() {
                 setSelectedAmt(null);
               }}
             >
-              <Text className={s.topUpCancelBtn} style={{ textAlign: "center" }}>
+              <Text
+                className={s.topUpCancelBtn}
+                style={{ textAlign: "center" }}
+              >
                 CANCEL
               </Text>
             </Pressable>

@@ -1,7 +1,7 @@
-import { View, Text, Pressable } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { restockMode as s } from "../../styles";
-import { formatPrice } from "../../utils/format";
 import type { RestockItem } from "../../types";
+import { formatPrice } from "../../utils/format";
 
 interface ProductCardProps {
   item: RestockItem;
@@ -25,7 +25,9 @@ export default function ProductCard({
       <View
         className={`${s.itemThumb} ${inCart ? s.itemThumbActive : s.itemThumbInactive}`}
       >
-        <Text style={{ fontSize: 20 }}>{item.emoji}</Text>
+        <Text style={{ fontSize: 20, fontFamily: "NotoSerif_400Regular" }}>
+          {item.emoji}
+        </Text>
       </View>
 
       <View style={{ flex: 1 }}>
@@ -47,7 +49,7 @@ export default function ProductCard({
 
         {qty === 0 ? (
           <Pressable className={s.addBtn} onPress={onAdd}>
-            <Text>ADD</Text>
+            <Text className="font-mono">ADD</Text>
           </Pressable>
         ) : (
           <View className={s.stepperRow}>
@@ -55,13 +57,22 @@ export default function ProductCard({
               className={`${s.stepperDec} ${qty === 1 ? s.stepperDecRemove : s.stepperDecNormal}`}
               onPress={onDecrement}
             >
-              <Text style={{ color: qty === 1 ? "#e85c3a" : "#6ec6ff" }}>
+              <Text
+                style={{
+                  color: qty === 1 ? "#e85c3a" : "#6ec6ff",
+                  fontFamily: "NotoSerif_400Regular",
+                }}
+              >
                 {qty === 1 ? "×" : "−"}
               </Text>
             </Pressable>
             <Text className={s.stepperValue}>{qty}</Text>
             <Pressable className={s.stepperInc} onPress={onIncrement}>
-              <Text style={{ color: "#6ec6ff" }}>+</Text>
+              <Text
+                style={{ color: "#6ec6ff", fontFamily: "NotoSerif_400Regular" }}
+              >
+                +
+              </Text>
             </Pressable>
           </View>
         )}

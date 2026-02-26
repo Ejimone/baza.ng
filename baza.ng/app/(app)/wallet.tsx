@@ -287,7 +287,7 @@ export default function WalletScreen() {
                   <Text
                     style={{
                       color: selectedAmt === amt ? "#4caf7d" : "#5a8a5a",
-                      fontFamily: "SpaceMono_400Regular",
+                      fontFamily: "NotoSerif_400Regular",
                       fontSize: 13,
                     }}
                   >
@@ -321,7 +321,7 @@ export default function WalletScreen() {
                 <Text
                   style={{
                     color: selectedAmt ? "#000" : "#2a3a2a",
-                    fontFamily: "SpaceMono_400Regular",
+                    fontFamily: "NotoSerif_400Regular",
                     fontSize: 11,
                     fontWeight: "bold",
                     letterSpacing: 2,

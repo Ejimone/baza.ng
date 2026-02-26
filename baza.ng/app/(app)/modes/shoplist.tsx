@@ -1,30 +1,25 @@
-import { useEffect, useState, useCallback, useRef } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  ActivityIndicator,
-} from "react-native";
 import { useRouter } from "expo-router";
-import { restockMode as s } from "../../../styles";
-import { useProducts } from "../../../hooks/useProducts";
-import { useCart } from "../../../hooks/useCart";
-import SearchBar from "../../../components/ui/SearchBar";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+    ActivityIndicator,
+    Pressable,
+    ScrollView,
+    Text,
+    View,
+} from "react-native";
 import ProductCard from "../../../components/cards/ProductCard";
 import FloatingCart from "../../../components/ui/FloatingCart";
+import SearchBar from "../../../components/ui/SearchBar";
 import { colors } from "../../../constants/theme";
+import { useCart } from "../../../hooks/useCart";
+import { useProducts } from "../../../hooks/useProducts";
+import { restockMode as s } from "../../../styles";
 import type { RestockItem } from "../../../types";
 
 export default function ShopListScreen() {
   const router = useRouter();
-  const {
-    restockItems,
-    restockCategories,
-    isLoading,
-    error,
-    fetchRestock,
-  } = useProducts();
+  const { restockItems, restockCategories, isLoading, error, fetchRestock } =
+    useProducts();
   const { addItem, getItemQty, updateQty, removeItem } = useCart();
 
   const [query, setQuery] = useState("");
@@ -37,12 +32,9 @@ export default function ShopListScreen() {
 
   const doFetch = useCallback(
     (cat: string, q: string) => {
-      fetchRestock(
-        cat === "All" ? undefined : cat,
-        q || undefined
-      );
+      fetchRestock(cat === "All" ? undefined : cat, q || undefined);
     },
-    [fetchRestock]
+    [fetchRestock],
   );
 
   const handleCategoryChange = (cat: string) => {
@@ -80,12 +72,10 @@ export default function ShopListScreen() {
         updateQty(item.id, clamped);
       }
     },
-    [addItem, updateQty, removeItem, getItemQty]
+    [addItem, updateQty, removeItem, getItemQty],
   );
 
-  const categories = restockCategories.length > 0
-    ? restockCategories
-    : ["All"];
+  const categories = restockCategories.length > 0 ? restockCategories : ["All"];
 
   return (
     <View className={s.container}>
@@ -123,6 +113,7 @@ export default function ShopListScreen() {
                   color: activeCat === cat ? "#6ec6ff" : "#3a5a8a",
                   fontSize: 9,
                   letterSpacing: 1,
+                  fontFamily: "NotoSerif_400Regular",
                 }}
               >
                 {cat}
@@ -133,22 +124,45 @@ export default function ShopListScreen() {
       </ScrollView>
 
       {isLoading && restockItems.length === 0 ? (
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
           <ActivityIndicator color={colors.accent.blue} size="small" />
         </View>
       ) : error && restockItems.length === 0 ? (
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <Text style={{ color: "#3a5a8a", fontSize: 11, letterSpacing: 1 }}>
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
+          <Text
+            style={{
+              color: "#3a5a8a",
+              fontSize: 11,
+              letterSpacing: 1,
+              fontFamily: "NotoSerif_400Regular",
+            }}
+          >
             {error}
           </Text>
-          <Pressable onPress={() => doFetch(activeCat, query)} style={{ marginTop: 16 }}>
-            <Text style={{ color: colors.accent.green, fontSize: 11, letterSpacing: 1 }}>
+          <Pressable
+            onPress={() => doFetch(activeCat, query)}
+            style={{ marginTop: 16 }}
+          >
+            <Text
+              style={{
+                color: colors.accent.green,
+                fontSize: 11,
+                letterSpacing: 1,
+                fontFamily: "NotoSerif_400Regular",
+              }}
+            >
               RETRY
             </Text>
           </Pressable>
         </View>
       ) : restockItems.length === 0 ? (
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
           <Text className={s.emptyText}>NOT IN STOCK YET.</Text>
         </View>
       ) : (

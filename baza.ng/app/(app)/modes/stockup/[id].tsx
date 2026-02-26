@@ -1,18 +1,18 @@
-import { useState, useEffect, useMemo } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useMemo, useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  ActivityIndicator,
+    ActivityIndicator,
+    Pressable,
+    ScrollView,
+    Text,
+    View,
 } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { bundleDetail as s } from "../../../../styles";
-import { useProducts } from "../../../../hooks/useProducts";
-import { useCart } from "../../../../hooks/useCart";
 import QtyControl from "../../../../components/ui/QtyControl";
-import { formatPrice } from "../../../../utils/format";
+import { useCart } from "../../../../hooks/useCart";
+import { useProducts } from "../../../../hooks/useProducts";
+import { bundleDetail as s } from "../../../../styles";
 import type { BundleItem } from "../../../../types";
+import { formatPrice } from "../../../../utils/format";
 
 interface EditableItem extends BundleItem {
   qty: number;
@@ -36,28 +36,24 @@ export default function BundleDetailScreen() {
 
   useEffect(() => {
     if (bundle) {
-      setItems(
-        bundle.items.map((i) => ({ ...i, qty: i.defaultQty }))
-      );
+      setItems(bundle.items.map((i) => ({ ...i, qty: i.defaultQty })));
     }
   }, [bundle]);
 
   const total = useMemo(
     () => items.reduce((sum, i) => sum + i.unitPrice * i.qty, 0),
-    [items]
+    [items],
   );
 
   const memberTotal = useMemo(
     () => (bundle ? Math.round(total * (1 - bundle.savings / 100)) : 0),
-    [total, bundle]
+    [total, bundle],
   );
 
   const activeItems = useMemo(() => items.filter((i) => i.qty > 0), [items]);
 
   const setQty = (itemId: string, qty: number) => {
-    setItems((prev) =>
-      prev.map((i) => (i.id === itemId ? { ...i, qty } : i))
-    );
+    setItems((prev) => prev.map((i) => (i.id === itemId ? { ...i, qty } : i)));
   };
 
   const handleAddToCart = () => {
@@ -87,7 +83,9 @@ export default function BundleDetailScreen() {
   if (!bundle) {
     return (
       <View className={s.container} style={{ backgroundColor: "#070e08" }}>
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
           <ActivityIndicator color="#f5a623" size="small" />
         </View>
       </View>
@@ -95,7 +93,10 @@ export default function BundleDetailScreen() {
   }
 
   return (
-    <View className={s.container} style={{ backgroundColor: bundle.color + "08" }}>
+    <View
+      className={s.container}
+      style={{ backgroundColor: bundle.color + "08" }}
+    >
       <View className={s.header}>
         <Pressable onPress={() => router.back()}>
           <Text className={s.backButton} style={{ color: bundle.color + "aa" }}>
@@ -106,10 +107,7 @@ export default function BundleDetailScreen() {
           <Text className={s.heroEmoji}>{bundle.emoji}</Text>
           <View style={{ flex: 1 }}>
             <Text className={s.heroTitle}>{bundle.name}</Text>
-            <Text
-              className={s.heroSavings}
-              style={{ color: bundle.color }}
-            >
+            <Text className={s.heroSavings} style={{ color: bundle.color }}>
               SAVE {bundle.savings}%
             </Text>
           </View>
@@ -117,7 +115,10 @@ export default function BundleDetailScreen() {
         <Text className={s.heroDesc}>{bundle.description}</Text>
       </View>
 
-      <ScrollView className={s.listSection} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className={s.listSection}
+        showsVerticalScrollIndicator={false}
+      >
         <Text className={s.listLabel}>
           {activeItems.length} OF {items.length} ITEMS
         </Text>
@@ -145,8 +146,12 @@ export default function BundleDetailScreen() {
             </View>
             <QtyControl
               value={item.qty}
-              onIncrement={() => setQty(item.id, Math.min(item.qty + 1, item.maxQty))}
-              onDecrement={() => setQty(item.id, Math.max(item.qty - 1, item.minQty))}
+              onIncrement={() =>
+                setQty(item.id, Math.min(item.qty + 1, item.maxQty))
+              }
+              onDecrement={() =>
+                setQty(item.id, Math.max(item.qty - 1, item.minQty))
+              }
               min={item.minQty}
               max={item.maxQty}
               accentColor={bundle.color}
@@ -158,13 +163,27 @@ export default function BundleDetailScreen() {
 
       <View className={s.footer}>
         <View className={s.retailRow}>
-          <Text style={{ color: "#2a3a2a", fontSize: 9, letterSpacing: 1 }}>
+          <Text
+            style={{
+              color: "#2a3a2a",
+              fontSize: 9,
+              letterSpacing: 1,
+              fontFamily: "NotoSerif_400Regular",
+            }}
+          >
             RETAIL VALUE
           </Text>
           <Text className={s.retailValue}>{formatPrice(total)}</Text>
         </View>
         <View className={s.memberRow}>
-          <Text style={{ color: bundle.color, fontSize: 9, letterSpacing: 1 }}>
+          <Text
+            style={{
+              color: bundle.color,
+              fontSize: 9,
+              letterSpacing: 1,
+              fontFamily: "NotoSerif_400Regular",
+            }}
+          >
             MEMBER PRICE
           </Text>
           <Text className={s.memberPrice}>{formatPrice(memberTotal)}</Text>
@@ -172,8 +191,7 @@ export default function BundleDetailScreen() {
         <Pressable
           className={s.addToCartBtn}
           style={{
-            backgroundColor:
-              activeItems.length > 0 ? bundle.color : "#1a2a1c",
+            backgroundColor: activeItems.length > 0 ? bundle.color : "#1a2a1c",
           }}
           onPress={handleAddToCart}
           disabled={activeItems.length === 0}
@@ -182,7 +200,7 @@ export default function BundleDetailScreen() {
             style={{
               color: activeItems.length > 0 ? "#000" : "#2a3a2a",
               textAlign: "center",
-              fontFamily: "SpaceMono_400Regular",
+              fontFamily: "NotoSerif_400Regular",
               fontSize: 11,
               fontWeight: "bold",
               letterSpacing: 2,

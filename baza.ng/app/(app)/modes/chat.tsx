@@ -1,16 +1,16 @@
-import { useEffect, useState, useRef } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TextInput,
-  Pressable,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
 import { useRouter } from "expo-router";
-import { chatMode as s } from "../../../styles";
+import { useEffect, useRef, useState } from "react";
+import {
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    View,
+} from "react-native";
 import * as supportService from "../../../services/support";
+import { chatMode as s } from "../../../styles";
 import type { SupportMessage } from "../../../types";
 
 interface ChatMessage {
@@ -52,11 +52,13 @@ export default function ChatScreen() {
     try {
       const thread = await supportService.getThread();
       if (thread.messages.length > 0) {
-        const loaded: ChatMessage[] = thread.messages.map((m: SupportMessage) => ({
-          id: m.id,
-          text: m.text,
-          from: m.sender === "USER" ? "user" as const : "ai" as const,
-        }));
+        const loaded: ChatMessage[] = thread.messages.map(
+          (m: SupportMessage) => ({
+            id: m.id,
+            text: m.text,
+            from: m.sender === "USER" ? ("user" as const) : ("ai" as const),
+          }),
+        );
         setMessages(loaded);
         setShowQuickReplies(false);
       }
@@ -132,12 +134,17 @@ export default function ChatScreen() {
             >
               <View
                 className={
-                  msg.from === "user"
-                    ? s.messageBubbleUser
-                    : s.messageBubbleBot
+                  msg.from === "user" ? s.messageBubbleUser : s.messageBubbleBot
                 }
               >
-                <Text style={{ color: "#d0d8e0", fontSize: 12, lineHeight: 20 }}>
+                <Text
+                  style={{
+                    color: "#d0d8e0",
+                    fontSize: 12,
+                    lineHeight: 20,
+                    fontFamily: "NotoSerif_400Regular",
+                  }}
+                >
                   {msg.text}
                 </Text>
               </View>
@@ -167,7 +174,14 @@ export default function ChatScreen() {
                 className={s.quickReplyBtn}
                 onPress={() => send(reply)}
               >
-                <Text style={{ color: "#6ec6ff", fontSize: 10, letterSpacing: 0.5 }}>
+                <Text
+                  style={{
+                    color: "#6ec6ff",
+                    fontSize: 10,
+                    letterSpacing: 0.5,
+                    fontFamily: "NotoSerif_400Regular",
+                  }}
+                >
                   {reply}
                 </Text>
               </Pressable>
@@ -191,7 +205,15 @@ export default function ChatScreen() {
             disabled={!input.trim()}
             style={{ opacity: input.trim() ? 1 : 0.5 }}
           >
-            <Text style={{ fontSize: 14, color: "#000" }}>↑</Text>
+            <Text
+              style={{
+                fontSize: 14,
+                color: "#000",
+                fontFamily: "NotoSerif_400Regular",
+              }}
+            >
+              ↑
+            </Text>
           </Pressable>
         </View>
       </View>

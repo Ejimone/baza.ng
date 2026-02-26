@@ -1,15 +1,9 @@
-import { useState } from "react";
-import {
-  View,
-  Text,
-  Pressable,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
 import * as Clipboard from "expo-clipboard";
 import * as WebBrowser from "expo-web-browser";
-import { fundPrompt as s } from "../../styles";
+import { useState } from "react";
+import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
 import { useWallet } from "../../hooks/useWallet";
+import { fundPrompt as s } from "../../styles";
 import { formatPrice } from "../../utils/format";
 
 const QUICK_AMOUNTS = [500000, 1000000, 2000000, 5000000];
@@ -25,13 +19,8 @@ export default function FundPrompt({
   onDismiss,
   onFunded,
 }: FundPromptProps) {
-  const {
-    accountNumber,
-    bankName,
-    initTopup,
-    verifyTopup,
-    refreshBalance,
-  } = useWallet();
+  const { accountNumber, bankName, initTopup, verifyTopup, refreshBalance } =
+    useWallet();
 
   const [selected, setSelected] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
@@ -53,8 +42,7 @@ export default function FundPrompt({
 
       await WebBrowser.openBrowserAsync(authorizationUrl, {
         dismissButtonStyle: "close",
-        presentationStyle:
-          WebBrowser.WebBrowserPresentationStyle.FORM_SHEET,
+        presentationStyle: WebBrowser.WebBrowserPresentationStyle.FORM_SHEET,
       });
 
       const result = await verifyTopup(reference);
@@ -63,7 +51,10 @@ export default function FundPrompt({
         await refreshBalance();
         onFunded();
       } else {
-        Alert.alert("Top-up Pending", "Payment is still being verified. Your balance will update shortly.");
+        Alert.alert(
+          "Top-up Pending",
+          "Payment is still being verified. Your balance will update shortly.",
+        );
         await refreshBalance();
         onFunded();
       }
@@ -86,9 +77,7 @@ export default function FundPrompt({
         <Text className={s.title}>Top up to complete</Text>
         <Text className={s.desc}>
           You need{" "}
-          <Text className={s.shortfallAmount}>
-            {formatPrice(shortfall)}
-          </Text>{" "}
+          <Text className={s.shortfallAmount}>{formatPrice(shortfall)}</Text>{" "}
           more to place this order. Fund via card or bank transfer below.
         </Text>
 
@@ -101,7 +90,7 @@ export default function FundPrompt({
                 <Text className={s.acctBank}>{bankName ?? "Wema Bank"}</Text>
               </View>
               <Pressable className={s.acctCopyBtn} onPress={handleCopy}>
-                <Text className="text-baza-green text-3xs tracking-wide-lg">
+                <Text className="text-baza-green text-3xs tracking-wide-lg font-mono">
                   {copied ? "COPIED" : "COPY"}
                 </Text>
               </Pressable>

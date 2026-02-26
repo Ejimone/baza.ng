@@ -1,22 +1,22 @@
-import { useState, useRef } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  TextInput,
-  Alert,
-  ActivityIndicator,
-} from "react-native";
 import { useRouter } from "expo-router";
-import { cartScreen as s } from "../../styles";
+import { useState } from "react";
+import {
+    ActivityIndicator,
+    Alert,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    View,
+} from "react-native";
+import FundPrompt from "../../components/ui/FundPrompt";
 import { useCart } from "../../hooks/useCart";
-import { useWallet } from "../../hooks/useWallet";
 import { useOrders } from "../../hooks/useOrders";
+import { useWallet } from "../../hooks/useWallet";
 import { cartItemsToOrderItems } from "../../services/orders";
 import { useWalletStore } from "../../stores/walletStore";
+import { cartScreen as s } from "../../styles";
 import { formatPrice } from "../../utils/format";
-import FundPrompt from "../../components/ui/FundPrompt";
 
 export default function CartScreen() {
   const router = useRouter();
@@ -106,27 +106,16 @@ export default function CartScreen() {
           className={`${s.balanceBar} ${hasFunds ? s.balanceBarOk : s.balanceBarLow}`}
         >
           <View>
-            <Text
-              className={
-                hasFunds ? s.balanceLabelOk : s.balanceLabelLow
-              }
-            >
+            <Text className={hasFunds ? s.balanceLabelOk : s.balanceLabelLow}>
               WALLET BALANCE
             </Text>
-            <Text
-              className={
-                hasFunds ? s.balanceAmountOk : s.balanceAmountLow
-              }
-            >
+            <Text className={hasFunds ? s.balanceAmountOk : s.balanceAmountLow}>
               {formattedBalance}
             </Text>
           </View>
           {!hasFunds && (
-            <Pressable
-              className={s.topUpBtn}
-              onPress={() => setShowFund(true)}
-            >
-              <Text className="text-baza-red text-3xs tracking-wide-lg">
+            <Pressable className={s.topUpBtn} onPress={() => setShowFund(true)}>
+              <Text className="text-baza-red text-3xs tracking-wide-lg font-mono">
                 TOP UP
               </Text>
             </Pressable>
@@ -168,13 +157,13 @@ export default function CartScreen() {
       {!isEmpty && (
         <View className={s.footer}>
           <View className={s.subtotalRow}>
-            <Text className="text-3xs text-[#2a3a2a] tracking-wide-lg">
+            <Text className="text-3xs text-[#2a3a2a] tracking-wide-lg font-mono">
               SUBTOTAL
             </Text>
             <Text className={s.subtotalValue}>{formattedTotal}</Text>
           </View>
           <View className={s.deliveryRow}>
-            <Text className="text-3xs text-[#2a3a2a] tracking-wide-lg">
+            <Text className="text-3xs text-[#2a3a2a] tracking-wide-lg font-mono">
               DELIVERY
             </Text>
             <Text className={s.deliveryValue}>FREE</Text>
@@ -205,9 +194,7 @@ export default function CartScreen() {
             {isLoading ? (
               <ActivityIndicator color="#000" size="small" />
             ) : (
-              <Text
-                className="text-black text-[11px] tracking-wide-2xl font-mono font-bold text-center"
-              >
+              <Text className="text-black text-[11px] tracking-wide-2xl font-mono font-bold text-center">
                 {hasFunds
                   ? "CONFIRM ORDER"
                   : `FUND WALLET · NEED ${formatPrice(shortfall)} MORE`}

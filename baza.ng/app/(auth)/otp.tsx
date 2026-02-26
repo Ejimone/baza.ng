@@ -1,19 +1,16 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    Text,
+    TextInput,
+    View,
+} from "react-native";
 import { useAuth } from "../../hooks/useAuth";
 import { authScreen as s } from "../../styles";
-import {
-  OTP_LENGTH,
-  OTP_RESEND_COOLDOWN_SECONDS,
-} from "../../utils/constants";
+import { OTP_LENGTH, OTP_RESEND_COOLDOWN_SECONDS } from "../../utils/constants";
 
 export default function OTPScreen() {
   const { phone, name, referralCode, mode } = useLocalSearchParams<{
@@ -139,7 +136,7 @@ export default function OTPScreen() {
         </View>
 
         {error ? (
-          <Text className="text-center text-3xs text-baza-red tracking-wide-md mb-4">
+          <Text className="text-center text-3xs text-baza-red tracking-wide-md mb-4 font-mono">
             {error}
           </Text>
         ) : (
@@ -153,11 +150,7 @@ export default function OTPScreen() {
         <Pressable
           onPress={() => handleVerify()}
           className={s.otpVerifyBtn}
-          style={
-            isComplete
-              ? { backgroundColor: "#4caf7d" }
-              : undefined
-          }
+          style={isComplete ? { backgroundColor: "#4caf7d" } : undefined}
           disabled={!isComplete || isLoading}
         >
           <Text
@@ -169,9 +162,7 @@ export default function OTPScreen() {
 
         <Pressable onPress={handleResend} disabled={cooldown > 0}>
           <Text className={s.otpResendBtn}>
-            {cooldown > 0
-              ? `RESEND CODE (${cooldown}s)`
-              : "RESEND CODE"}
+            {cooldown > 0 ? `RESEND CODE (${cooldown}s)` : "RESEND CODE"}
           </Text>
         </Pressable>
       </View>

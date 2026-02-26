@@ -59,7 +59,14 @@ export default function ReadyEatScreen() {
         <View
           style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
         >
-          <Text style={{ color: "#4a2a1a", fontSize: 11, letterSpacing: 1 }}>
+          <Text
+            style={{
+              color: "#4a2a1a",
+              fontSize: 11,
+              letterSpacing: 1,
+              fontFamily: "NotoSerif_400Regular",
+            }}
+          >
             {error}
           </Text>
           <Pressable onPress={fetchReadyEat} style={{ marginTop: 16 }}>
@@ -68,6 +75,7 @@ export default function ReadyEatScreen() {
                 color: colors.accent.green,
                 fontSize: 11,
                 letterSpacing: 1,
+                fontFamily: "NotoSerif_400Regular",
               }}
             >
               RETRY
@@ -84,6 +92,7 @@ export default function ReadyEatScreen() {
               fontSize: 11,
               letterSpacing: 1,
               textAlign: "center",
+              fontFamily: "NotoSerif_400Regular",
             }}
           >
             NO READY-TO-EAT ITEMS YET.{"\n"}CHECK BACK SOON.
@@ -155,6 +164,7 @@ export default function ReadyEatScreen() {
                         color: item.color,
                         fontSize: 10,
                         letterSpacing: 1,
+                        fontFamily: "NotoSerif_400Regular",
                       }}
                     >
                       ADD
@@ -179,7 +189,10 @@ export default function ReadyEatScreen() {
                         }}
                       >
                         <Text
-                          style={{ color: qty === 1 ? "#e85c3a" : item.color }}
+                          style={{
+                            color: qty === 1 ? "#e85c3a" : item.color,
+                            fontFamily: "NotoSerif_400Regular",
+                          }}
                         >
                           {qty === 1 ? "×" : "−"}
                         </Text>
@@ -193,7 +206,14 @@ export default function ReadyEatScreen() {
                           updateQty(item.id, qty + 1);
                         }}
                       >
-                        <Text style={{ color: item.color }}>+</Text>
+                        <Text
+                          style={{
+                            color: item.color,
+                            fontFamily: "NotoSerif_400Regular",
+                          }}
+                        >
+                          +
+                        </Text>
                       </Pressable>
                     </View>
                     <Text
@@ -329,7 +349,7 @@ function ReadyEatPopup({
               style={{
                 color: "#000",
                 textAlign: "center",
-                fontFamily: "SpaceMono_400Regular",
+                fontFamily: "NotoSerif_400Regular",
                 fontSize: 11,
                 fontWeight: "bold",
                 letterSpacing: 2,

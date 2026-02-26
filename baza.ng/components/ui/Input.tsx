@@ -1,9 +1,9 @@
-import { View, Text } from "react-native";
+import { Text, View } from "react-native";
 
 export default function Input() {
   return (
     <View>
-      <Text>Input</Text>
+      <Text className="font-mono">Input</Text>
     </View>
   );
 }

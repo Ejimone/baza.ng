@@ -1,16 +1,16 @@
-import { useState, useEffect, useMemo } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useMemo, useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
   ActivityIndicator,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
 } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { mealPackDetail as s } from "../../../../styles";
-import { useProducts } from "../../../../hooks/useProducts";
-import { useCart } from "../../../../hooks/useCart";
 import QtyControl from "../../../../components/ui/QtyControl";
+import { useCart } from "../../../../hooks/useCart";
+import { useProducts } from "../../../../hooks/useProducts";
+import { mealPackDetail as s } from "../../../../styles";
 import { formatPrice } from "../../../../utils/format";
 
 export default function MealPackDetailScreen() {
@@ -40,13 +40,14 @@ export default function MealPackDetailScreen() {
   const price = pack ? Math.round(pack.basePrice * ratio) : 0;
 
   const activeIngredients = useMemo(
-    () => (pack?.ingredients ?? []).filter((i) => !removedItems.includes(i.name)),
-    [pack, removedItems]
+    () =>
+      (pack?.ingredients ?? []).filter((i) => !removedItems.includes(i.name)),
+    [pack, removedItems],
   );
 
   const toggleIngredient = (name: string) => {
     setRemovedItems((prev) =>
-      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
+      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name],
     );
   };
 
@@ -78,7 +79,9 @@ export default function MealPackDetailScreen() {
   if (!pack) {
     return (
       <View className={s.container} style={{ backgroundColor: "#080a04" }}>
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
           <ActivityIndicator color="#e85c3a" size="small" />
         </View>
       </View>
@@ -86,11 +89,21 @@ export default function MealPackDetailScreen() {
   }
 
   return (
-    <View className={s.container} style={{ backgroundColor: pack.color + "06" }}>
+    <View
+      className={s.container}
+      style={{ backgroundColor: pack.color + "06" }}
+    >
       <View className={s.hero} style={{ backgroundColor: pack.color + "12" }}>
         <Text className={s.heroEmoji}>{pack.emoji}</Text>
         <Pressable className={s.heroBackBtn} onPress={() => router.back()}>
-          <Text style={{ color: "#aaa", fontSize: 10, letterSpacing: 1 }}>
+          <Text
+            style={{
+              color: "#aaa",
+              fontSize: 10,
+              letterSpacing: 1,
+              fontFamily: "NotoSerif_400Regular",
+            }}
+          >
             ← BACK
           </Text>
         </Pressable>
@@ -139,7 +152,14 @@ export default function MealPackDetailScreen() {
               borderColor: "#e85c3a22",
             }}
           >
-            <Text style={{ color: "#e85c3a", fontSize: 9, letterSpacing: 1 }}>
+            <Text
+              style={{
+                color: "#e85c3a",
+                fontSize: 9,
+                letterSpacing: 1,
+                fontFamily: "NotoSerif_400Regular",
+              }}
+            >
               {removedItems.length} ITEM{removedItems.length > 1 ? "S" : ""}{" "}
               REMOVED
             </Text>
@@ -147,7 +167,10 @@ export default function MealPackDetailScreen() {
         )}
       </View>
 
-      <ScrollView className={s.ingredientList} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className={s.ingredientList}
+        showsVerticalScrollIndicator={false}
+      >
         <Text className={s.ingredientHint}>
           WHAT'S INSIDE FOR {plates} PLATE{plates > 1 ? "S" : ""}
         </Text>
@@ -182,7 +205,8 @@ export default function MealPackDetailScreen() {
                     {formatQty(scaledQty)} {item.unit}
                   </Text>
                   <Text className={s.ingredientQtyPrice}>
-                    {" "}· {formatPrice(item.pricePerPlate * plates)}
+                    {" "}
+                    · {formatPrice(item.pricePerPlate * plates)}
                   </Text>
                 </Text>
               </View>
@@ -199,6 +223,7 @@ export default function MealPackDetailScreen() {
                   style={{
                     color: isRemoved ? "#e85c3a" : pack.color,
                     fontSize: 12,
+                    fontFamily: "NotoSerif_400Regular",
                   }}
                 >
                   {isRemoved ? "+" : "×"}
@@ -231,7 +256,7 @@ export default function MealPackDetailScreen() {
             style={{
               color: "#000",
               textAlign: "center",
-              fontFamily: "SpaceMono_400Regular",
+              fontFamily: "NotoSerif_400Regular",
               fontSize: 11,
               fontWeight: "bold",
               letterSpacing: 2,

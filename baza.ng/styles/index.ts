@@ -293,7 +293,7 @@ export const snacksDrinksMode = {
   card: "bg-[#100818] p-3.5 px-3 flex-col gap-2 w-[48%]",
   cardActive: "border border-[#c77dff44]",
   cardInactive: "border border-[#1a0a2a]",
-  cardEmoji: "text-[28px]",
+  cardEmoji: "text-[28px] font-mono",
   cardName: "text-xs text-[#e0d0f0] leading-tight font-mono",
   cardTag: "text-2xs mt-1 tracking-wide-md font-mono",
   cardFooter: "flex-row items-center justify-between",

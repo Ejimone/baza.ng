@@ -43,8 +43,8 @@ export const colors = {
 } as const;
 
 export const fonts = {
-  serif: "DMSerifDisplay_400Regular",
-  mono: "SpaceMono_400Regular",
+  serif: "NotoSerif_400Regular",
+  mono: "NotoSerif_400Regular",
 } as const;
 
 export const spacing = {

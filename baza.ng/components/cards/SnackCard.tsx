@@ -1,7 +1,7 @@
-import { View, Text, Pressable } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { snacksDrinksMode as s } from "../../styles";
-import { formatPrice } from "../../utils/format";
 import type { SnackItem } from "../../types";
+import { formatPrice } from "../../utils/format";
 
 interface SnackCardProps {
   item: SnackItem;
@@ -40,7 +40,14 @@ export default function SnackCard({
             style={{ borderWidth: 1, borderColor: "#c77dff55" }}
             onPress={onAdd}
           >
-            <Text style={{ color: "#c77dff", fontSize: 9, letterSpacing: 1 }}>
+            <Text
+              style={{
+                color: "#c77dff",
+                fontSize: 9,
+                letterSpacing: 1,
+                fontFamily: "NotoSerif_400Regular",
+              }}
+            >
               ADD
             </Text>
           </Pressable>
@@ -50,13 +57,22 @@ export default function SnackCard({
               className={`${s.stepperDec} ${qty === 1 ? s.stepperDecRemove : s.stepperDecNormal}`}
               onPress={onDecrement}
             >
-              <Text style={{ color: qty === 1 ? "#e85c3a" : "#c77dff" }}>
+              <Text
+                style={{
+                  color: qty === 1 ? "#e85c3a" : "#c77dff",
+                  fontFamily: "NotoSerif_400Regular",
+                }}
+              >
                 {qty === 1 ? "×" : "−"}
               </Text>
             </Pressable>
             <Text className={s.stepperValue}>{qty}</Text>
             <Pressable className={s.stepperInc} onPress={onIncrement}>
-              <Text style={{ color: "#c77dff" }}>+</Text>
+              <Text
+                style={{ color: "#c77dff", fontFamily: "NotoSerif_400Regular" }}
+              >
+                +
+              </Text>
             </Pressable>
           </View>
         )}

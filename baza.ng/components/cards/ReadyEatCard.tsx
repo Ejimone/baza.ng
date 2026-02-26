@@ -1,9 +1,9 @@
-import { View, Text } from "react-native";
+import { Text, View } from "react-native";
 
 export default function ReadyEatCard() {
   return (
     <View>
-      <Text>ReadyEatCard</Text>
+      <Text className="font-mono">ReadyEatCard</Text>
     </View>
   );
 }

@@ -201,7 +201,7 @@ function TopUpSheet({ onClose }: { onClose: () => void }) {
               <Text
                 style={{
                   color: selectedAmount === amount ? "#4caf7d" : "#5a8a5a",
-                  fontFamily: "SpaceMono_400Regular",
+                  fontFamily: "NotoSerif_400Regular",
                   fontSize: 13,
                 }}
               >
@@ -237,7 +237,7 @@ function TopUpSheet({ onClose }: { onClose: () => void }) {
               style={{
                 color: selectedAmount ? "#000" : "#2a3a2a",
                 textAlign: "center",
-                fontFamily: "SpaceMono_400Regular",
+                fontFamily: "NotoSerif_400Regular",
                 fontSize: 11,
                 fontWeight: "bold",
                 letterSpacing: 2,

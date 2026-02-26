@@ -1,18 +1,18 @@
+import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  ActivityIndicator,
+    ActivityIndicator,
+    Pressable,
+    ScrollView,
+    Text,
+    View,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { tonightMode as s } from "../../../styles";
-import { useProducts } from "../../../hooks/useProducts";
-import { useCart } from "../../../hooks/useCart";
 import MealPackCard from "../../../components/cards/MealPackCard";
 import FloatingCart from "../../../components/ui/FloatingCart";
 import { colors } from "../../../constants/theme";
+import { useCart } from "../../../hooks/useCart";
+import { useProducts } from "../../../hooks/useProducts";
+import { tonightMode as s } from "../../../styles";
 
 export default function CookMealScreen() {
   const router = useRouter();
@@ -30,29 +30,55 @@ export default function CookMealScreen() {
           <Text className={s.backButton}>← BACK</Text>
         </Pressable>
         <Text className={s.title}>Cook a Meal</Text>
-        <Text className={s.subtitle}>
-          CHOOSE A MEAL PACK · SET YOUR PLATES
-        </Text>
+        <Text className={s.subtitle}>CHOOSE A MEAL PACK · SET YOUR PLATES</Text>
       </View>
 
       {isLoading && mealPacks.length === 0 ? (
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
           <ActivityIndicator color={colors.accent.red} size="small" />
         </View>
       ) : error && mealPacks.length === 0 ? (
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <Text style={{ color: "#4a6a2a", fontSize: 11, letterSpacing: 1 }}>
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
+          <Text
+            style={{
+              color: "#4a6a2a",
+              fontSize: 11,
+              letterSpacing: 1,
+              fontFamily: "NotoSerif_400Regular",
+            }}
+          >
             {error}
           </Text>
           <Pressable onPress={fetchMealPacks} style={{ marginTop: 16 }}>
-            <Text style={{ color: colors.accent.green, fontSize: 11, letterSpacing: 1 }}>
+            <Text
+              style={{
+                color: colors.accent.green,
+                fontSize: 11,
+                letterSpacing: 1,
+                fontFamily: "NotoSerif_400Regular",
+              }}
+            >
               RETRY
             </Text>
           </Pressable>
         </View>
       ) : mealPacks.length === 0 ? (
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <Text style={{ color: "#4a6a2a", fontSize: 11, letterSpacing: 1, textAlign: "center" }}>
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
+          <Text
+            style={{
+              color: "#4a6a2a",
+              fontSize: 11,
+              letterSpacing: 1,
+              textAlign: "center",
+              fontFamily: "NotoSerif_400Regular",
+            }}
+          >
             NO MEAL PACKS AVAILABLE YET.{"\n"}CHECK BACK SOON.
           </Text>
         </View>

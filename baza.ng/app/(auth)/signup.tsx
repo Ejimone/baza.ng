@@ -1,14 +1,14 @@
+import { router } from "expo-router";
 import { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
-import { router } from "expo-router";
 import { useAuth } from "../../hooks/useAuth";
 import { authScreen as s } from "../../styles";
 
@@ -19,7 +19,8 @@ export default function SignUpScreen() {
   const [refApplied, setRefApplied] = useState(false);
   const { requestOtp, isLoading, error, clearError } = useAuth();
 
-  const isValid = name.trim().length >= 1 && phone.replace(/\s/g, "").length >= 8;
+  const isValid =
+    name.trim().length >= 1 && phone.replace(/\s/g, "").length >= 8;
 
   const handleSendCode = async () => {
     if (!isValid || isLoading) return;
@@ -79,8 +80,7 @@ export default function SignUpScreen() {
         />
 
         <Text className={s.signupRefLabel}>
-          REFERRAL CODE{" "}
-          <Text className={s.signupRefOptional}>(OPTIONAL)</Text>
+          REFERRAL CODE <Text className={s.signupRefOptional}>(OPTIONAL)</Text>
         </Text>
         <View className={s.signupRefRow}>
           <TextInput
@@ -115,13 +115,11 @@ export default function SignUpScreen() {
 
         <Text className={`${s.signupHint} mt-5`}>
           We'll send a verification code to your number.{"\n"}
-          <Text className={s.signupHintDim}>
-            Standard SMS rates may apply.
-          </Text>
+          <Text className={s.signupHintDim}>Standard SMS rates may apply.</Text>
         </Text>
 
         {error ? (
-          <Text className="text-3xs text-baza-red tracking-wide-sm mb-4">
+          <Text className="text-3xs text-baza-red tracking-wide-sm mb-4 font-mono">
             {error}
           </Text>
         ) : null}

@@ -32,7 +32,9 @@ export default function Header({ onTopUpPress }: HeaderProps) {
         className={s.avatarButton}
         onPress={() => router.push("/(app)/profile")}
       >
-        <Text style={{ fontSize: 18 }}>{initial}</Text>
+        <Text style={{ fontSize: 18, fontFamily: "NotoSerif_400Regular" }}>
+          {initial}
+        </Text>
       </Pressable>
     </View>
   );
