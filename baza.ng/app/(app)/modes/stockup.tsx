@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Pressable,
@@ -8,16 +8,18 @@ import {
     View,
 } from "react-native";
 import BundleCard from "../../../components/cards/BundleCard";
+import AddMoreItemsSheet from "../../../components/ui/AddMoreItemsSheet";
 import FloatingCart from "../../../components/ui/FloatingCart";
 import { colors } from "../../../constants/theme";
 import { useCart } from "../../../hooks/useCart";
 import { useProducts } from "../../../hooks/useProducts";
-import { stockUpMode as s } from "../../../styles";
+import { addMoreButton, stockUpMode as s } from "../../../styles";
 
 export default function StockUpScreen() {
   const router = useRouter();
   const { bundles, isLoading, error, fetchBundles } = useProducts();
   const { isInCart } = useCart();
+  const [showAddMore, setShowAddMore] = useState(false);
 
   useEffect(() => {
     fetchBundles();
@@ -98,10 +100,28 @@ export default function StockUpScreen() {
               isInCart={isInCart(bundle.id)}
             />
           ))}
+
+          <Pressable
+            className={addMoreButton.wrapper}
+            style={{ borderColor: "#4caf7d55" }}
+            onPress={() => setShowAddMore(true)}
+          >
+            <Text
+              className={addMoreButton.text}
+              style={{ color: colors.accent.green }}
+            >
+              + ADD MORE ITEMS
+            </Text>
+          </Pressable>
         </ScrollView>
       )}
 
       <FloatingCart />
+
+      <AddMoreItemsSheet
+        visible={showAddMore}
+        onClose={() => setShowAddMore(false)}
+      />
     </View>
   );
 }

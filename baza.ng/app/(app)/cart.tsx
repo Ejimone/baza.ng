@@ -9,13 +9,14 @@ import {
     TextInput,
     View,
 } from "react-native";
+import AddMoreItemsSheet from "../../components/ui/AddMoreItemsSheet";
 import FundPrompt from "../../components/ui/FundPrompt";
 import { useCart } from "../../hooks/useCart";
 import { useOrders } from "../../hooks/useOrders";
 import { useWallet } from "../../hooks/useWallet";
 import { cartItemsToOrderItems } from "../../services/orders";
 import { useWalletStore } from "../../stores/walletStore";
-import { cartScreen as s } from "../../styles";
+import { addMoreButton, cartScreen as s } from "../../styles";
 import { formatPrice } from "../../utils/format";
 
 export default function CartScreen() {
@@ -29,6 +30,7 @@ export default function CartScreen() {
   const [showFund, setShowFund] = useState(false);
   const [orderNote, setOrderNote] = useState("");
   const [eta, setEta] = useState("");
+  const [showAddMore, setShowAddMore] = useState(false);
 
   const hasFunds = balance >= total;
   const shortfall = total - balance;
@@ -131,26 +133,38 @@ export default function CartScreen() {
         {isEmpty ? (
           <Text className={s.emptyText}>CART IS EMPTY</Text>
         ) : (
-          items.map((item) => (
-            <View key={item.id} className={s.itemRow}>
-              <Text className={s.itemEmoji}>{item.emoji}</Text>
-              <View style={{ flex: 1 }}>
-                <Text className={s.itemName}>{item.name}</Text>
-                <Text className={s.itemType}>
-                  {item.itemType}
-                  {item.qty > 1 ? ` × ${item.qty}` : ""}
-                </Text>
+          <>
+            {items.map((item) => (
+              <View key={item.id} className={s.itemRow}>
+                <Text className={s.itemEmoji}>{item.emoji}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text className={s.itemName}>{item.name}</Text>
+                  <Text className={s.itemType}>
+                    {item.itemType}
+                    {item.qty > 1 ? ` × ${item.qty}` : ""}
+                  </Text>
+                </View>
+                <View className={s.itemRight}>
+                  <Text className={s.itemPrice}>
+                    {formatPrice(item.totalPrice)}
+                  </Text>
+                  <Pressable onPress={() => removeItem(item.id)}>
+                    <Text className={s.itemRemoveBtn}>×</Text>
+                  </Pressable>
+                </View>
               </View>
-              <View className={s.itemRight}>
-                <Text className={s.itemPrice}>
-                  {formatPrice(item.totalPrice)}
-                </Text>
-                <Pressable onPress={() => removeItem(item.id)}>
-                  <Text className={s.itemRemoveBtn}>×</Text>
-                </Pressable>
-              </View>
-            </View>
-          ))
+            ))}
+
+            <Pressable
+              className={addMoreButton.wrapper}
+              style={{ borderColor: "#4caf7d55" }}
+              onPress={() => setShowAddMore(true)}
+            >
+              <Text className={addMoreButton.text} style={{ color: "#4caf7d" }}>
+                + ADD MORE ITEMS
+              </Text>
+            </Pressable>
+          </>
         )}
       </ScrollView>
 
@@ -203,6 +217,11 @@ export default function CartScreen() {
           </Pressable>
         </View>
       )}
+
+      <AddMoreItemsSheet
+        visible={showAddMore}
+        onClose={() => setShowAddMore(false)}
+      />
 
       {showFund && (
         <FundPrompt

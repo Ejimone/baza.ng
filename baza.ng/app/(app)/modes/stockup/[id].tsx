@@ -7,11 +7,12 @@ import {
     Text,
     View,
 } from "react-native";
+import AddMoreItemsSheet from "../../../../components/ui/AddMoreItemsSheet";
 import QtyControl from "../../../../components/ui/QtyControl";
 import { useCart } from "../../../../hooks/useCart";
 import { useProducts } from "../../../../hooks/useProducts";
-import { bundleDetail as s } from "../../../../styles";
-import type { BundleItem } from "../../../../types";
+import { addMoreButton, bundleDetail as s } from "../../../../styles";
+import type { BundleItem, RestockItem } from "../../../../types";
 import { formatPrice } from "../../../../utils/format";
 
 interface EditableItem extends BundleItem {
@@ -33,6 +34,7 @@ export default function BundleDetailScreen() {
   }, [bundle, bundles.length]);
 
   const [items, setItems] = useState<EditableItem[]>([]);
+  const [showAddMore, setShowAddMore] = useState(false);
 
   useEffect(() => {
     if (bundle) {
@@ -54,6 +56,33 @@ export default function BundleDetailScreen() {
 
   const setQty = (itemId: string, qty: number) => {
     setItems((prev) => prev.map((i) => (i.id === itemId ? { ...i, qty } : i)));
+  };
+
+  const handleItemSelected = (restockItem: RestockItem) => {
+    setItems((prev) => {
+      const existing = prev.find((i) => i.id === restockItem.id);
+      if (existing) {
+        // Already in list — increment qty
+        return prev.map((i) =>
+          i.id === restockItem.id
+            ? { ...i, qty: Math.min(i.qty + 1, i.maxQty) }
+            : i,
+        );
+      }
+      // Append as new editable item
+      const newItem: EditableItem = {
+        id: restockItem.id,
+        productId: restockItem.id,
+        name: restockItem.name,
+        emoji: restockItem.emoji,
+        unitPrice: restockItem.price,
+        defaultQty: 1,
+        minQty: 0,
+        maxQty: 20,
+        qty: 1,
+      };
+      return [...prev, newItem];
+    });
   };
 
   const handleAddToCart = () => {
@@ -189,6 +218,16 @@ export default function BundleDetailScreen() {
           <Text className={s.memberPrice}>{formatPrice(memberTotal)}</Text>
         </View>
         <Pressable
+          className={addMoreButton.wrapper}
+          style={{ borderColor: bundle.color + "44" }}
+          onPress={() => setShowAddMore(true)}
+        >
+          <Text className={addMoreButton.text} style={{ color: bundle.color }}>
+            + ADD MORE ITEMS
+          </Text>
+        </Pressable>
+
+        <Pressable
           className={s.addToCartBtn}
           style={{
             backgroundColor: activeItems.length > 0 ? bundle.color : "#1a2a1c",
@@ -212,6 +251,12 @@ export default function BundleDetailScreen() {
           </Text>
         </Pressable>
       </View>
+
+      <AddMoreItemsSheet
+        visible={showAddMore}
+        onClose={() => setShowAddMore(false)}
+        onItemSelected={handleItemSelected}
+      />
     </View>
   );
 }

@@ -2,6 +2,9 @@
 
 ## Completed
 
+- Added "+ Add More Items" button and bottom sheet to Stock Up, Cook a Meal, and Ready to Eat mode screens. Users can tap the button at the bottom of each list to open a search overlay that browses the full product catalog (via restock API), with category filters and debounced search. Items are added to cart as `product` type. Implemented via reusable `AddMoreItemsSheet` component.
+- Extended "+ Add More Items" button to the Cart page (below cart items) and both detail pages: Bundle Detail (`stockup/[id]`) and Meal Pack Detail (`cookmeal/[id]`), placed above the "Add to Cart" button.
+- Added slide-up/slide-down animation to `BottomSheet` component using `Animated.spring` (open) and `Animated.timing` (close) with background fade overlay.
 - Updated home header wallet balance interaction: tapping the amount no longer navigates to wallet; only the `TOP UP` button is actionable and opens the top-up sheet directly.
 - Implemented auth session bootstrap persistence on app reload by always attempting `/auth/refresh` at startup, then hydrating user state from `/user/me` when refresh succeeds.
 - Cleaned auth client flow to remove unused local refresh-token storage dependency from frontend logout/bootstrap path.

@@ -7,10 +7,12 @@ import {
   Text,
   View,
 } from "react-native";
+import AddMoreItemsSheet from "../../../../components/ui/AddMoreItemsSheet";
 import QtyControl from "../../../../components/ui/QtyControl";
 import { useCart } from "../../../../hooks/useCart";
 import { useProducts } from "../../../../hooks/useProducts";
-import { mealPackDetail as s } from "../../../../styles";
+import { addMoreButton, mealPackDetail as s } from "../../../../styles";
+import type { RestockItem } from "../../../../types";
 import { formatPrice } from "../../../../utils/format";
 
 export default function MealPackDetailScreen() {
@@ -29,6 +31,10 @@ export default function MealPackDetailScreen() {
 
   const [plates, setPlates] = useState(4);
   const [removedItems, setRemovedItems] = useState<string[]>([]);
+  const [showAddMore, setShowAddMore] = useState(false);
+  const [extraItems, setExtraItems] = useState<
+    Array<{ id: string; name: string; emoji: string; qty: number; unitPrice: number }>
+  >([]);
 
   useEffect(() => {
     if (pack) {
@@ -37,7 +43,9 @@ export default function MealPackDetailScreen() {
   }, [pack]);
 
   const ratio = pack ? plates / pack.basePlates : 1;
-  const price = pack ? Math.round(pack.basePrice * ratio) : 0;
+  const basePrice = pack ? Math.round(pack.basePrice * ratio) : 0;
+  const extrasTotal = extraItems.reduce((sum, i) => sum + i.unitPrice * i.qty, 0);
+  const price = basePrice + extrasTotal;
 
   const activeIngredients = useMemo(
     () =>
@@ -56,6 +64,37 @@ export default function MealPackDetailScreen() {
     return val.toFixed(1);
   };
 
+  const handleItemSelected = (restockItem: RestockItem) => {
+    setExtraItems((prev) => {
+      const existing = prev.find((i) => i.id === restockItem.id);
+      if (existing) {
+        return prev.map((i) =>
+          i.id === restockItem.id ? { ...i, qty: i.qty + 1 } : i,
+        );
+      }
+      return [
+        ...prev,
+        {
+          id: restockItem.id,
+          name: restockItem.name,
+          emoji: restockItem.emoji,
+          qty: 1,
+          unitPrice: restockItem.price,
+        },
+      ];
+    });
+  };
+
+  const setExtraQty = (itemId: string, qty: number) => {
+    if (qty <= 0) {
+      setExtraItems((prev) => prev.filter((i) => i.id !== itemId));
+    } else {
+      setExtraItems((prev) =>
+        prev.map((i) => (i.id === itemId ? { ...i, qty } : i)),
+      );
+    }
+  };
+
   const handleAddToCart = () => {
     if (!pack) return;
 
@@ -70,6 +109,7 @@ export default function MealPackDetailScreen() {
       meta: {
         plates,
         removedItems,
+        extraItems: extraItems.length > 0 ? extraItems : undefined,
       },
     });
 
@@ -232,6 +272,56 @@ export default function MealPackDetailScreen() {
             </View>
           );
         })}
+
+        {/* Extra items added via search */}
+        {extraItems.length > 0 && (
+          <>
+            <Text
+              className={s.ingredientHint}
+              style={{ marginTop: 16 }}
+            >
+              EXTRA ITEMS ADDED
+            </Text>
+            {extraItems.map((item) => (
+              <View
+                key={item.id}
+                className={s.ingredientRow}
+                style={{
+                  borderBottomWidth: 1,
+                  borderBottomColor: pack.color + "0a",
+                }}
+              >
+                <Text className={s.ingredientEmoji}>{item.emoji}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text
+                    className={s.ingredientName}
+                    style={{ color: "#d0e0d0" }}
+                  >
+                    {item.name}
+                  </Text>
+                  <Text className={s.ingredientQty}>
+                    <Text style={{ color: pack.color }}>
+                      {item.qty} × {formatPrice(item.unitPrice)}
+                    </Text>
+                    <Text className={s.ingredientQtyPrice}>
+                      {" "}
+                      · {formatPrice(item.unitPrice * item.qty)}
+                    </Text>
+                  </Text>
+                </View>
+                <QtyControl
+                  value={item.qty}
+                  onIncrement={() => setExtraQty(item.id, item.qty + 1)}
+                  onDecrement={() => setExtraQty(item.id, item.qty - 1)}
+                  min={0}
+                  max={20}
+                  accentColor={pack.color}
+                  small
+                />
+              </View>
+            ))}
+          </>
+        )}
       </ScrollView>
 
       <View className={s.footer}>
@@ -246,6 +336,16 @@ export default function MealPackDetailScreen() {
             <Text className={s.footerPrice}>{formatPrice(price)}</Text>
           </View>
         </View>
+
+        <Pressable
+          className={addMoreButton.wrapper}
+          style={{ borderColor: pack.color + "44" }}
+          onPress={() => setShowAddMore(true)}
+        >
+          <Text className={addMoreButton.text} style={{ color: pack.color }}>
+            + ADD MORE ITEMS
+          </Text>
+        </Pressable>
 
         <Pressable
           className={s.addBtn}
@@ -266,6 +366,12 @@ export default function MealPackDetailScreen() {
           </Text>
         </Pressable>
       </View>
+
+      <AddMoreItemsSheet
+        visible={showAddMore}
+        onClose={() => setShowAddMore(false)}
+        onItemSelected={handleItemSelected}
+      />
     </View>
   );
 }

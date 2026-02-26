@@ -908,3 +908,24 @@ export const walletScreen = {
   topUpCancelBtn:
     "w-full py-3 bg-transparent text-[#2a3a2a] text-xxs tracking-wide-lg font-mono",
 };
+
+// ─── ADD MORE ITEMS SHEET ────────────────────────────────────────────────────
+
+export const addMoreSheet = {
+  handle: "w-9 h-1 bg-[#1a2540] rounded-sm mx-auto mt-3 mb-5",
+  title: "text-lg text-txt-primary font-serif tracking-tight-xs px-6 mb-3",
+  searchWrap: "px-5 mb-2",
+  catFilter: "flex-row gap-2 pb-2.5",
+  catButton: "py-1.5 px-3.5 text-3xs tracking-wide-lg font-mono shrink-0",
+  catButtonActive: "bg-[#6ec6ff18] border border-[#6ec6ff55] text-baza-blue",
+  catButtonInactive: "bg-transparent border border-[#1a2540] text-[#3a5a8a]",
+  list: "px-5",
+  emptyText:
+    "text-[#1a2a3a] text-[11px] tracking-wide-lg text-center pt-10 font-mono",
+};
+
+export const addMoreButton = {
+  wrapper:
+    "mt-4 mb-2 mx-auto w-full py-[14px] bg-transparent border border-dashed items-center justify-center",
+  text: "text-xxs tracking-wide-xl font-mono font-bold",
+};

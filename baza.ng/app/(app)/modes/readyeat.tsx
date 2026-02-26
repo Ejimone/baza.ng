@@ -1,17 +1,22 @@
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
+    ActivityIndicator,
+    Pressable,
+    ScrollView,
+    Text,
+    View,
 } from "react-native";
+import AddMoreItemsSheet from "../../../components/ui/AddMoreItemsSheet";
 import FloatingCart from "../../../components/ui/FloatingCart";
 import { colors } from "../../../constants/theme";
 import { useCart } from "../../../hooks/useCart";
 import { useProducts } from "../../../hooks/useProducts";
-import { readyEatMode, readyEatMode as s } from "../../../styles";
+import {
+    addMoreButton,
+    readyEatMode,
+    readyEatMode as s,
+} from "../../../styles";
 import type { ReadyEatItem } from "../../../types";
 import { formatPrice } from "../../../utils/format";
 
@@ -20,6 +25,7 @@ export default function ReadyEatScreen() {
   const { readyEat, isLoading, error, fetchReadyEat } = useProducts();
   const { addItem, isInCart, getItemQty, updateQty, removeItem } = useCart();
   const [selected, setSelected] = useState<ReadyEatItem | null>(null);
+  const [showAddMore, setShowAddMore] = useState(false);
 
   useEffect(() => {
     fetchReadyEat();
@@ -227,10 +233,25 @@ export default function ReadyEatScreen() {
               </Pressable>
             );
           })}
+
+          <Pressable
+            className={addMoreButton.wrapper}
+            style={{ borderColor: "#7a3a1a55" }}
+            onPress={() => setShowAddMore(true)}
+          >
+            <Text className={addMoreButton.text} style={{ color: "#7a3a1a" }}>
+              + ADD MORE ITEMS
+            </Text>
+          </Pressable>
         </ScrollView>
       )}
 
       <FloatingCart />
+
+      <AddMoreItemsSheet
+        visible={showAddMore}
+        onClose={() => setShowAddMore(false)}
+      />
 
       {selected && (
         <ReadyEatPopup

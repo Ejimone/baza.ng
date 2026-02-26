@@ -161,6 +161,13 @@ export interface BundleMeta {
 export interface MealPackMeta {
   plates: number;
   removedItems: string[];
+  extraItems?: Array<{
+    id: string;
+    name: string;
+    emoji: string;
+    qty: number;
+    unitPrice: number;
+  }>;
 }
 
 export interface CartItem {
