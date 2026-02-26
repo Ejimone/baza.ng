@@ -1,11 +1,11 @@
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Pressable,
-    ScrollView,
-    Text,
-    View,
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
 } from "react-native";
 import ProductCard from "../../../components/cards/ProductCard";
 import FloatingCart from "../../../components/ui/FloatingCart";
@@ -90,9 +90,7 @@ export default function ShopListScreen() {
           onChangeText={handleQueryChange}
           placeholder="What do you need?"
         />
-        <Text className={s.searchHint}>
-          EACH SIZE IS ITS OWN PRODUCT — PICK THE ONE YOU WANT
-        </Text>
+        <Text className={s.searchHint}>SEARCH OR BROWSE BY CATEGORY</Text>
       </View>
 
       <ScrollView

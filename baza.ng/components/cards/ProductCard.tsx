@@ -49,7 +49,7 @@ export default function ProductCard({
 
         {qty === 0 ? (
           <Pressable className={s.addBtn} onPress={onAdd}>
-            <Text className="font-mono">ADD</Text>
+            <Text className="font-mono text-baza-blue">ADD</Text>
           </Pressable>
         ) : (
           <View className={s.stepperRow}>
