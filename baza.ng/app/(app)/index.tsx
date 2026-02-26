@@ -61,7 +61,7 @@ export default function IntentGateScreen() {
           {greeting.toUpperCase().replace(" ", "  ")}
         </Text>
         <Text className={s.greetingTitle}>
-          What are we{"\n"}getting you, {firstName}?
+          What are we{"\n"}doing today?
         </Text>
       </View>
 
