@@ -33,7 +33,13 @@ export default function MealPackDetailScreen() {
   const [removedItems, setRemovedItems] = useState<string[]>([]);
   const [showAddMore, setShowAddMore] = useState(false);
   const [extraItems, setExtraItems] = useState<
-    Array<{ id: string; name: string; emoji: string; qty: number; unitPrice: number }>
+    Array<{
+      id: string;
+      name: string;
+      emoji: string;
+      qty: number;
+      unitPrice: number;
+    }>
   >([]);
 
   useEffect(() => {
@@ -44,7 +50,10 @@ export default function MealPackDetailScreen() {
 
   const ratio = pack ? plates / pack.basePlates : 1;
   const basePrice = pack ? Math.round(pack.basePrice * ratio) : 0;
-  const extrasTotal = extraItems.reduce((sum, i) => sum + i.unitPrice * i.qty, 0);
+  const extrasTotal = extraItems.reduce(
+    (sum, i) => sum + i.unitPrice * i.qty,
+    0,
+  );
   const price = basePrice + extrasTotal;
 
   const activeIngredients = useMemo(
@@ -276,10 +285,7 @@ export default function MealPackDetailScreen() {
         {/* Extra items added via search */}
         {extraItems.length > 0 && (
           <>
-            <Text
-              className={s.ingredientHint}
-              style={{ marginTop: 16 }}
-            >
+            <Text className={s.ingredientHint} style={{ marginTop: 16 }}>
               EXTRA ITEMS ADDED
             </Text>
             {extraItems.map((item) => (

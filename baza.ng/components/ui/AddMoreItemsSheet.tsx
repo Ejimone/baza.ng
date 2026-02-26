@@ -279,9 +279,7 @@ export default function AddMoreItemsSheet({
                         paddingHorizontal: 18,
                         borderWidth: 1,
                         borderColor: wasAdded ? "#4caf7d55" : "#6ec6ff55",
-                        backgroundColor: wasAdded
-                          ? "#4caf7d12"
-                          : "transparent",
+                        backgroundColor: wasAdded ? "#4caf7d12" : "transparent",
                       }}
                     >
                       <Text
