@@ -43,7 +43,7 @@ export default function SnackCard({
             <Text
               style={{
                 color: "#c77dff",
-                fontSize: 9,
+                fontSize: 7,
                 letterSpacing: 1,
                 fontFamily: "NotoSerif_400Regular",
               }}

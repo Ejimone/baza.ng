@@ -195,7 +195,7 @@ export const mealPackDetail = {
   footerOldPrice: "text-3xs text-[#2a3a2a] line-through text-right font-mono",
   footerPrice: "text-[22px] text-txt-primary font-bold font-mono",
   addBtn:
-    "w-full py-[15px] text-black text-[11px] tracking-wide-2xl font-mono font-bold",
+    "w-full py-[15px] text-black text-[9px] tracking-wide-2xl font-mono font-bold",
 };
 
 // ─── TONIGHT (COOK A MEAL) MODE ──────────────────────────────────────────────
@@ -236,7 +236,7 @@ export const readyEatMode = {
   itemOldPrice: "text-3xs text-[#3a2a1a] line-through font-mono",
   itemPrice: "text-[11px] text-txt-primary font-bold font-mono",
   addBtn:
-    "py-2 px-4 bg-transparent text-xxs tracking-wide-lg font-mono shrink-0",
+    "py-2 px-4 bg-transparent text-[8px] tracking-wide-lg font-mono shrink-0",
   stepperCol: "flex-col items-end gap-1 shrink-0",
   stepperRow: "flex-row items-center overflow-hidden",
   stepperBtn: "w-7 h-7 items-center justify-center text-sm",
@@ -298,7 +298,7 @@ export const snacksDrinksMode = {
   cardTag: "text-2xs mt-1 tracking-wide-md font-mono",
   cardFooter: "flex-row items-center justify-between",
   cardPrice: "text-[13px] text-txt-primary font-bold font-mono",
-  addBtn: "py-1.5 px-3.5 bg-transparent text-3xs tracking-wide-md font-mono",
+  addBtn: "py-1.5 px-3.5 bg-transparent text-[7px] tracking-wide-md font-mono",
   stepperRow: "flex-row items-center overflow-hidden",
   stepperDec: "w-[26px] h-[26px] items-center justify-center text-sm",
   stepperDecRemove: "bg-[#2a0a0a]",
@@ -343,7 +343,7 @@ export const restockMode = {
   itemRight: "flex-col items-end gap-2 shrink-0",
   itemPrice: "text-xs text-txt-primary font-mono",
   addBtn:
-    "py-[7px] px-[18px] bg-transparent border border-[#6ec6ff55] text-baza-blue text-xxs tracking-wide-lg font-mono",
+    "py-[7px] px-[18px] bg-transparent border border-[#6ec6ff55] text-baza-blue text-[8px] tracking-wide-lg font-mono",
   stepperRow: "flex-row items-center border border-[#6ec6ff44] overflow-hidden",
   stepperDec: "w-8 h-[30px] items-center justify-center text-base",
   stepperDecRemove: "bg-[#1a0a0a] text-baza-red",
