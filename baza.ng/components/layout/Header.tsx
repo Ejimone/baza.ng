@@ -18,7 +18,7 @@ export default function Header({ onTopUpPress }: HeaderProps) {
   return (
     <View className={s.topBar}>
       <View>
-        <Text className={s.walletLabel}>WALLET BALANCE</Text>
+        <Text className={s.walletLabel}>WALLET</Text>
         <View className={s.balanceRow}>
           <Text className={s.balanceAmount}>{formattedBalance}</Text>
           <Pressable className={s.topUpButton} onPress={onTopUpPress}>
