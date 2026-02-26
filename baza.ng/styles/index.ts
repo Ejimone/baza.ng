@@ -48,7 +48,7 @@ export const intentGate = {
 
 export const intentGateBalance = {
   container: "flex-1 bg-[#080f09] flex-col font-mono relative",
-  topBar: "pt-status px-6 flex-row justify-between items-start",
+  topBar: "pt-[70px] px-6 flex-row justify-between items-start",
   walletLabel: "text-3xs tracking-wide-2xl text-[#2a4a2a] mb-[5px]",
   balanceRow: "flex-row items-baseline gap-3",
   balanceAmount:
@@ -58,8 +58,8 @@ export const intentGateBalance = {
   availableLabel: "text-3xs text-[#2a4a2a] tracking-wide-md mt-[3px]",
   avatarButton:
     "w-10 h-10 rounded-full bg-[#0d1a0f] border border-[#2a4a2c] items-center justify-center text-lg",
-  greeting: "px-6 pt-10 pb-4",
-  greetingTime: "text-3xs tracking-wide-lg text-[#2a4a2a] mb-1.5",
+  greeting: "px-6 pt-5 pb-4",
+  greetingTime: "text-3xs tracking-wide-lg text-[#2a4a2a] mb-1",
   greetingTitle:
     "text-[26px] text-txt-primary font-serif tracking-tight-half leading-tight",
   scrollBody: "flex-1 px-5",
