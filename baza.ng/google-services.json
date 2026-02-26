@@ -1,0 +1,91 @@
+{
+  "project_info": {
+    "project_number": "11119285834",
+    "firebase_url": "https://ejimone-a2da3-default-rtdb.firebaseio.com",
+    "project_id": "ejimone-a2da3",
+    "storage_bucket": "ejimone-a2da3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:11119285834:android:40ed9e37551303871238b3",
+        "android_client_info": {
+          "package_name": "com.jonkech.inventory"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "11119285834-gnnj9kp01dqq3mjc93l6fmkq9l96euop.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jonkech.inventory",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "11119285834-ei9vif4b0vvlqosv0lqa9r109h6mf239.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3ZR2HSNkx9khYusokwZnbXKiPew-VSxw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "11119285834-ei9vif4b0vvlqosv0lqa9r109h6mf239.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "11119285834-a7653nlor55q0jhd18lpfta7kvdetppt.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.jonkech.inventory"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:11119285834:android:0721bc5ecda030a61238b3",
+        "android_client_info": {
+          "package_name": "com.opencodeceo.baza.ng"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "11119285834-ei9vif4b0vvlqosv0lqa9r109h6mf239.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3ZR2HSNkx9khYusokwZnbXKiPew-VSxw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "11119285834-ei9vif4b0vvlqosv0lqa9r109h6mf239.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "11119285834-a7653nlor55q0jhd18lpfta7kvdetppt.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.jonkech.inventory"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
