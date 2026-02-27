@@ -8,6 +8,7 @@ import {
   RefreshControl,
   ScrollView,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import ModeCard from "../../components/cards/ModeCard";
@@ -142,14 +143,39 @@ function TopUpSheet({ onClose }: { onClose: () => void }) {
   } = useWallet();
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [customAmount, setCustomAmount] = useState("");
+  const [isCustom, setIsCustom] = useState(false);
 
   const quickAmounts = [500000, 1000000, 2000000, 5000000];
 
+  const customAmountKobo = Math.round(parseFloat(customAmount || "0") * 100);
+  const isValidCustom = isCustom && customAmountKobo >= 10000; // min ₦100
+  const effectiveAmount = isCustom ? (isValidCustom ? customAmountKobo : null) : selectedAmount;
+  const canConfirm = effectiveAmount !== null && effectiveAmount > 0;
+
+  const handleSelectQuick = (amt: number) => {
+    setSelectedAmount(amt);
+    setIsCustom(false);
+    setCustomAmount("");
+  };
+
+  const handleCustomFocus = () => {
+    setIsCustom(true);
+    setSelectedAmount(null);
+  };
+
+  const handleCustomChange = (text: string) => {
+    const sanitized = text.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1");
+    setCustomAmount(sanitized);
+    setIsCustom(true);
+    setSelectedAmount(null);
+  };
+
   const handleConfirm = async () => {
-    if (!selectedAmount) return;
+    if (!effectiveAmount) return;
     setIsProcessing(true);
     try {
-      const { authorizationUrl, reference } = await initTopup(selectedAmount);
+      const { authorizationUrl, reference } = await initTopup(effectiveAmount);
       await WebBrowser.openBrowserAsync(authorizationUrl, {
         dismissButtonStyle: "close",
         presentationStyle: WebBrowser.WebBrowserPresentationStyle.FORM_SHEET,
@@ -194,7 +220,7 @@ function TopUpSheet({ onClose }: { onClose: () => void }) {
                 borderColor:
                   selectedAmount === amount ? "#4caf7d66" : "#1a2a1c",
               }}
-              onPress={() => setSelectedAmount(amount)}
+              onPress={() => handleSelectQuick(amount)}
             >
               <Text
                 style={{
@@ -207,6 +233,23 @@ function TopUpSheet({ onClose }: { onClose: () => void }) {
               </Text>
             </Pressable>
           ))}
+        </View>
+
+        <Text className={s.topUpCustomLabel}>OR ENTER CUSTOM AMOUNT</Text>
+        <View
+          className={`${s.topUpCustomRow} ${isCustom ? s.topUpCustomRowActive : ""}`}
+        >
+          <Text className={s.topUpCustomPrefix}>₦</Text>
+          <TextInput
+            className={s.topUpCustomInput}
+            placeholder="e.g. 2500"
+            placeholderTextColor="#2a4a2a"
+            keyboardType="decimal-pad"
+            value={customAmount}
+            onFocus={handleCustomFocus}
+            onChangeText={handleCustomChange}
+            selectionColor="#4caf7d"
+          />
         </View>
 
         {accountNumber && (
@@ -222,18 +265,18 @@ function TopUpSheet({ onClose }: { onClose: () => void }) {
         <Pressable
           className={s.topUpConfirmBtn}
           style={{
-            backgroundColor: selectedAmount ? "#4caf7d" : "#1a2a1c",
+            backgroundColor: canConfirm ? "#4caf7d" : "#1a2a1c",
             alignItems: "center",
           }}
           onPress={handleConfirm}
-          disabled={!selectedAmount || isProcessing}
+          disabled={!canConfirm || isProcessing}
         >
           {isProcessing ? (
             <ActivityIndicator color="#000" size="small" />
           ) : (
             <Text
               style={{
-                color: selectedAmount ? "#000" : "#2a3a2a",
+                color: canConfirm ? "#000" : "#2a3a2a",
                 textAlign: "center",
                 fontFamily: "NotoSerif_400Regular",
                 fontSize: 11,
@@ -241,8 +284,8 @@ function TopUpSheet({ onClose }: { onClose: () => void }) {
                 letterSpacing: 2,
               }}
             >
-              {selectedAmount
-                ? `CONFIRM ${formatPrice(selectedAmount)}`
+              {canConfirm
+                ? `CONFIRM ${formatPrice(effectiveAmount!)}`
                 : "SELECT AMOUNT"}
             </Text>
           )}

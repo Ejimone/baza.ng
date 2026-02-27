@@ -98,7 +98,15 @@ export const intentGateBalance = {
   topUpAcctLabel: "text-3xs text-[#2a4a2a] tracking-wide-lg mb-1.5 font-mono",
   topUpAcctNumber: "text-base text-txt-primary tracking-wide-sm font-mono",
   topUpAcctBank: "text-3xs text-[#3a5c3a] mt-1 font-mono",
-  topUpGrid: "flex-row flex-wrap gap-2 mb-4",
+  topUpGrid: "flex-row flex-wrap gap-2 mb-3",
+  topUpCustomLabel:
+    "text-3xs text-[#2a4a2a] tracking-wide-xl mb-2 font-mono",
+  topUpCustomRow:
+    "flex-row items-center border border-[#1a2a1c] mb-4 px-3",
+  topUpCustomRowActive: "border-[#4caf7d66] bg-[#4caf7d08]",
+  topUpCustomPrefix: "text-sm text-[#3a5c3a] font-mono mr-1",
+  topUpCustomInput:
+    "flex-1 py-3 text-sm text-txt-primary font-mono tracking-wide-sm",
   topUpConfirmBtn:
     "w-full py-[15px] font-mono text-[11px] tracking-wide-2xl font-bold mb-2.5",
   topUpCancelBtn:
@@ -404,10 +412,17 @@ export const fundPrompt = {
   acctCopyBtn:
     "bg-transparent border border-[#1a2a1c] text-baza-green text-3xs tracking-wide-lg py-1.5 px-3",
   quickLabel: "text-3xs text-[#2a4a2a] tracking-wide-xl mb-3 font-mono",
-  quickGrid: "flex-row flex-wrap gap-2 mb-5",
+  quickGrid: "flex-row flex-wrap gap-2 mb-3",
   quickBtn: "py-3 text-xs tracking-wide-xs font-mono w-[48%]",
   quickBtnActive: "bg-[#4caf7d18] border border-[#4caf7d66] text-baza-green",
   quickBtnInactive: "bg-transparent border border-[#1a2a1c] text-[#6a8a6a]",
+  customLabel: "text-3xs text-[#2a4a2a] tracking-wide-xl mb-2 font-mono",
+  customRow: "flex-row items-center gap-2 mb-5",
+  customPrefix: "text-sm text-[#3a5c3a] font-mono",
+  customInput:
+    "flex-1 bg-[#0a120a] border border-[#1a2a1c] py-[11px] px-3.5 text-txt-primary text-sm font-mono",
+  customInputActive:
+    "flex-1 bg-[#4caf7d08] border border-[#4caf7d55] py-[11px] px-3.5 text-txt-primary text-sm font-mono",
   confirmBtn:
     "w-full py-[15px] mb-3 text-[11px] tracking-wide-2xl font-mono font-bold",
   confirmBtnActive: "bg-baza-green text-black",
@@ -584,10 +599,18 @@ export const profileScreen = {
   topUpHandle: "w-9 h-1 bg-[#1a2a1c] rounded-sm mx-auto mb-5",
   topUpLabel: "text-3xs text-[#2a4a2a] tracking-wide-2xl mb-1.5 font-mono",
   topUpTitle: "text-xl text-txt-primary font-serif tracking-tight-xs mb-5",
-  topUpGrid: "flex-row flex-wrap gap-2 mb-5",
+  topUpGrid: "flex-row flex-wrap gap-2 mb-3",
   topUpBtn: "py-[13px] text-[13px] font-mono w-[48%]",
   topUpBtnActive: "bg-[#4caf7d18] border border-[#4caf7d66] text-baza-green",
   topUpBtnInactive: "bg-transparent border border-[#1a2a1c] text-[#5a8a5a]",
+  topUpCustomLabel:
+    "text-3xs text-[#2a4a2a] tracking-wide-xl mb-2 font-mono",
+  topUpCustomRow:
+    "flex-row items-center border border-[#1a2a1c] mb-4 px-3",
+  topUpCustomRowActive: "border-[#4caf7d66] bg-[#4caf7d08]",
+  topUpCustomPrefix: "text-sm text-[#3a5c3a] font-mono mr-1",
+  topUpCustomInput:
+    "flex-1 py-3 text-sm text-txt-primary font-mono tracking-wide-sm",
   topUpTransferBox: "bg-[#0d1a0f] border border-[#1a2a1c] p-3 px-3.5 mb-4",
   topUpTransferLabel:
     "text-3xs text-[#2a4a2a] tracking-wide-lg mb-1.5 font-mono",
@@ -931,10 +954,18 @@ export const walletScreen = {
   topUpHandle: "w-9 h-1 bg-[#1a2a1c] rounded-sm mx-auto mb-5",
   topUpLabel: "text-3xs text-[#2a4a2a] tracking-wide-2xl mb-1.5 font-mono",
   topUpTitle: "text-xl text-txt-primary font-serif tracking-tight-xs mb-5",
-  topUpGrid: "flex-row flex-wrap gap-2 mb-5",
+  topUpGrid: "flex-row flex-wrap gap-2 mb-3",
   topUpBtn: "py-[13px] text-[13px] font-mono w-[48%]",
   topUpBtnActive: "bg-[#4caf7d18] border border-[#4caf7d66]",
   topUpBtnInactive: "bg-transparent border border-[#1a2a1c]",
+  topUpCustomLabel:
+    "text-3xs text-[#2a4a2a] tracking-wide-xl mb-2 font-mono",
+  topUpCustomRow:
+    "flex-row items-center border border-[#1a2a1c] mb-4 px-3",
+  topUpCustomRowActive: "border-[#4caf7d66] bg-[#4caf7d08]",
+  topUpCustomPrefix: "text-sm text-[#3a5c3a] font-mono mr-1",
+  topUpCustomInput:
+    "flex-1 py-3 text-sm text-txt-primary font-mono tracking-wide-sm",
   topUpTransferBox: "bg-[#0d1a0f] border border-[#1a2a1c] p-3 px-3.5 mb-4",
   topUpTransferLabel:
     "text-3xs text-[#2a4a2a] tracking-wide-lg mb-1.5 font-mono",

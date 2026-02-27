@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
+  TextInput,
   FlatList,
   Pressable,
   ActivityIndicator,
@@ -65,6 +66,13 @@ export default function WalletScreen() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState<TxFilter>("ALL");
+  const [customAmount, setCustomAmount] = useState("");
+  const [isCustom, setIsCustom] = useState(false);
+
+  const customAmountKobo = Math.round(parseFloat(customAmount || "0") * 100);
+  const isValidCustom = isCustom && customAmountKobo >= 10000; // min ₦100
+  const effectiveAmount = isCustom ? (isValidCustom ? customAmountKobo : null) : selectedAmt;
+  const canConfirm = effectiveAmount !== null && effectiveAmount > 0;
 
   const filteredTransactions = transactions.filter((tx) =>
     matchesFilter(tx.type as WalletTxnType, activeFilter),
@@ -91,11 +99,29 @@ export default function WalletScreen() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleSelectQuick = (amt: number) => {
+    setSelectedAmt(amt);
+    setIsCustom(false);
+    setCustomAmount("");
+  };
+
+  const handleCustomFocus = () => {
+    setIsCustom(true);
+    setSelectedAmt(null);
+  };
+
+  const handleCustomChange = (text: string) => {
+    const sanitized = text.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1");
+    setCustomAmount(sanitized);
+    setIsCustom(true);
+    setSelectedAmt(null);
+  };
+
   const handleTopUp = async () => {
-    if (!selectedAmt) return;
+    if (!effectiveAmount) return;
     setIsProcessing(true);
     try {
-      const { authorizationUrl, reference } = await initTopup(selectedAmt);
+      const { authorizationUrl, reference } = await initTopup(effectiveAmount);
       await WebBrowser.openBrowserAsync(authorizationUrl, {
         dismissButtonStyle: "close",
         presentationStyle: WebBrowser.WebBrowserPresentationStyle.FORM_SHEET,
@@ -110,6 +136,8 @@ export default function WalletScreen() {
       }
       setShowTopUp(false);
       setSelectedAmt(null);
+      setCustomAmount("");
+      setIsCustom(false);
     } catch (err: any) {
       Alert.alert(
         "Top-up Failed",
@@ -267,6 +295,8 @@ export default function WalletScreen() {
             onPress={() => {
               setShowTopUp(false);
               setSelectedAmt(null);
+              setCustomAmount("");
+              setIsCustom(false);
             }}
           />
           <View className={s.topUpSheetInner}>
@@ -278,7 +308,7 @@ export default function WalletScreen() {
               {TOP_UP_AMOUNTS.map((amt) => (
                 <Pressable
                   key={amt}
-                  onPress={() => setSelectedAmt(amt)}
+                  onPress={() => handleSelectQuick(amt)}
                   className={`${s.topUpBtn} ${
                     selectedAmt === amt ? s.topUpBtnActive : s.topUpBtnInactive
                   }`}
@@ -297,6 +327,23 @@ export default function WalletScreen() {
               ))}
             </View>
 
+            <Text className={s.topUpCustomLabel}>OR ENTER CUSTOM AMOUNT</Text>
+            <View
+              className={`${s.topUpCustomRow} ${isCustom ? s.topUpCustomRowActive : ""}`}
+            >
+              <Text className={s.topUpCustomPrefix}>₦</Text>
+              <TextInput
+                className={s.topUpCustomInput}
+                placeholder="e.g. 2500"
+                placeholderTextColor="#2a4a2a"
+                keyboardType="decimal-pad"
+                value={customAmount}
+                onFocus={handleCustomFocus}
+                onChangeText={handleCustomChange}
+                selectionColor="#4caf7d"
+              />
+            </View>
+
             {accountNumber && (
               <View className={s.topUpTransferBox}>
                 <Text className={s.topUpTransferLabel}>OR TRANSFER TO</Text>
@@ -309,10 +356,10 @@ export default function WalletScreen() {
 
             <Pressable
               className={`${s.topUpConfirmBtn} ${
-                selectedAmt ? s.topUpConfirmActive : s.topUpConfirmInactive
+                canConfirm ? s.topUpConfirmActive : s.topUpConfirmInactive
               }`}
               onPress={handleTopUp}
-              disabled={!selectedAmt || isProcessing}
+              disabled={!canConfirm || isProcessing}
               style={{ alignItems: "center" }}
             >
               {isProcessing ? (
@@ -320,7 +367,7 @@ export default function WalletScreen() {
               ) : (
                 <Text
                   style={{
-                    color: selectedAmt ? "#000" : "#2a3a2a",
+                    color: canConfirm ? "#000" : "#2a3a2a",
                     fontFamily: "NotoSerif_400Regular",
                     fontSize: 11,
                     fontWeight: "bold",
@@ -328,8 +375,8 @@ export default function WalletScreen() {
                     textAlign: "center",
                   }}
                 >
-                  {selectedAmt
-                    ? `CONFIRM ${formatPrice(selectedAmt)}`
+                  {canConfirm
+                    ? `CONFIRM ${formatPrice(effectiveAmount!)}`
                     : "SELECT AMOUNT"}
                 </Text>
               )}
@@ -339,6 +386,8 @@ export default function WalletScreen() {
               onPress={() => {
                 setShowTopUp(false);
                 setSelectedAmt(null);
+                setCustomAmount("");
+                setIsCustom(false);
               }}
             >
               <Text className={s.topUpCancelBtn} style={{ textAlign: "center" }}>

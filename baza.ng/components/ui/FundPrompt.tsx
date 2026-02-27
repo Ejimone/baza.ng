@@ -1,12 +1,20 @@
 import * as Clipboard from "expo-clipboard";
 import * as WebBrowser from "expo-web-browser";
 import { useState } from "react";
-import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
+import {
+    ActivityIndicator,
+    Alert,
+    Pressable,
+    Text,
+    TextInput,
+    View,
+} from "react-native";
 import { useWallet } from "../../hooks/useWallet";
 import { fundPrompt as s } from "../../styles";
 import { formatPrice } from "../../utils/format";
 
 const QUICK_AMOUNTS = [500000, 1000000, 2000000, 5000000];
+const MIN_TOPUP = 10000; // ₦100 in kobo
 
 interface FundPromptProps {
   shortfall: number;
@@ -23,8 +31,36 @@ export default function FundPrompt({
     useWallet();
 
   const [selected, setSelected] = useState<number | null>(null);
+  const [customAmount, setCustomAmount] = useState("");
+  const [isCustom, setIsCustom] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const customAmountKobo = Math.round(parseFloat(customAmount || "0") * 100);
+  const effectiveAmount = isCustom ? customAmountKobo : selected;
+  const isValidCustom = isCustom && customAmountKobo >= MIN_TOPUP;
+  const canConfirm = isCustom ? isValidCustom : !!selected;
+
+  const handleSelectQuick = (amount: number) => {
+    setSelected(amount);
+    setIsCustom(false);
+    setCustomAmount("");
+  };
+
+  const handleCustomFocus = () => {
+    setIsCustom(true);
+    setSelected(null);
+  };
+
+  const handleCustomChange = (text: string) => {
+    const cleaned = text.replace(/[^0-9.]/g, "");
+    const parts = cleaned.split(".");
+    const sanitized =
+      parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : cleaned;
+    setCustomAmount(sanitized);
+    setIsCustom(true);
+    setSelected(null);
+  };
 
   const handleCopy = async () => {
     if (!accountNumber) return;
@@ -34,11 +70,11 @@ export default function FundPrompt({
   };
 
   const handleConfirm = async () => {
-    if (!selected) return;
+    if (!effectiveAmount || !canConfirm) return;
 
     setIsProcessing(true);
     try {
-      const { authorizationUrl, reference } = await initTopup(selected);
+      const { authorizationUrl, reference } = await initTopup(effectiveAmount);
 
       await WebBrowser.openBrowserAsync(authorizationUrl, {
         dismissButtonStyle: "close",
@@ -104,14 +140,16 @@ export default function FundPrompt({
             <Pressable
               key={amount}
               className={`${s.quickBtn} ${
-                selected === amount ? s.quickBtnActive : s.quickBtnInactive
+                selected === amount && !isCustom
+                  ? s.quickBtnActive
+                  : s.quickBtnInactive
               }`}
-              onPress={() => setSelected(amount)}
+              onPress={() => handleSelectQuick(amount)}
               style={{ alignItems: "center" }}
             >
               <Text
                 className={
-                  selected === amount
+                  selected === amount && !isCustom
                     ? "text-baza-green text-xs tracking-wide-xs font-mono"
                     : "text-[#6a8a6a] text-xs tracking-wide-xs font-mono"
                 }
@@ -122,12 +160,29 @@ export default function FundPrompt({
           ))}
         </View>
 
+        <Text className={s.customLabel}>OR ENTER CUSTOM AMOUNT</Text>
+        <View className={s.customRow}>
+          <Text className={s.customPrefix}>₦</Text>
+          <TextInput
+            className={
+              isCustom && customAmount ? s.customInputActive : s.customInput
+            }
+            value={customAmount}
+            onChangeText={handleCustomChange}
+            onFocus={handleCustomFocus}
+            placeholder="e.g. 3000"
+            placeholderTextColor="#2a3a2a"
+            keyboardType="decimal-pad"
+            returnKeyType="done"
+          />
+        </View>
+
         <Pressable
           className={`${s.confirmBtn} ${
-            selected ? s.confirmBtnActive : s.confirmBtnInactive
+            canConfirm ? s.confirmBtnActive : s.confirmBtnInactive
           }`}
           onPress={handleConfirm}
-          disabled={!selected || isProcessing}
+          disabled={!canConfirm || isProcessing}
           style={{ alignItems: "center" }}
         >
           {isProcessing ? (
@@ -135,13 +190,13 @@ export default function FundPrompt({
           ) : (
             <Text
               className={
-                selected
+                canConfirm
                   ? "text-black text-[11px] tracking-wide-2xl font-mono font-bold"
                   : "text-[#2a3a2a] text-[11px] tracking-wide-2xl font-mono font-bold"
               }
             >
-              {selected
-                ? `ADD ${formatPrice(selected)} TO WALLET`
+              {canConfirm
+                ? `ADD ${formatPrice(effectiveAmount!)} TO WALLET`
                 : "SELECT AN AMOUNT"}
             </Text>
           )}
