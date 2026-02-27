@@ -1,11 +1,11 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
+    ActivityIndicator,
+    Pressable,
+    ScrollView,
+    Text,
+    View,
 } from "react-native";
 import AddMoreItemsSheet from "../../../../components/ui/AddMoreItemsSheet";
 import QtyControl from "../../../../components/ui/QtyControl";
@@ -256,6 +256,18 @@ export default function BundleDetailScreen() {
         visible={showAddMore}
         onClose={() => setShowAddMore(false)}
         onItemSelected={handleItemSelected}
+        onItemRemoved={(item) => {
+          setItems((prev) => {
+            const existing = prev.find((i) => i.id === item.id);
+            if (!existing) return prev;
+            if (existing.qty <= 1) {
+              return prev.filter((i) => i.id !== item.id);
+            }
+            return prev.map((i) =>
+              i.id === item.id ? { ...i, qty: i.qty - 1 } : i,
+            );
+          });
+        }}
       />
     </View>
   );

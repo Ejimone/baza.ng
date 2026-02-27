@@ -1,16 +1,20 @@
 import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Pressable,
-    RefreshControl,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Alert,
+  Animated,
+  FlatList,
+  Keyboard,
+  Platform,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import ScreenWrapper from "../../components/layout/ScreenWrapper";
 import TransactionItem from "../../components/wallet/TransactionItem";
@@ -68,6 +72,7 @@ export default function WalletScreen() {
   const [activeFilter, setActiveFilter] = useState<TxFilter>("ALL");
   const [customAmount, setCustomAmount] = useState("");
   const [isCustom, setIsCustom] = useState(false);
+  const keyboardTranslateY = useRef(new Animated.Value(0)).current;
 
   const customAmountKobo = Math.round(parseFloat(customAmount || "0") * 100);
   const isValidCustom = isCustom && customAmountKobo >= 10000; // min ₦100
@@ -89,6 +94,35 @@ export default function WalletScreen() {
     startPolling();
     return () => stopPolling();
   }, []);
+
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent =
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const showSub = Keyboard.addListener(showEvent, (event) => {
+      const height = event.endCoordinates?.height ?? 0;
+      Animated.timing(keyboardTranslateY, {
+        toValue: -height,
+        duration: event.duration ?? 250,
+        useNativeDriver: true,
+      }).start();
+    });
+
+    const hideSub = Keyboard.addListener(hideEvent, (event) => {
+      Animated.timing(keyboardTranslateY, {
+        toValue: 0,
+        duration: event?.duration ?? 220,
+        useNativeDriver: true,
+      }).start();
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [keyboardTranslateY]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -302,105 +336,122 @@ export default function WalletScreen() {
               setIsCustom(false);
             }}
           />
-          <View className={s.topUpSheetInner}>
-            <View className={s.topUpHandle} />
-            <Text className={s.topUpLabel}>ADD FUNDS</Text>
-            <Text className={s.topUpTitle}>How much?</Text>
+          <Animated.View
+            style={{ transform: [{ translateY: keyboardTranslateY }] }}
+          >
+            <ScrollView
+              bounces={false}
+              keyboardShouldPersistTaps="handled"
+              style={{ flexGrow: 0 }}
+            >
+              <View className={s.topUpSheetInner}>
+                <View className={s.topUpHandle} />
+                <Text className={s.topUpLabel}>ADD FUNDS</Text>
+                <Text className={s.topUpTitle}>How much?</Text>
 
-            <View className={s.topUpGrid}>
-              {TOP_UP_AMOUNTS.map((amt) => (
+                <View className={s.topUpGrid}>
+                  {TOP_UP_AMOUNTS.map((amt) => (
+                    <Pressable
+                      key={amt}
+                      onPress={() => handleSelectQuick(amt)}
+                      className={`${s.topUpBtn} ${
+                        selectedAmt === amt
+                          ? s.topUpBtnActive
+                          : s.topUpBtnInactive
+                      }`}
+                      style={{ alignItems: "center" }}
+                    >
+                      <Text
+                        style={{
+                          color: selectedAmt === amt ? "#4caf7d" : "#5a8a5a",
+                          fontFamily: "NotoSerif_400Regular",
+                          fontSize: 13,
+                        }}
+                      >
+                        {formatPrice(amt)}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+
+                <Text className={s.topUpCustomLabel}>
+                  OR ENTER CUSTOM AMOUNT
+                </Text>
+                <View
+                  className={`${s.topUpCustomRow} ${isCustom ? s.topUpCustomRowActive : ""}`}
+                >
+                  <Text className={s.topUpCustomPrefix}>₦</Text>
+                  <TextInput
+                    className={s.topUpCustomInput}
+                    placeholder="e.g. 2500"
+                    placeholderTextColor="#2a4a2a"
+                    keyboardType="decimal-pad"
+                    value={customAmount}
+                    onFocus={handleCustomFocus}
+                    onChangeText={handleCustomChange}
+                    selectionColor="#4caf7d"
+                  />
+                </View>
+
+                {accountNumber && (
+                  <View className={s.topUpTransferBox}>
+                    <Text className={s.topUpTransferLabel}>OR TRANSFER TO</Text>
+                    <Text className={s.topUpTransferNumber}>
+                      {accountNumber}
+                    </Text>
+                    <Text className={s.topUpTransferBank}>
+                      {bankName ?? "PROVIDUS BANK"} ·{" "}
+                      {accountName ?? "BAZA NG LTD"}
+                    </Text>
+                  </View>
+                )}
+
                 <Pressable
-                  key={amt}
-                  onPress={() => handleSelectQuick(amt)}
-                  className={`${s.topUpBtn} ${
-                    selectedAmt === amt ? s.topUpBtnActive : s.topUpBtnInactive
+                  className={`${s.topUpConfirmBtn} ${
+                    canConfirm ? s.topUpConfirmActive : s.topUpConfirmInactive
                   }`}
+                  onPress={handleTopUp}
+                  disabled={!canConfirm || isProcessing}
                   style={{ alignItems: "center" }}
                 >
-                  <Text
-                    style={{
-                      color: selectedAmt === amt ? "#4caf7d" : "#5a8a5a",
-                      fontFamily: "NotoSerif_400Regular",
-                      fontSize: 13,
-                    }}
-                  >
-                    {formatPrice(amt)}
-                  </Text>
+                  {isProcessing ? (
+                    <ActivityIndicator color="#000" size="small" />
+                  ) : (
+                    <Text
+                      style={{
+                        color: canConfirm ? "#000" : "#2a3a2a",
+                        fontFamily: "NotoSerif_400Regular",
+                        fontSize: 11,
+                        fontWeight: "bold",
+                        letterSpacing: 2,
+                        textAlign: "center",
+                      }}
+                    >
+                      {canConfirm
+                        ? `CONFIRM ${formatPrice(effectiveAmount!)}`
+                        : "SELECT AMOUNT"}
+                    </Text>
+                  )}
                 </Pressable>
-              ))}
-            </View>
 
-            <Text className={s.topUpCustomLabel}>OR ENTER CUSTOM AMOUNT</Text>
-            <View
-              className={`${s.topUpCustomRow} ${isCustom ? s.topUpCustomRowActive : ""}`}
-            >
-              <Text className={s.topUpCustomPrefix}>₦</Text>
-              <TextInput
-                className={s.topUpCustomInput}
-                placeholder="e.g. 2500"
-                placeholderTextColor="#2a4a2a"
-                keyboardType="decimal-pad"
-                value={customAmount}
-                onFocus={handleCustomFocus}
-                onChangeText={handleCustomChange}
-                selectionColor="#4caf7d"
-              />
-            </View>
-
-            {accountNumber && (
-              <View className={s.topUpTransferBox}>
-                <Text className={s.topUpTransferLabel}>OR TRANSFER TO</Text>
-                <Text className={s.topUpTransferNumber}>{accountNumber}</Text>
-                <Text className={s.topUpTransferBank}>
-                  {bankName ?? "PROVIDUS BANK"} · {accountName ?? "BAZA NG LTD"}
-                </Text>
-              </View>
-            )}
-
-            <Pressable
-              className={`${s.topUpConfirmBtn} ${
-                canConfirm ? s.topUpConfirmActive : s.topUpConfirmInactive
-              }`}
-              onPress={handleTopUp}
-              disabled={!canConfirm || isProcessing}
-              style={{ alignItems: "center" }}
-            >
-              {isProcessing ? (
-                <ActivityIndicator color="#000" size="small" />
-              ) : (
-                <Text
-                  style={{
-                    color: canConfirm ? "#000" : "#2a3a2a",
-                    fontFamily: "NotoSerif_400Regular",
-                    fontSize: 11,
-                    fontWeight: "bold",
-                    letterSpacing: 2,
-                    textAlign: "center",
+                <Pressable
+                  onPress={() => {
+                    setShowTopUp(false);
+                    setSelectedAmt(null);
+                    setCustomAmount("");
+                    setIsCustom(false);
                   }}
                 >
-                  {canConfirm
-                    ? `CONFIRM ${formatPrice(effectiveAmount!)}`
-                    : "SELECT AMOUNT"}
-                </Text>
-              )}
-            </Pressable>
-
-            <Pressable
-              onPress={() => {
-                setShowTopUp(false);
-                setSelectedAmt(null);
-                setCustomAmount("");
-                setIsCustom(false);
-              }}
-            >
-              <Text
-                className={s.topUpCancelBtn}
-                style={{ textAlign: "center" }}
-              >
-                CANCEL
-              </Text>
-            </Pressable>
-          </View>
+                  <Text
+                    className={s.topUpCancelBtn}
+                    style={{ textAlign: "center" }}
+                  >
+                    CANCEL
+                  </Text>
+                </Pressable>
+              </View>
+            </ScrollView>
+          </Animated.View>
         </View>
       )}
     </ScreenWrapper>

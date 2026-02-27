@@ -1,13 +1,17 @@
 import * as Clipboard from "expo-clipboard";
 import * as WebBrowser from "expo-web-browser";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Pressable,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Alert,
+  Animated,
+  Keyboard,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { useWallet } from "../../hooks/useWallet";
 import { fundPrompt as s } from "../../styles";
@@ -35,6 +39,7 @@ export default function FundPrompt({
   const [isCustom, setIsCustom] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const keyboardTranslateY = useRef(new Animated.Value(0)).current;
 
   const customAmountKobo = Math.round(parseFloat(customAmount || "0") * 100);
   const effectiveAmount = isCustom ? customAmountKobo : selected;
@@ -103,111 +108,154 @@ export default function FundPrompt({
     }
   };
 
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent =
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const showSub = Keyboard.addListener(showEvent, (event) => {
+      const height = event.endCoordinates?.height ?? 0;
+      Animated.timing(keyboardTranslateY, {
+        toValue: -height,
+        duration: event.duration ?? 250,
+        useNativeDriver: true,
+      }).start();
+    });
+
+    const hideSub = Keyboard.addListener(hideEvent, (event) => {
+      Animated.timing(keyboardTranslateY, {
+        toValue: 0,
+        duration: event?.duration ?? 220,
+        useNativeDriver: true,
+      }).start();
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [keyboardTranslateY]);
+
   return (
     <View className={s.overlay}>
       <Pressable style={{ flex: 1 }} onPress={onDismiss} />
-      <View className={s.sheet}>
-        <View className={s.handle} />
+      <Animated.View
+        style={{ transform: [{ translateY: keyboardTranslateY }] }}
+      >
+        <ScrollView
+          bounces={false}
+          keyboardShouldPersistTaps="handled"
+          style={{ flexGrow: 0 }}
+        >
+          <View className={s.sheet}>
+            <View className={s.handle} />
 
-        <Text className={s.insufficientLabel}>INSUFFICIENT BALANCE</Text>
-        <Text className={s.title}>Top up to complete</Text>
-        <Text className={s.desc}>
-          You need{" "}
-          <Text className={s.shortfallAmount}>{formatPrice(shortfall)}</Text>{" "}
-          more to place this order. Fund via card or bank transfer below.
-        </Text>
+            <Text className={s.insufficientLabel}>INSUFFICIENT BALANCE</Text>
+            <Text className={s.title}>Top up to complete</Text>
+            <Text className={s.desc}>
+              You need{" "}
+              <Text className={s.shortfallAmount}>
+                {formatPrice(shortfall)}
+              </Text>{" "}
+              more to place this order. Fund via card or bank transfer below.
+            </Text>
 
-        {accountNumber && (
-          <View className={s.acctBox}>
-            <Text className={s.acctLabel}>YOUR BAZA ACCOUNT</Text>
-            <View className={s.acctRow}>
-              <View>
-                <Text className={s.acctNumber}>{accountNumber}</Text>
-                <Text className={s.acctBank}>{bankName ?? "Wema Bank"}</Text>
+            {accountNumber && (
+              <View className={s.acctBox}>
+                <Text className={s.acctLabel}>YOUR BAZA ACCOUNT</Text>
+                <View className={s.acctRow}>
+                  <View>
+                    <Text className={s.acctNumber}>{accountNumber}</Text>
+                    <Text className={s.acctBank}>
+                      {bankName ?? "Wema Bank"}
+                    </Text>
+                  </View>
+                  <Pressable className={s.acctCopyBtn} onPress={handleCopy}>
+                    <Text className="text-baza-green text-3xs tracking-wide-lg font-mono">
+                      {copied ? "COPIED" : "COPY"}
+                    </Text>
+                  </Pressable>
+                </View>
               </View>
-              <Pressable className={s.acctCopyBtn} onPress={handleCopy}>
-                <Text className="text-baza-green text-3xs tracking-wide-lg font-mono">
-                  {copied ? "COPIED" : "COPY"}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-        )}
+            )}
 
-        <Text className={s.quickLabel}>QUICK TOP-UP VIA CARD</Text>
-        <View className={s.quickGrid}>
-          {QUICK_AMOUNTS.map((amount) => (
+            <Text className={s.quickLabel}>QUICK TOP-UP VIA CARD</Text>
+            <View className={s.quickGrid}>
+              {QUICK_AMOUNTS.map((amount) => (
+                <Pressable
+                  key={amount}
+                  className={`${s.quickBtn} ${
+                    selected === amount && !isCustom
+                      ? s.quickBtnActive
+                      : s.quickBtnInactive
+                  }`}
+                  onPress={() => handleSelectQuick(amount)}
+                  style={{ alignItems: "center" }}
+                >
+                  <Text
+                    className={
+                      selected === amount && !isCustom
+                        ? "text-baza-green text-xs tracking-wide-xs font-mono"
+                        : "text-[#6a8a6a] text-xs tracking-wide-xs font-mono"
+                    }
+                  >
+                    {formatPrice(amount)}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            <Text className={s.customLabel}>OR ENTER CUSTOM AMOUNT</Text>
+            <View className={s.customRow}>
+              <Text className={s.customPrefix}>₦</Text>
+              <TextInput
+                className={
+                  isCustom && customAmount ? s.customInputActive : s.customInput
+                }
+                value={customAmount}
+                onChangeText={handleCustomChange}
+                onFocus={handleCustomFocus}
+                placeholder="e.g. 3000"
+                placeholderTextColor="#2a3a2a"
+                keyboardType="decimal-pad"
+                returnKeyType="done"
+              />
+            </View>
+
             <Pressable
-              key={amount}
-              className={`${s.quickBtn} ${
-                selected === amount && !isCustom
-                  ? s.quickBtnActive
-                  : s.quickBtnInactive
+              className={`${s.confirmBtn} ${
+                canConfirm ? s.confirmBtnActive : s.confirmBtnInactive
               }`}
-              onPress={() => handleSelectQuick(amount)}
+              onPress={handleConfirm}
+              disabled={!canConfirm || isProcessing}
               style={{ alignItems: "center" }}
             >
-              <Text
-                className={
-                  selected === amount && !isCustom
-                    ? "text-baza-green text-xs tracking-wide-xs font-mono"
-                    : "text-[#6a8a6a] text-xs tracking-wide-xs font-mono"
-                }
-              >
-                {formatPrice(amount)}
+              {isProcessing ? (
+                <ActivityIndicator color="#000" size="small" />
+              ) : (
+                <Text
+                  className={
+                    canConfirm
+                      ? "text-black text-[11px] tracking-wide-2xl font-mono font-bold"
+                      : "text-[#2a3a2a] text-[11px] tracking-wide-2xl font-mono font-bold"
+                  }
+                >
+                  {canConfirm
+                    ? `ADD ${formatPrice(effectiveAmount!)} TO WALLET`
+                    : "SELECT AN AMOUNT"}
+                </Text>
+              )}
+            </Pressable>
+
+            <Pressable className={s.cancelBtn} onPress={onDismiss}>
+              <Text className="text-[#2a3a2a] text-xxs tracking-wide-lg font-mono text-center">
+                CANCEL
               </Text>
             </Pressable>
-          ))}
-        </View>
-
-        <Text className={s.customLabel}>OR ENTER CUSTOM AMOUNT</Text>
-        <View className={s.customRow}>
-          <Text className={s.customPrefix}>₦</Text>
-          <TextInput
-            className={
-              isCustom && customAmount ? s.customInputActive : s.customInput
-            }
-            value={customAmount}
-            onChangeText={handleCustomChange}
-            onFocus={handleCustomFocus}
-            placeholder="e.g. 3000"
-            placeholderTextColor="#2a3a2a"
-            keyboardType="decimal-pad"
-            returnKeyType="done"
-          />
-        </View>
-
-        <Pressable
-          className={`${s.confirmBtn} ${
-            canConfirm ? s.confirmBtnActive : s.confirmBtnInactive
-          }`}
-          onPress={handleConfirm}
-          disabled={!canConfirm || isProcessing}
-          style={{ alignItems: "center" }}
-        >
-          {isProcessing ? (
-            <ActivityIndicator color="#000" size="small" />
-          ) : (
-            <Text
-              className={
-                canConfirm
-                  ? "text-black text-[11px] tracking-wide-2xl font-mono font-bold"
-                  : "text-[#2a3a2a] text-[11px] tracking-wide-2xl font-mono font-bold"
-              }
-            >
-              {canConfirm
-                ? `ADD ${formatPrice(effectiveAmount!)} TO WALLET`
-                : "SELECT AN AMOUNT"}
-            </Text>
-          )}
-        </Pressable>
-
-        <Pressable className={s.cancelBtn} onPress={onDismiss}>
-          <Text className="text-[#2a3a2a] text-xxs tracking-wide-lg font-mono text-center">
-            CANCEL
-          </Text>
-        </Pressable>
-      </View>
+          </View>
+        </ScrollView>
+      </Animated.View>
     </View>
   );
 }

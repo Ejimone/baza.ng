@@ -1,15 +1,18 @@
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
+    ActivityIndicator,
+    Alert,
+    Animated,
+    Keyboard,
+    Platform,
+    Pressable,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 import ModeCard from "../../components/cards/ModeCard";
 import Header from "../../components/layout/Header";
@@ -145,6 +148,7 @@ function TopUpSheet({ onClose }: { onClose: () => void }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [customAmount, setCustomAmount] = useState("");
   const [isCustom, setIsCustom] = useState(false);
+  const keyboardTranslateY = useRef(new Animated.Value(0)).current;
 
   const quickAmounts = [500000, 1000000, 2000000, 5000000];
 
@@ -202,105 +206,147 @@ function TopUpSheet({ onClose }: { onClose: () => void }) {
     }
   };
 
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent =
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const showSub = Keyboard.addListener(showEvent, (event) => {
+      const height = event.endCoordinates?.height ?? 0;
+      Animated.timing(keyboardTranslateY, {
+        toValue: -height,
+        duration: event.duration ?? 250,
+        useNativeDriver: true,
+      }).start();
+    });
+
+    const hideSub = Keyboard.addListener(hideEvent, (event) => {
+      Animated.timing(keyboardTranslateY, {
+        toValue: 0,
+        duration: event?.duration ?? 220,
+        useNativeDriver: true,
+      }).start();
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [keyboardTranslateY]);
+
   return (
     <View className={s.topUpSheet}>
       <Pressable style={{ flex: 1 }} onPress={onClose} />
-      <View className={s.topUpSheetInner}>
-        <View className={s.topUpHandle} />
-        <Text className={s.topUpLabel}>FUND YOUR WALLET</Text>
-        <Text className={s.topUpTitle}>How much?</Text>
+      <Animated.View
+        style={{ transform: [{ translateY: keyboardTranslateY }] }}
+      >
+        <ScrollView
+          bounces={false}
+          keyboardShouldPersistTaps="handled"
+          style={{ flexGrow: 0 }}
+        >
+          <View className={s.topUpSheetInner}>
+            <View className={s.topUpHandle} />
+            <Text className={s.topUpLabel}>FUND YOUR WALLET</Text>
+            <Text className={s.topUpTitle}>How much?</Text>
 
-        <View className={s.topUpGrid}>
-          {quickAmounts.map((amount) => (
-            <Pressable
-              key={amount}
-              style={{
-                width: "48%",
-                paddingVertical: 13,
-                alignItems: "center",
-                backgroundColor:
-                  selectedAmount === amount ? "#4caf7d18" : "transparent",
-                borderWidth: 1,
-                borderColor:
-                  selectedAmount === amount ? "#4caf7d66" : "#1a2a1c",
-              }}
-              onPress={() => handleSelectQuick(amount)}
+            <View className={s.topUpGrid}>
+              {quickAmounts.map((amount) => (
+                <Pressable
+                  key={amount}
+                  style={{
+                    width: "48%",
+                    paddingVertical: 13,
+                    alignItems: "center",
+                    backgroundColor:
+                      selectedAmount === amount ? "#4caf7d18" : "transparent",
+                    borderWidth: 1,
+                    borderColor:
+                      selectedAmount === amount ? "#4caf7d66" : "#1a2a1c",
+                  }}
+                  onPress={() => handleSelectQuick(amount)}
+                >
+                  <Text
+                    style={{
+                      color: selectedAmount === amount ? "#4caf7d" : "#5a8a5a",
+                      fontFamily: "NotoSerif_400Regular",
+                      fontSize: 13,
+                    }}
+                  >
+                    {formatPrice(amount)}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            <Text className={s.topUpCustomLabel}>OR ENTER CUSTOM AMOUNT</Text>
+            <View
+              className={`${s.topUpCustomRow} ${isCustom ? s.topUpCustomRowActive : ""}`}
             >
+              <Text className={s.topUpCustomPrefix}>₦</Text>
+              <TextInput
+                className={s.topUpCustomInput}
+                placeholder="e.g. 2500"
+                placeholderTextColor="#2a4a2a"
+                keyboardType="decimal-pad"
+                value={customAmount}
+                onFocus={handleCustomFocus}
+                onChangeText={handleCustomChange}
+                selectionColor="#4caf7d"
+              />
+            </View>
+
+            {accountNumber && (
+              <View className={s.topUpAcctBox}>
+                <Text className={s.topUpAcctLabel}>OR TRANSFER TO</Text>
+                <Text className={s.topUpAcctNumber}>{accountNumber}</Text>
+                <Text className={s.topUpAcctBank}>
+                  {bankName ?? "Providus Bank"} · {accountName ?? "Baza NG Ltd"}
+                </Text>
+              </View>
+            )}
+
+            <Pressable
+              className={s.topUpConfirmBtn}
+              style={{
+                backgroundColor: canConfirm ? "#4caf7d" : "#1a2a1c",
+                alignItems: "center",
+              }}
+              onPress={handleConfirm}
+              disabled={!canConfirm || isProcessing}
+            >
+              {isProcessing ? (
+                <ActivityIndicator color="#000" size="small" />
+              ) : (
+                <Text
+                  style={{
+                    color: canConfirm ? "#000" : "#2a3a2a",
+                    textAlign: "center",
+                    fontFamily: "NotoSerif_400Regular",
+                    fontSize: 11,
+                    fontWeight: "bold",
+                    letterSpacing: 2,
+                  }}
+                >
+                  {canConfirm
+                    ? `CONFIRM ${formatPrice(effectiveAmount!)}`
+                    : "SELECT AMOUNT"}
+                </Text>
+              )}
+            </Pressable>
+
+            <Pressable onPress={onClose}>
               <Text
-                style={{
-                  color: selectedAmount === amount ? "#4caf7d" : "#5a8a5a",
-                  fontFamily: "NotoSerif_400Regular",
-                  fontSize: 13,
-                }}
+                className={s.topUpCancelBtn}
+                style={{ textAlign: "center" }}
               >
-                {formatPrice(amount)}
+                CANCEL
               </Text>
             </Pressable>
-          ))}
-        </View>
-
-        <Text className={s.topUpCustomLabel}>OR ENTER CUSTOM AMOUNT</Text>
-        <View
-          className={`${s.topUpCustomRow} ${isCustom ? s.topUpCustomRowActive : ""}`}
-        >
-          <Text className={s.topUpCustomPrefix}>₦</Text>
-          <TextInput
-            className={s.topUpCustomInput}
-            placeholder="e.g. 2500"
-            placeholderTextColor="#2a4a2a"
-            keyboardType="decimal-pad"
-            value={customAmount}
-            onFocus={handleCustomFocus}
-            onChangeText={handleCustomChange}
-            selectionColor="#4caf7d"
-          />
-        </View>
-
-        {accountNumber && (
-          <View className={s.topUpAcctBox}>
-            <Text className={s.topUpAcctLabel}>OR TRANSFER TO</Text>
-            <Text className={s.topUpAcctNumber}>{accountNumber}</Text>
-            <Text className={s.topUpAcctBank}>
-              {bankName ?? "Providus Bank"} · {accountName ?? "Baza NG Ltd"}
-            </Text>
           </View>
-        )}
-
-        <Pressable
-          className={s.topUpConfirmBtn}
-          style={{
-            backgroundColor: canConfirm ? "#4caf7d" : "#1a2a1c",
-            alignItems: "center",
-          }}
-          onPress={handleConfirm}
-          disabled={!canConfirm || isProcessing}
-        >
-          {isProcessing ? (
-            <ActivityIndicator color="#000" size="small" />
-          ) : (
-            <Text
-              style={{
-                color: canConfirm ? "#000" : "#2a3a2a",
-                textAlign: "center",
-                fontFamily: "NotoSerif_400Regular",
-                fontSize: 11,
-                fontWeight: "bold",
-                letterSpacing: 2,
-              }}
-            >
-              {canConfirm
-                ? `CONFIRM ${formatPrice(effectiveAmount!)}`
-                : "SELECT AMOUNT"}
-            </Text>
-          )}
-        </Pressable>
-
-        <Pressable onPress={onClose}>
-          <Text className={s.topUpCancelBtn} style={{ textAlign: "center" }}>
-            CANCEL
-          </Text>
-        </Pressable>
-      </View>
+        </ScrollView>
+      </Animated.View>
     </View>
   );
 }

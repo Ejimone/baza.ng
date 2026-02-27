@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Dimensions,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
+    ActivityIndicator,
+    Dimensions,
+    Pressable,
+    ScrollView,
+    Text,
+    View,
 } from "react-native";
 import { colors } from "../../constants/theme";
 import { useCart } from "../../hooks/useCart";
@@ -23,12 +23,15 @@ interface AddMoreItemsSheetProps {
   onClose: () => void;
   /** When provided, items are passed to this callback instead of being added to cart */
   onItemSelected?: (item: RestockItem) => void;
+  /** Called when an item is decremented/removed in append-to-list mode */
+  onItemRemoved?: (item: RestockItem) => void;
 }
 
 export default function AddMoreItemsSheet({
   visible,
   onClose,
   onItemSelected,
+  onItemRemoved,
 }: AddMoreItemsSheetProps) {
   const { restockItems, restockCategories, isLoading, error, fetchRestock } =
     useProducts();
@@ -36,7 +39,7 @@ export default function AddMoreItemsSheet({
 
   const [query, setQuery] = useState("");
   const [activeCat, setActiveCat] = useState("All");
-  const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
+  const [addedQtys, setAddedQtys] = useState<Map<string, number>>(new Map());
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -44,7 +47,7 @@ export default function AddMoreItemsSheet({
       fetchRestock();
       setQuery("");
       setActiveCat("All");
-      setAddedIds(new Set());
+      setAddedQtys(new Map());
     }
   }, [visible]);
 
@@ -97,9 +100,30 @@ export default function AddMoreItemsSheet({
     (item: RestockItem) => {
       if (!onItemSelected) return;
       onItemSelected(item);
-      setAddedIds((prev) => new Set(prev).add(item.id));
+      setAddedQtys((prev) => {
+        const next = new Map(prev);
+        next.set(item.id, (prev.get(item.id) ?? 0) + 1);
+        return next;
+      });
     },
     [onItemSelected],
+  );
+
+  const handleDecrementItem = useCallback(
+    (item: RestockItem) => {
+      setAddedQtys((prev) => {
+        const currentQty = prev.get(item.id) ?? 0;
+        const next = new Map(prev);
+        if (currentQty <= 1) {
+          next.delete(item.id);
+        } else {
+          next.set(item.id, currentQty - 1);
+        }
+        return next;
+      });
+      onItemRemoved?.(item);
+    },
+    [onItemRemoved],
   );
 
   const categories = restockCategories.length > 0 ? restockCategories : ["All"];
@@ -217,8 +241,9 @@ export default function AddMoreItemsSheet({
             >
               {restockItems.map((item) => {
                 if (onItemSelected) {
-                  // Append-to-list mode: simple ADD / ✓ ADDED button
-                  const wasAdded = addedIds.has(item.id);
+                  // Append-to-list mode: ADD / qty stepper
+                  const itemQty = addedQtys.get(item.id) ?? 0;
+                  const wasAdded = itemQty > 0;
                   return (
                     <View
                       key={item.id}
@@ -273,29 +298,99 @@ export default function AddMoreItemsSheet({
                           {item.brand}
                         </Text>
                       </View>
-                      <Pressable
-                        onPress={() => !wasAdded && handleAppendItem(item)}
-                        style={{
-                          paddingVertical: 7,
-                          paddingHorizontal: 18,
-                          borderWidth: 1,
-                          borderColor: wasAdded ? "#4caf7d55" : "#6ec6ff55",
-                          backgroundColor: wasAdded
-                            ? "#4caf7d12"
-                            : "transparent",
-                        }}
-                      >
-                        <Text
+                      {!wasAdded ? (
+                        <Pressable
+                          onPress={() => handleAppendItem(item)}
                           style={{
-                            color: wasAdded ? "#4caf7d" : "#6ec6ff",
-                            fontSize: 8,
-                            letterSpacing: 1,
-                            fontFamily: "NotoSerif_400Regular",
+                            paddingVertical: 7,
+                            paddingHorizontal: 18,
+                            borderWidth: 1,
+                            borderColor: "#6ec6ff55",
+                            backgroundColor: "transparent",
                           }}
                         >
-                          {wasAdded ? "✓ ADDED" : "ADD"}
-                        </Text>
-                      </Pressable>
+                          <Text
+                            style={{
+                              color: "#6ec6ff",
+                              fontSize: 8,
+                              letterSpacing: 1,
+                              fontFamily: "NotoSerif_400Regular",
+                            }}
+                          >
+                            ADD
+                          </Text>
+                        </Pressable>
+                      ) : (
+                        <View
+                          style={{ flexDirection: "row", alignItems: "center" }}
+                        >
+                          <Pressable
+                            onPress={() => handleDecrementItem(item)}
+                            style={{
+                              width: 32,
+                              height: 32,
+                              borderWidth: 1,
+                              borderColor: "#4caf7d55",
+                              backgroundColor: "#4caf7d12",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <Text
+                              style={{
+                                color: "#4caf7d",
+                                fontSize: 16,
+                                fontFamily: "NotoSerif_400Regular",
+                              }}
+                            >
+                              −
+                            </Text>
+                          </Pressable>
+                          <View
+                            style={{
+                              width: 32,
+                              height: 32,
+                              alignItems: "center",
+                              justifyContent: "center",
+                              borderTopWidth: 1,
+                              borderBottomWidth: 1,
+                              borderColor: "#4caf7d33",
+                            }}
+                          >
+                            <Text
+                              style={{
+                                color: "#f0f8f0",
+                                fontSize: 11,
+                                fontFamily: "NotoSerif_400Regular",
+                              }}
+                            >
+                              {itemQty}
+                            </Text>
+                          </View>
+                          <Pressable
+                            onPress={() => handleAppendItem(item)}
+                            style={{
+                              width: 32,
+                              height: 32,
+                              borderWidth: 1,
+                              borderColor: "#4caf7d55",
+                              backgroundColor: "#4caf7d12",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <Text
+                              style={{
+                                color: "#4caf7d",
+                                fontSize: 16,
+                                fontFamily: "NotoSerif_400Regular",
+                              }}
+                            >
+                              +
+                            </Text>
+                          </Pressable>
+                        </View>
+                      )}
                     </View>
                   );
                 }
