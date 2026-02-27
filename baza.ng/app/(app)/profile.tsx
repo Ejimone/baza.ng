@@ -43,7 +43,11 @@ export default function ProfileScreen() {
 
   const customAmountKobo = Math.round(parseFloat(customAmount || "0") * 100);
   const isValidCustom = isCustom && customAmountKobo >= 10000; // min ₦100
-  const effectiveAmount = isCustom ? (isValidCustom ? customAmountKobo : null) : selectedAmt;
+  const effectiveAmount = isCustom
+    ? isValidCustom
+      ? customAmountKobo
+      : null
+    : selectedAmt;
   const canConfirm = effectiveAmount !== null && effectiveAmount > 0;
 
   useEffect(() => {

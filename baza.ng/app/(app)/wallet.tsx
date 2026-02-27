@@ -1,24 +1,24 @@
-import { useEffect, useState, useCallback } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  FlatList,
-  Pressable,
-  ActivityIndicator,
-  RefreshControl,
-  Alert,
-} from "react-native";
-import { useRouter } from "expo-router";
 import * as Clipboard from "expo-clipboard";
+import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { useWallet } from "../../hooks/useWallet";
-import { formatPrice } from "../../utils/format";
-import { walletScreen as s } from "../../styles";
-import { colors } from "../../constants/theme";
-import TransactionItem from "../../components/wallet/TransactionItem";
+import { useCallback, useEffect, useState } from "react";
+import {
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    Pressable,
+    RefreshControl,
+    Text,
+    TextInput,
+    View,
+} from "react-native";
 import ScreenWrapper from "../../components/layout/ScreenWrapper";
+import TransactionItem from "../../components/wallet/TransactionItem";
+import { colors } from "../../constants/theme";
+import { useWallet } from "../../hooks/useWallet";
+import { walletScreen as s } from "../../styles";
 import type { WalletTransaction, WalletTxnType } from "../../types";
+import { formatPrice } from "../../utils/format";
 
 const TOP_UP_AMOUNTS = [500000, 1000000, 2000000, 5000000];
 
@@ -71,7 +71,11 @@ export default function WalletScreen() {
 
   const customAmountKobo = Math.round(parseFloat(customAmount || "0") * 100);
   const isValidCustom = isCustom && customAmountKobo >= 10000; // min ₦100
-  const effectiveAmount = isCustom ? (isValidCustom ? customAmountKobo : null) : selectedAmt;
+  const effectiveAmount = isCustom
+    ? isValidCustom
+      ? customAmountKobo
+      : null
+    : selectedAmt;
   const canConfirm = effectiveAmount !== null && effectiveAmount > 0;
 
   const filteredTransactions = transactions.filter((tx) =>
@@ -237,7 +241,8 @@ export default function WalletScreen() {
           {activeFilter === "ALL" ? "TRANSACTION HISTORY" : activeFilter}
         </Text>
         <Text className={s.txCount}>
-          {filteredTransactions.length} TRANSACTION{filteredTransactions.length !== 1 ? "S" : ""}
+          {filteredTransactions.length} TRANSACTION
+          {filteredTransactions.length !== 1 ? "S" : ""}
         </Text>
       </View>
     </View>
@@ -251,9 +256,7 @@ export default function WalletScreen() {
   ) : (
     <View className={s.emptyTx}>
       <Text className={s.emptyTxText}>NO TRANSACTIONS YET</Text>
-      <Text className={s.emptyTxSub}>
-        Top up your wallet to get started
-      </Text>
+      <Text className={s.emptyTxSub}>Top up your wallet to get started</Text>
     </View>
   );
 
@@ -390,7 +393,10 @@ export default function WalletScreen() {
                 setIsCustom(false);
               }}
             >
-              <Text className={s.topUpCancelBtn} style={{ textAlign: "center" }}>
+              <Text
+                className={s.topUpCancelBtn}
+                style={{ textAlign: "center" }}
+              >
                 CANCEL
               </Text>
             </Pressable>

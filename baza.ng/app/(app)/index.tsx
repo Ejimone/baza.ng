@@ -2,14 +2,14 @@ import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
+    ActivityIndicator,
+    Alert,
+    Pressable,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 import ModeCard from "../../components/cards/ModeCard";
 import Header from "../../components/layout/Header";
@@ -150,7 +150,11 @@ function TopUpSheet({ onClose }: { onClose: () => void }) {
 
   const customAmountKobo = Math.round(parseFloat(customAmount || "0") * 100);
   const isValidCustom = isCustom && customAmountKobo >= 10000; // min ₦100
-  const effectiveAmount = isCustom ? (isValidCustom ? customAmountKobo : null) : selectedAmount;
+  const effectiveAmount = isCustom
+    ? isValidCustom
+      ? customAmountKobo
+      : null
+    : selectedAmount;
   const canConfirm = effectiveAmount !== null && effectiveAmount > 0;
 
   const handleSelectQuick = (amt: number) => {

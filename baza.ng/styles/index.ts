@@ -99,10 +99,8 @@ export const intentGateBalance = {
   topUpAcctNumber: "text-base text-txt-primary tracking-wide-sm font-mono",
   topUpAcctBank: "text-3xs text-[#3a5c3a] mt-1 font-mono",
   topUpGrid: "flex-row flex-wrap gap-2 mb-3",
-  topUpCustomLabel:
-    "text-3xs text-[#2a4a2a] tracking-wide-xl mb-2 font-mono",
-  topUpCustomRow:
-    "flex-row items-center border border-[#1a2a1c] mb-4 px-3",
+  topUpCustomLabel: "text-3xs text-[#2a4a2a] tracking-wide-xl mb-2 font-mono",
+  topUpCustomRow: "flex-row items-center border border-[#1a2a1c] mb-4 px-3",
   topUpCustomRowActive: "border-[#4caf7d66] bg-[#4caf7d08]",
   topUpCustomPrefix: "text-sm text-[#3a5c3a] font-mono mr-1",
   topUpCustomInput:
@@ -603,10 +601,8 @@ export const profileScreen = {
   topUpBtn: "py-[13px] text-[13px] font-mono w-[48%]",
   topUpBtnActive: "bg-[#4caf7d18] border border-[#4caf7d66] text-baza-green",
   topUpBtnInactive: "bg-transparent border border-[#1a2a1c] text-[#5a8a5a]",
-  topUpCustomLabel:
-    "text-3xs text-[#2a4a2a] tracking-wide-xl mb-2 font-mono",
-  topUpCustomRow:
-    "flex-row items-center border border-[#1a2a1c] mb-4 px-3",
+  topUpCustomLabel: "text-3xs text-[#2a4a2a] tracking-wide-xl mb-2 font-mono",
+  topUpCustomRow: "flex-row items-center border border-[#1a2a1c] mb-4 px-3",
   topUpCustomRowActive: "border-[#4caf7d66] bg-[#4caf7d08]",
   topUpCustomPrefix: "text-sm text-[#3a5c3a] font-mono mr-1",
   topUpCustomInput:
@@ -958,10 +954,8 @@ export const walletScreen = {
   topUpBtn: "py-[13px] text-[13px] font-mono w-[48%]",
   topUpBtnActive: "bg-[#4caf7d18] border border-[#4caf7d66]",
   topUpBtnInactive: "bg-transparent border border-[#1a2a1c]",
-  topUpCustomLabel:
-    "text-3xs text-[#2a4a2a] tracking-wide-xl mb-2 font-mono",
-  topUpCustomRow:
-    "flex-row items-center border border-[#1a2a1c] mb-4 px-3",
+  topUpCustomLabel: "text-3xs text-[#2a4a2a] tracking-wide-xl mb-2 font-mono",
+  topUpCustomRow: "flex-row items-center border border-[#1a2a1c] mb-4 px-3",
   topUpCustomRowActive: "border-[#4caf7d66] bg-[#4caf7d08]",
   topUpCustomPrefix: "text-sm text-[#3a5c3a] font-mono mr-1",
   topUpCustomInput:
