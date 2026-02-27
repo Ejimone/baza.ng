@@ -1,17 +1,17 @@
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  TextInput,
   Alert,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { useAuthStore } from "../../../stores/authStore";
-import * as userService from "../../../services/user";
-import { accountSettingsScreen as s } from "../../../styles/index";
 import ScreenWrapper from "../../../components/layout/ScreenWrapper";
+import * as userService from "../../../services/user";
+import { useAuthStore } from "../../../stores/authStore";
+import { accountSettingsScreen as s } from "../../../styles/index";
 
 export default function AccountScreen() {
   const router = useRouter();
@@ -104,16 +104,12 @@ export default function AccountScreen() {
             disabled={isSaving}
             style={{ alignItems: "center" }}
           >
-            <Text className={s.saveBtn}>
+            <Text className={s.saveBtn + " text-center"}>
               {isSaving ? "SAVING..." : "SAVE CHANGES"}
             </Text>
           </Pressable>
 
-          {saved && (
-            <Text className={s.savedConfirm}>
-              {"✓ CHANGES SAVED"}
-            </Text>
-          )}
+          {saved && <Text className={s.savedConfirm}>{"✓ CHANGES SAVED"}</Text>}
         </View>
       </ScrollView>
     </ScreenWrapper>

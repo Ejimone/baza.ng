@@ -1,5 +1,5 @@
-import { View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
+import { Pressable, Text } from "react-native";
 import { profileScreen as styles } from "../../styles/index";
 import { formatPrice } from "../../utils/format";
 
@@ -20,7 +20,9 @@ export default function WalletCard({ balance, onTopUp }: WalletCardProps) {
       <Text className={styles.walletBalance}>{formatPrice(balance)}</Text>
       <Text className={styles.walletAvailable}>AVAILABLE BALANCE</Text>
       <Pressable onPress={onTopUp}>
-        <Text className={styles.walletTopUpBtn}>+ TOP UP WALLET</Text>
+        <Text className={styles.walletTopUpBtn + " text-center"}>
+          + TOP UP WALLET
+        </Text>
       </Pressable>
     </Pressable>
   );
