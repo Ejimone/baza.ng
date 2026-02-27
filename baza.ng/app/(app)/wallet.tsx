@@ -106,7 +106,7 @@ export default function WalletScreen() {
   const handleSelectQuick = (amt: number) => {
     setSelectedAmt(amt);
     setIsCustom(false);
-    setCustomAmount("");
+    setCustomAmount(String(amt / 100));
   };
 
   const handleCustomFocus = () => {

@@ -160,7 +160,7 @@ function TopUpSheet({ onClose }: { onClose: () => void }) {
   const handleSelectQuick = (amt: number) => {
     setSelectedAmount(amt);
     setIsCustom(false);
-    setCustomAmount("");
+    setCustomAmount(String(amt / 100));
   };
 
   const handleCustomFocus = () => {
