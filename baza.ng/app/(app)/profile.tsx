@@ -3,13 +3,13 @@ import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import ScreenWrapper from "../../components/layout/ScreenWrapper";
 import WalletCard from "../../components/wallet/WalletCard";
@@ -242,6 +242,9 @@ export default function ProfileScreen() {
             SIGN OUT
           </Text>
         </Pressable>
+
+        {/* Spacer for scrollable height */}
+        <View style={{ height: 120 }} />
       </ScrollView>
 
       {/* Top-up Sheet */}

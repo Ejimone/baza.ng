@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Dimensions,
-    Pressable,
-    ScrollView,
-    Text,
-    View,
+  ActivityIndicator,
+  Dimensions,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
 } from "react-native";
 import { colors } from "../../constants/theme";
 import { useCart } from "../../hooks/useCart";
@@ -106,7 +106,7 @@ export default function AddMoreItemsSheet({
 
   return (
     <BottomSheet visible={visible} onClose={onClose} heroColor="#070a12">
-      <View style={{ maxHeight: SHEET_HEIGHT }}>
+      <View style={{ height: SHEET_HEIGHT }}>
         {/* Handle */}
         <View className={s.handle} />
 
@@ -128,7 +128,7 @@ export default function AddMoreItemsSheet({
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 20 }}
-          style={{ flexGrow: 0 }}
+          style={{ flexGrow: 0, flexShrink: 0 }}
         >
           <View className={s.catFilter}>
             {categories.map((cat) => (
@@ -139,9 +139,9 @@ export default function AddMoreItemsSheet({
               >
                 <Text
                   style={{
-                    color: activeCat === cat ? "#6ec6ff" : "#3a5a8a",
-                    fontSize: 9,
-                    letterSpacing: 1,
+                    color: activeCat === cat ? "#6ec6ff" : "#5a7aaa",
+                    fontSize: 11,
+                    letterSpacing: 1.2,
                     fontFamily: "NotoSerif_400Regular",
                   }}
                 >
@@ -152,166 +152,170 @@ export default function AddMoreItemsSheet({
           </View>
         </ScrollView>
 
-        {/* Product list */}
-        {isLoading && restockItems.length === 0 ? (
-          <View
-            style={{
-              height: 200,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <ActivityIndicator color={colors.accent.blue} size="small" />
-          </View>
-        ) : error && restockItems.length === 0 ? (
-          <View
-            style={{
-              height: 200,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text
+        {/* Product list — flex: 1 so it fills remaining space without overlaying filters */}
+        <View style={{ flex: 1, minHeight: 0 }}>
+          {isLoading && restockItems.length === 0 ? (
+            <View
               style={{
-                color: "#3a5a8a",
-                fontSize: 11,
-                letterSpacing: 1,
-                fontFamily: "NotoSerif_400Regular",
+                height: 200,
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              {error}
-            </Text>
-            <Pressable
-              onPress={() => doFetch(activeCat, query)}
-              style={{ marginTop: 16 }}
+              <ActivityIndicator color={colors.accent.blue} size="small" />
+            </View>
+          ) : error && restockItems.length === 0 ? (
+            <View
+              style={{
+                height: 200,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
             >
               <Text
                 style={{
-                  color: colors.accent.green,
+                  color: "#3a5a8a",
                   fontSize: 11,
                   letterSpacing: 1,
                   fontFamily: "NotoSerif_400Regular",
                 }}
               >
-                RETRY
+                {error}
               </Text>
-            </Pressable>
-          </View>
-        ) : restockItems.length === 0 ? (
-          <View
-            style={{
-              height: 200,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text className={s.emptyText}>NO PRODUCTS FOUND.</Text>
-          </View>
-        ) : (
-          <ScrollView
-            className={s.list}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 40 }}
-            nestedScrollEnabled
-          >
-            {restockItems.map((item) => {
-              if (onItemSelected) {
-                // Append-to-list mode: simple ADD / ✓ ADDED button
-                const wasAdded = addedIds.has(item.id);
-                return (
-                  <View
-                    key={item.id}
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: 14,
-                      paddingVertical: 15,
-                      borderBottomWidth: 1,
-                      borderBottomColor: "#0d1220",
-                    }}
-                  >
+              <Pressable
+                onPress={() => doFetch(activeCat, query)}
+                style={{ marginTop: 16 }}
+              >
+                <Text
+                  style={{
+                    color: colors.accent.green,
+                    fontSize: 11,
+                    letterSpacing: 1,
+                    fontFamily: "NotoSerif_400Regular",
+                  }}
+                >
+                  RETRY
+                </Text>
+              </Pressable>
+            </View>
+          ) : restockItems.length === 0 ? (
+            <View
+              style={{
+                height: 200,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text className={s.emptyText}>NO PRODUCTS FOUND.</Text>
+            </View>
+          ) : (
+            <ScrollView
+              className={s.list}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 40 }}
+              nestedScrollEnabled
+            >
+              {restockItems.map((item) => {
+                if (onItemSelected) {
+                  // Append-to-list mode: simple ADD / ✓ ADDED button
+                  const wasAdded = addedIds.has(item.id);
+                  return (
                     <View
+                      key={item.id}
                       style={{
-                        width: 44,
-                        height: 44,
-                        backgroundColor: "#0d1220",
-                        borderWidth: 1,
-                        borderColor: wasAdded ? "#4caf7d33" : "#1a2540",
+                        flexDirection: "row",
                         alignItems: "center",
-                        justifyContent: "center",
+                        gap: 14,
+                        paddingVertical: 15,
+                        borderBottomWidth: 1,
+                        borderBottomColor: "#0d1220",
                       }}
                     >
-                      <Text
+                      <View
                         style={{
-                          fontSize: 20,
-                          fontFamily: "NotoSerif_400Regular",
+                          width: 44,
+                          height: 44,
+                          backgroundColor: "#0d1220",
+                          borderWidth: 1,
+                          borderColor: wasAdded ? "#4caf7d33" : "#1a2540",
+                          alignItems: "center",
+                          justifyContent: "center",
                         }}
                       >
-                        {item.emoji}
-                      </Text>
+                        <Text
+                          style={{
+                            fontSize: 20,
+                            fontFamily: "NotoSerif_400Regular",
+                          }}
+                        >
+                          {item.emoji}
+                        </Text>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text
+                          style={{
+                            color: wasAdded ? "#f0f8f0" : "#c8d8f0",
+                            fontSize: 14,
+                            fontFamily: "NotoSerif_400Regular",
+                          }}
+                        >
+                          {item.name}
+                        </Text>
+                        <Text
+                          style={{
+                            color: "#2a4060",
+                            fontSize: 9,
+                            letterSpacing: 1,
+                            marginTop: 3,
+                            fontFamily: "NotoSerif_400Regular",
+                          }}
+                        >
+                          {item.brand}
+                        </Text>
+                      </View>
+                      <Pressable
+                        onPress={() => !wasAdded && handleAppendItem(item)}
+                        style={{
+                          paddingVertical: 7,
+                          paddingHorizontal: 18,
+                          borderWidth: 1,
+                          borderColor: wasAdded ? "#4caf7d55" : "#6ec6ff55",
+                          backgroundColor: wasAdded
+                            ? "#4caf7d12"
+                            : "transparent",
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color: wasAdded ? "#4caf7d" : "#6ec6ff",
+                            fontSize: 8,
+                            letterSpacing: 1,
+                            fontFamily: "NotoSerif_400Regular",
+                          }}
+                        >
+                          {wasAdded ? "✓ ADDED" : "ADD"}
+                        </Text>
+                      </Pressable>
                     </View>
-                    <View style={{ flex: 1 }}>
-                      <Text
-                        style={{
-                          color: wasAdded ? "#f0f8f0" : "#c8d8f0",
-                          fontSize: 14,
-                          fontFamily: "NotoSerif_400Regular",
-                        }}
-                      >
-                        {item.name}
-                      </Text>
-                      <Text
-                        style={{
-                          color: "#2a4060",
-                          fontSize: 9,
-                          letterSpacing: 1,
-                          marginTop: 3,
-                          fontFamily: "NotoSerif_400Regular",
-                        }}
-                      >
-                        {item.brand}
-                      </Text>
-                    </View>
-                    <Pressable
-                      onPress={() => !wasAdded && handleAppendItem(item)}
-                      style={{
-                        paddingVertical: 7,
-                        paddingHorizontal: 18,
-                        borderWidth: 1,
-                        borderColor: wasAdded ? "#4caf7d55" : "#6ec6ff55",
-                        backgroundColor: wasAdded ? "#4caf7d12" : "transparent",
-                      }}
-                    >
-                      <Text
-                        style={{
-                          color: wasAdded ? "#4caf7d" : "#6ec6ff",
-                          fontSize: 8,
-                          letterSpacing: 1,
-                          fontFamily: "NotoSerif_400Regular",
-                        }}
-                      >
-                        {wasAdded ? "✓ ADDED" : "ADD"}
-                      </Text>
-                    </Pressable>
-                  </View>
-                );
-              }
+                  );
+                }
 
-              // Default cart mode
-              const qty = getItemQty(item.id);
-              return (
-                <ProductCard
-                  key={item.id}
-                  item={item}
-                  qty={qty}
-                  onAdd={() => handleSetQty(item, 1)}
-                  onIncrement={() => handleSetQty(item, qty + 1)}
-                  onDecrement={() => handleSetQty(item, qty - 1)}
-                />
-              );
-            })}
-          </ScrollView>
-        )}
+                // Default cart mode
+                const qty = getItemQty(item.id);
+                return (
+                  <ProductCard
+                    key={item.id}
+                    item={item}
+                    qty={qty}
+                    onAdd={() => handleSetQty(item, 1)}
+                    onIncrement={() => handleSetQty(item, qty + 1)}
+                    onDecrement={() => handleSetQty(item, qty - 1)}
+                  />
+                );
+              })}
+            </ScrollView>
+          )}
+        </View>
       </View>
     </BottomSheet>
   );

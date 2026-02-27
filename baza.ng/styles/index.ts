@@ -558,7 +558,7 @@ export const profileScreen = {
     "w-[52px] h-[52px] rounded-full bg-[#0d1a0f] border-2 border-[#4caf7d44] items-center justify-center text-[22px]",
   userName: "text-xl text-txt-primary font-serif tracking-tight-xs",
   memberSince: "text-3xs text-[#3a5c3a] tracking-wide-lg mt-[3px] font-mono",
-  scrollBody: "flex-1 px-6 pb-10",
+  scrollBody: "flex-1 px-6 pb-[420px]",
   walletCard:
     "bg-gradient-to-br from-[#0d1a0f] to-[#0a1a12] border border-[#2a4a2c] p-[22px] mb-4",
   walletLabel: "text-3xs text-[#3a5c3a] tracking-wide-2xl mb-3 font-mono",
