@@ -1,9 +1,15 @@
-import { useState, useCallback, useEffect, useRef } from "react";
-import { useWalletStore } from "../stores/walletStore";
+import { useCallback, useRef, useState } from "react";
 import * as walletService from "../services/wallet";
-import { formatPrice } from "../utils/format";
+import { useWalletStore } from "../stores/walletStore";
+import type {
+    Pagination,
+    PaystackConfig,
+    TopupInitResponse,
+    WalletAccountResponse,
+    WalletTransaction,
+} from "../types";
 import { WALLET_POLL_INTERVAL_MS } from "../utils/constants";
-import type { WalletTransaction, WalletAccountResponse, TopupInitResponse, Pagination } from "../types";
+import { formatPrice } from "../utils/format";
 
 export function useWallet() {
   const {
@@ -23,28 +29,28 @@ export function useWallet() {
 
   const formattedBalance = formatPrice(balance);
 
-  const fetchTransactions = useCallback(
-    async (page = 1, limit = 20) => {
-      setIsLoadingTx(true);
-      setError(null);
-      try {
-        const data = await walletService.getTransactions(page, limit);
-        setTransactions(data.transactions);
-        if (data.pagination) setTxPagination(data.pagination);
-      } catch (err: any) {
-        setError(err.response?.data?.error ?? "Failed to load transactions");
-      } finally {
-        setIsLoadingTx(false);
-      }
-    },
-    [],
-  );
+  const fetchTransactions = useCallback(async (page = 1, limit = 20) => {
+    setIsLoadingTx(true);
+    setError(null);
+    try {
+      const data = await walletService.getTransactions(page, limit);
+      setTransactions(data.transactions);
+      if (data.pagination) setTxPagination(data.pagination);
+    } catch (err: any) {
+      setError(err.response?.data?.error ?? "Failed to load transactions");
+    } finally {
+      setIsLoadingTx(false);
+    }
+  }, []);
 
   const initTopup = useCallback(
     async (amount: number): Promise<TopupInitResponse> => {
       setError(null);
       try {
-        return await walletService.initTopup(amount, "bazang://wallet/topup-success");
+        return await walletService.initTopup(
+          amount,
+          "bazang://wallet/topup-success",
+        );
       } catch (err: any) {
         const msg = err.response?.data?.error ?? "Failed to initiate top-up";
         setError(msg);
@@ -54,21 +60,18 @@ export function useWallet() {
     [],
   );
 
-  const verifyTopup = useCallback(
-    async (reference: string) => {
-      setError(null);
-      try {
-        const result = await walletService.verifyTopup(reference);
-        useWalletStore.getState().setBalance(result.walletBalance);
-        return result;
-      } catch (err: any) {
-        const msg = err.response?.data?.error ?? "Verification failed";
-        setError(msg);
-        throw err;
-      }
-    },
-    [],
-  );
+  const verifyTopup = useCallback(async (reference: string) => {
+    setError(null);
+    try {
+      const result = await walletService.verifyTopup(reference);
+      useWalletStore.getState().setBalance(result.walletBalance);
+      return result;
+    } catch (err: any) {
+      const msg = err.response?.data?.error ?? "Verification failed";
+      setError(msg);
+      throw err;
+    }
+  }, []);
 
   const [account, setAccount] = useState<WalletAccountResponse | null>(null);
   const [isLoadingAccount, setIsLoadingAccount] = useState(false);
@@ -111,6 +114,16 @@ export function useWallet() {
     }
   }, []);
 
+  const fetchPaystackConfig = useCallback(async (): Promise<PaystackConfig> => {
+    try {
+      return await walletService.getPaystackConfig();
+    } catch (err: any) {
+      const msg = err.response?.data?.error ?? "Failed to get payment config";
+      setError(msg);
+      throw err;
+    }
+  }, []);
+
   return {
     balance,
     formattedBalance,
@@ -129,6 +142,7 @@ export function useWallet() {
     fetchAccount,
     initTopup,
     verifyTopup,
+    fetchPaystackConfig,
     startPolling,
     stopPolling,
   };

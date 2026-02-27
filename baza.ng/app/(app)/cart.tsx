@@ -1,22 +1,23 @@
 import { useRouter } from "expo-router";
-import * as WebBrowser from "expo-web-browser";
 import { useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
+    ActivityIndicator,
+    Alert,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 import AddMoreItemsSheet from "../../components/ui/AddMoreItemsSheet";
 import FundPrompt from "../../components/ui/FundPrompt";
 import InsufficientFundsSheet from "../../components/ui/InsufficientFundsSheet";
 import PaymentMethodSelector from "../../components/ui/PaymentMethodSelector";
+import PaystackInline from "../../components/ui/PaystackInline";
+import { useAuth } from "../../hooks/useAuth";
 import { useCart } from "../../hooks/useCart";
 import { useOrders } from "../../hooks/useOrders";
 import { useWallet } from "../../hooks/useWallet";
@@ -30,8 +31,9 @@ export default function CartScreen() {
   const router = useRouter();
   const { items, total, formattedTotal, isEmpty, removeItem, clear } =
     useCart();
-  const { balance, formattedBalance } = useWallet();
+  const { balance, formattedBalance, fetchPaystackConfig } = useWallet();
   const { createOrder, verifyPayment, isLoading } = useOrders();
+  const { user } = useAuth();
 
   const [done, setDone] = useState(false);
   const [showFund, setShowFund] = useState(false);
@@ -40,6 +42,13 @@ export default function CartScreen() {
   const [eta, setEta] = useState("");
   const [showAddMore, setShowAddMore] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("wallet");
+
+  // Paystack Inline state
+  const [showPaystack, setShowPaystack] = useState(false);
+  const [paystackKey, setPaystackKey] = useState("");
+  const [paystackRef, setPaystackRef] = useState("");
+  const [paystackOrderId, setPaystackOrderId] = useState("");
+  const [paystackEmail, setPaystackEmail] = useState("");
 
   const hasFunds = balance >= total;
   const shortfall = total - balance;
@@ -72,56 +81,65 @@ export default function CartScreen() {
 
   const handleCardCheckout = async () => {
     try {
+      // 1. Get Paystack public key
+      const config = await fetchPaystackConfig();
+
+      // 2. Create order with paystack_inline method
       const payload = {
         items: cartItemsToOrderItems(items),
         total,
         note: orderNote.trim() || undefined,
-        paymentMethod: "paystack" as const,
-        callbackUrl: "https://baza.ng/payment/callback",
+        paymentMethod: "paystack_inline" as const,
       };
 
       const result = await createOrder(payload);
-      const { authorizationUrl, reference } = result;
       const orderId = result.order.id;
+      const email = user?.email || `${user?.phone ?? "customer"}@baza.ng`;
+      const ref = result.reference ?? `order_${orderId}_${Date.now()}`;
 
-      if (!authorizationUrl) {
-        Alert.alert(
-          "Payment Error",
-          "Could not initialise card payment. Please try again.",
-        );
-        return;
-      }
-
-      await WebBrowser.openBrowserAsync(authorizationUrl, {
-        dismissButtonStyle: "close",
-        presentationStyle: WebBrowser.WebBrowserPresentationStyle.FORM_SHEET,
-      });
-
-      // After browser closes, verify payment
-      if (reference && orderId) {
-        try {
-          const verifyResult = await verifyPayment(reference, orderId);
-          if (verifyResult.status === "success") {
-            setEta(verifyResult.order.eta ?? "Tomorrow by 10am");
-            clear();
-            setDone(true);
-          } else {
-            Alert.alert(
-              "Payment Pending",
-              "Your payment is still being verified. Your order will be confirmed shortly.",
-            );
-          }
-        } catch {
-          Alert.alert(
-            "Verification Pending",
-            "We could not verify your payment right now. If you completed the payment, your order will be confirmed automatically.",
-          );
-        }
-      }
+      // 3. Show Paystack Inline modal
+      setPaystackKey(config.publicKey);
+      setPaystackRef(ref);
+      setPaystackOrderId(orderId);
+      setPaystackEmail(email);
+      setShowPaystack(true);
     } catch (err: any) {
       const message = err.response?.data?.error ?? "Failed to place order";
       Alert.alert("Order Failed", message);
     }
+  };
+
+  const handlePaystackSuccess = async (data: {
+    reference: string;
+    message: string;
+  }) => {
+    setShowPaystack(false);
+    try {
+      const verifyResult = await verifyPayment(data.reference, paystackOrderId);
+      if (verifyResult.status === "success") {
+        setEta(verifyResult.order.eta ?? "Tomorrow by 10am");
+        clear();
+        setDone(true);
+      } else {
+        Alert.alert(
+          "Payment Pending",
+          "Your payment is still being verified. Your order will be confirmed shortly.",
+        );
+      }
+    } catch {
+      Alert.alert(
+        "Verification Pending",
+        "We could not verify your payment right now. If you completed the payment, your order will be confirmed automatically.",
+      );
+    }
+  };
+
+  const handlePaystackCancel = () => {
+    setShowPaystack(false);
+    Alert.alert(
+      "Payment Cancelled",
+      "Your order has been created but not yet paid. You can retry payment from your orders page.",
+    );
   };
 
   const handleCheckout = async () => {
@@ -345,6 +363,17 @@ export default function CartScreen() {
         onPayWithCard={handleInsufficientPayWithCard}
         onFundWallet={handleInsufficientFundWallet}
         onDismiss={() => setShowInsufficientSheet(false)}
+      />
+
+      <PaystackInline
+        visible={showPaystack}
+        publicKey={paystackKey}
+        email={paystackEmail}
+        amount={total}
+        reference={paystackRef}
+        metadata={{ orderId: paystackOrderId, purpose: "order_payment" }}
+        onSuccess={handlePaystackSuccess}
+        onCancel={handlePaystackCancel}
       />
     </KeyboardAvoidingView>
   );
