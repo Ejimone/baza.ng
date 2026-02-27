@@ -2,13 +2,16 @@ import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Alert,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import AddMoreItemsSheet from "../../components/ui/AddMoreItemsSheet";
 import FundPrompt from "../../components/ui/FundPrompt";
@@ -178,7 +181,12 @@ export default function CartScreen() {
   }
 
   return (
-    <View className={s.container}>
+    <KeyboardAvoidingView
+      className={s.container}
+      behavior="padding"
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 24}
+      style={{ flex: 1 }}
+    >
       <View className={s.header}>
         <Pressable onPress={() => router.back()}>
           <Text className={s.backButton}>← BACK</Text>
@@ -212,6 +220,8 @@ export default function CartScreen() {
         className={s.list}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 20 }}
+        keyboardShouldPersistTaps="handled"
+        onScrollBeginDrag={Keyboard.dismiss}
       >
         {isEmpty ? (
           <Text className={s.emptyText}>CART IS EMPTY</Text>
@@ -249,72 +259,72 @@ export default function CartScreen() {
             </Pressable>
           </>
         )}
-      </ScrollView>
 
-      {!isEmpty && (
-        <View className={s.footer}>
-          <View className={s.subtotalRow}>
-            <Text className="text-3xs text-[#2a3a2a] tracking-wide-lg font-mono">
-              SUBTOTAL
-            </Text>
-            <Text className={s.subtotalValue}>{formattedTotal}</Text>
-          </View>
-          <View className={s.deliveryRow}>
-            <Text className="text-3xs text-[#2a3a2a] tracking-wide-lg font-mono">
-              DELIVERY
-            </Text>
-            <Text className={s.deliveryValue}>FREE</Text>
-          </View>
-
-          <View className={s.noteSection}>
-            <Text className={s.noteLabel}>
-              NOTE FOR RIDER / KITCHEN{" "}
-              <Text className={s.noteOptional}>(OPTIONAL)</Text>
-            </Text>
-            <TextInput
-              className={s.noteInput}
-              value={orderNote}
-              onChangeText={setOrderNote}
-              placeholder="e.g. Leave at gate, call on arrival, no pepper..."
-              placeholderTextColor="#2a3a2a"
-              multiline
-              numberOfLines={2}
-              textAlignVertical="top"
-            />
-          </View>
-
-          <PaymentMethodSelector
-            selected={paymentMethod}
-            onSelect={setPaymentMethod}
-            walletBalance={balance}
-            total={total}
-          />
-
-          <Pressable
-            className={`${s.confirmBtn} ${
-              paymentMethod === "paystack"
-                ? s.confirmBtnCard
-                : hasFunds
-                  ? s.confirmBtnOk
-                  : s.confirmBtnLow
-            }`}
-            onPress={handleCheckout}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#000" size="small" />
-            ) : (
-              <Text className="text-black text-[11px] tracking-wide-2xl font-mono font-bold text-center">
-                {paymentMethod === "paystack"
-                  ? `PAY ${formattedTotal} WITH CARD`
-                  : hasFunds
-                    ? "CONFIRM ORDER"
-                    : `FUND WALLET · NEED ${formatPrice(shortfall)} MORE`}
+        {!isEmpty && (
+          <View className={s.footer}>
+            <View className={s.subtotalRow}>
+              <Text className="text-3xs text-[#2a3a2a] tracking-wide-lg font-mono">
+                SUBTOTAL
               </Text>
-            )}
-          </Pressable>
-        </View>
-      )}
+              <Text className={s.subtotalValue}>{formattedTotal}</Text>
+            </View>
+            <View className={s.deliveryRow}>
+              <Text className="text-3xs text-[#2a3a2a] tracking-wide-lg font-mono">
+                DELIVERY
+              </Text>
+              <Text className={s.deliveryValue}>FREE</Text>
+            </View>
+
+            <View className={s.noteSection}>
+              <Text className={s.noteLabel}>
+                NOTE FOR RIDER / KITCHEN{" "}
+                <Text className={s.noteOptional}>(OPTIONAL)</Text>
+              </Text>
+              <TextInput
+                className={s.noteInput}
+                value={orderNote}
+                onChangeText={setOrderNote}
+                placeholder="e.g. Leave at gate, call on arrival, no pepper..."
+                placeholderTextColor="#2a3a2a"
+                multiline
+                numberOfLines={2}
+                textAlignVertical="top"
+              />
+            </View>
+
+            <PaymentMethodSelector
+              selected={paymentMethod}
+              onSelect={setPaymentMethod}
+              walletBalance={balance}
+              total={total}
+            />
+
+            <Pressable
+              className={`${s.confirmBtn} ${
+                paymentMethod === "paystack"
+                  ? s.confirmBtnCard
+                  : hasFunds
+                    ? s.confirmBtnOk
+                    : s.confirmBtnLow
+              }`}
+              onPress={handleCheckout}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#000" size="small" />
+              ) : (
+                <Text className="text-black text-[11px] tracking-wide-2xl font-mono font-bold text-center">
+                  {paymentMethod === "paystack"
+                    ? `PAY ${formattedTotal} WITH CARD`
+                    : hasFunds
+                      ? "CONFIRM ORDER"
+                      : `FUND WALLET · NEED ${formatPrice(shortfall)} MORE`}
+                </Text>
+              )}
+            </Pressable>
+          </View>
+        )}
+      </ScrollView>
 
       <AddMoreItemsSheet
         visible={showAddMore}
@@ -336,6 +346,6 @@ export default function CartScreen() {
         onFundWallet={handleInsufficientFundWallet}
         onDismiss={() => setShowInsufficientSheet(false)}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
