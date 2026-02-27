@@ -1,11 +1,12 @@
-import api from "./api";
 import type {
-  CartItem,
-  Order,
-  OrderDetail,
-  OrderStatus,
-  Pagination,
+    CartItem,
+    Order,
+    OrderDetail,
+    OrderPaymentVerifyResponse,
+    OrderStatus,
+    Pagination,
 } from "../types";
+import api from "./api";
 
 export interface CreateOrderPayload {
   items: Array<{
@@ -21,11 +22,16 @@ export interface CreateOrderPayload {
   total: number;
   note?: string;
   addressId?: string;
+  paymentMethod?: string;
+  callbackUrl?: string;
 }
 
 export interface CreateOrderResponse {
   order: OrderDetail;
   walletBalance: number;
+  authorizationUrl?: string;
+  accessCode?: string;
+  reference?: string;
 }
 
 export async function createOrder(
@@ -49,6 +55,16 @@ export async function getOrders(
 export async function getOrder(id: string): Promise<OrderDetail> {
   const { data } = await api.get(`/orders/${id}`);
   return data.order ?? data;
+}
+
+export async function verifyOrderPayment(
+  reference: string,
+  orderId: string,
+): Promise<OrderPaymentVerifyResponse> {
+  const { data } = await api.get("/orders/verify-payment", {
+    params: { reference, orderId },
+  });
+  return data;
 }
 
 export function cartItemsToOrderItems(

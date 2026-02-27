@@ -15,6 +15,8 @@ export type WalletTxnType =
   | "DEBIT_ORDER"
   | "DEBIT_REFUND";
 
+export type PaymentMethod = "wallet" | "paystack";
+
 export type MessageSender = "USER" | "AI" | "HUMAN_AGENT" | "SYSTEM";
 
 export type CartItemType =
@@ -207,6 +209,8 @@ export interface Order {
   total: number;
   note?: string;
   eta?: string;
+  paymentMethod?: string;
+  paymentReference?: string;
   items: OrderItemSummary[];
   createdAt: string;
 }
@@ -214,6 +218,12 @@ export interface Order {
 export interface OrderDetail extends Omit<Order, "items"> {
   items: OrderItem[];
   addressId?: string;
+}
+
+export interface OrderPaymentVerifyResponse {
+  status: string;
+  message: string;
+  order: OrderDetail;
 }
 
 // Wallet

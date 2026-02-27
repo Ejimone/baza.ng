@@ -1,4 +1,5 @@
 import { useRouter } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
 import { useState } from "react";
 import {
     ActivityIndicator,
@@ -11,12 +12,15 @@ import {
 } from "react-native";
 import AddMoreItemsSheet from "../../components/ui/AddMoreItemsSheet";
 import FundPrompt from "../../components/ui/FundPrompt";
+import InsufficientFundsSheet from "../../components/ui/InsufficientFundsSheet";
+import PaymentMethodSelector from "../../components/ui/PaymentMethodSelector";
 import { useCart } from "../../hooks/useCart";
 import { useOrders } from "../../hooks/useOrders";
 import { useWallet } from "../../hooks/useWallet";
 import { cartItemsToOrderItems } from "../../services/orders";
 import { useWalletStore } from "../../stores/walletStore";
 import { addMoreButton, cartScreen as s } from "../../styles";
+import type { PaymentMethod } from "../../types";
 import { formatPrice } from "../../utils/format";
 
 export default function CartScreen() {
@@ -24,28 +28,26 @@ export default function CartScreen() {
   const { items, total, formattedTotal, isEmpty, removeItem, clear } =
     useCart();
   const { balance, formattedBalance } = useWallet();
-  const { createOrder, isLoading } = useOrders();
+  const { createOrder, verifyPayment, isLoading } = useOrders();
 
   const [done, setDone] = useState(false);
   const [showFund, setShowFund] = useState(false);
+  const [showInsufficientSheet, setShowInsufficientSheet] = useState(false);
   const [orderNote, setOrderNote] = useState("");
   const [eta, setEta] = useState("");
   const [showAddMore, setShowAddMore] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("wallet");
 
   const hasFunds = balance >= total;
   const shortfall = total - balance;
 
-  const handleCheckout = async () => {
-    if (!hasFunds) {
-      setShowFund(true);
-      return;
-    }
-
+  const handleWalletCheckout = async () => {
     try {
       const payload = {
         items: cartItemsToOrderItems(items),
         total,
         note: orderNote.trim() || undefined,
+        paymentMethod: "wallet" as const,
       };
 
       const result = await createOrder(payload);
@@ -58,11 +60,92 @@ export default function CartScreen() {
       const message = err.response?.data?.error ?? "Failed to place order";
 
       if (code === "INSUFFICIENT_BALANCE") {
-        setShowFund(true);
+        setShowInsufficientSheet(true);
       } else {
         Alert.alert("Order Failed", message);
       }
     }
+  };
+
+  const handleCardCheckout = async () => {
+    try {
+      const payload = {
+        items: cartItemsToOrderItems(items),
+        total,
+        note: orderNote.trim() || undefined,
+        paymentMethod: "paystack" as const,
+        callbackUrl: "https://baza.ng/payment/callback",
+      };
+
+      const result = await createOrder(payload);
+      const { authorizationUrl, reference } = result;
+      const orderId = result.order.id;
+
+      if (!authorizationUrl) {
+        Alert.alert(
+          "Payment Error",
+          "Could not initialise card payment. Please try again.",
+        );
+        return;
+      }
+
+      await WebBrowser.openBrowserAsync(authorizationUrl, {
+        dismissButtonStyle: "close",
+        presentationStyle: WebBrowser.WebBrowserPresentationStyle.FORM_SHEET,
+      });
+
+      // After browser closes, verify payment
+      if (reference && orderId) {
+        try {
+          const verifyResult = await verifyPayment(reference, orderId);
+          if (verifyResult.status === "success") {
+            setEta(verifyResult.order.eta ?? "Tomorrow by 10am");
+            clear();
+            setDone(true);
+          } else {
+            Alert.alert(
+              "Payment Pending",
+              "Your payment is still being verified. Your order will be confirmed shortly.",
+            );
+          }
+        } catch {
+          Alert.alert(
+            "Verification Pending",
+            "We could not verify your payment right now. If you completed the payment, your order will be confirmed automatically.",
+          );
+        }
+      }
+    } catch (err: any) {
+      const message = err.response?.data?.error ?? "Failed to place order";
+      Alert.alert("Order Failed", message);
+    }
+  };
+
+  const handleCheckout = async () => {
+    if (paymentMethod === "paystack") {
+      await handleCardCheckout();
+      return;
+    }
+
+    // Wallet flow
+    if (!hasFunds) {
+      setShowInsufficientSheet(true);
+      return;
+    }
+
+    await handleWalletCheckout();
+  };
+
+  const handleInsufficientPayWithCard = () => {
+    setShowInsufficientSheet(false);
+    setPaymentMethod("paystack");
+    // Trigger card checkout after state update
+    setTimeout(() => handleCardCheckout(), 100);
+  };
+
+  const handleInsufficientFundWallet = () => {
+    setShowInsufficientSheet(false);
+    setShowFund(true);
   };
 
   const handleFunded = () => {
@@ -200,8 +283,21 @@ export default function CartScreen() {
             />
           </View>
 
+          <PaymentMethodSelector
+            selected={paymentMethod}
+            onSelect={setPaymentMethod}
+            walletBalance={balance}
+            total={total}
+          />
+
           <Pressable
-            className={`${s.confirmBtn} ${hasFunds ? s.confirmBtnOk : s.confirmBtnLow}`}
+            className={`${s.confirmBtn} ${
+              paymentMethod === "paystack"
+                ? s.confirmBtnCard
+                : hasFunds
+                  ? s.confirmBtnOk
+                  : s.confirmBtnLow
+            }`}
             onPress={handleCheckout}
             disabled={isLoading}
           >
@@ -209,9 +305,11 @@ export default function CartScreen() {
               <ActivityIndicator color="#000" size="small" />
             ) : (
               <Text className="text-black text-[11px] tracking-wide-2xl font-mono font-bold text-center">
-                {hasFunds
-                  ? "CONFIRM ORDER"
-                  : `FUND WALLET · NEED ${formatPrice(shortfall)} MORE`}
+                {paymentMethod === "paystack"
+                  ? `PAY ${formattedTotal} WITH CARD`
+                  : hasFunds
+                    ? "CONFIRM ORDER"
+                    : `FUND WALLET · NEED ${formatPrice(shortfall)} MORE`}
               </Text>
             )}
           </Pressable>
@@ -230,6 +328,14 @@ export default function CartScreen() {
           onFunded={handleFunded}
         />
       )}
+
+      <InsufficientFundsSheet
+        visible={showInsufficientSheet}
+        shortfall={shortfall}
+        onPayWithCard={handleInsufficientPayWithCard}
+        onFundWallet={handleInsufficientFundWallet}
+        onDismiss={() => setShowInsufficientSheet(false)}
+      />
     </View>
   );
 }

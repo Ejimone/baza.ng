@@ -1,6 +1,12 @@
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 import * as ordersService from "../services/orders";
-import type { Order, OrderDetail, OrderStatus, Pagination } from "../types";
+import type {
+    Order,
+    OrderDetail,
+    OrderPaymentVerifyResponse,
+    OrderStatus,
+    Pagination,
+} from "../types";
 
 export function useOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -15,7 +21,9 @@ export function useOrders() {
       setError(null);
       try {
         const data = await ordersService.getOrders(page, limit, status);
-        setOrders((prev) => (page === 1 ? data.orders : [...prev, ...data.orders]));
+        setOrders((prev) =>
+          page === 1 ? data.orders : [...prev, ...data.orders],
+        );
         setPagination(data.pagination);
       } catch (err: any) {
         setError(err.response?.data?.error ?? "Failed to load orders");
@@ -59,6 +67,30 @@ export function useOrders() {
     [],
   );
 
+  const verifyPayment = useCallback(
+    async (
+      reference: string,
+      orderId: string,
+    ): Promise<OrderPaymentVerifyResponse> => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const result = await ordersService.verifyOrderPayment(
+          reference,
+          orderId,
+        );
+        return result;
+      } catch (err: any) {
+        const msg = err.response?.data?.error ?? "Payment verification failed";
+        setError(msg);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [],
+  );
+
   return {
     orders,
     pagination,
@@ -68,6 +100,7 @@ export function useOrders() {
     fetchOrders,
     fetchOrder,
     createOrder,
+    verifyPayment,
     clearError: () => setError(null),
   };
 }

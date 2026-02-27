@@ -466,6 +466,45 @@ export const cartScreen = {
   confirmBtn: "w-full py-4 font-mono text-[11px] tracking-wide-2xl font-bold",
   confirmBtnOk: "bg-txt-primary text-black",
   confirmBtnLow: "bg-baza-red text-black",
+  confirmBtnCard: "bg-baza-green text-black",
+};
+
+// ─── PAYMENT METHOD SELECTOR ─────────────────────────────────────────────────
+
+export const paymentSelector = {
+  container: "mb-3.5",
+  label: "text-3xs text-[#2a3a2a] tracking-wide-lg font-mono mb-2",
+  row: "flex-row gap-2",
+  option: "flex-1 p-3",
+  optionActive: "bg-[#4caf7d0e] border border-[#4caf7d55]",
+  optionInactive: "bg-[#0a120a] border border-[#1a2a1c]",
+  optionIcon: "text-lg mb-1",
+  optionLabel: "text-xxs text-txt-primary tracking-wide-sm font-mono",
+  optionDetail: "text-3xs text-[#2a3a2a] font-mono mt-0.5",
+  optionDetailRed: "text-3xs text-baza-red font-mono mt-0.5",
+};
+
+// ─── INSUFFICIENT FUNDS SHEET ────────────────────────────────────────────────
+
+export const insufficientSheet = {
+  overlay: "absolute inset-0 z-[500] bg-black/85 flex-col justify-end",
+  sheet:
+    "bg-[#080f09] border-t-2 border-[#4caf7d44] rounded-t-sheet pt-7 px-6 pb-12 font-mono",
+  handle: "w-9 h-1 bg-[#1a2a1c] rounded-sm mx-auto mb-6",
+  label: "text-3xs tracking-wide-2xl text-baza-red mb-2 font-mono",
+  title: "text-[22px] text-txt-primary font-serif tracking-tight-sm mb-1.5",
+  desc: "text-[11px] text-[#3a5c3a] mb-6 leading-relaxed font-mono",
+  shortfallAmount: "text-baza-amber font-mono",
+  payCardBtn:
+    "w-full py-[15px] mb-3 bg-txt-primary text-[11px] tracking-wide-2xl font-mono font-bold items-center",
+  payCardBtnText:
+    "text-black text-[11px] tracking-wide-2xl font-mono font-bold text-center",
+  fundWalletBtn:
+    "w-full py-[15px] mb-3 bg-transparent border border-[#1a2a1c] text-[11px] tracking-wide-2xl font-mono font-bold items-center",
+  fundWalletBtnText:
+    "text-baza-green text-[11px] tracking-wide-2xl font-mono font-bold text-center",
+  cancelBtn:
+    "w-full py-3 bg-transparent text-[#2a3a2a] text-xxs tracking-wide-lg font-mono",
 };
 
 // ─── ORDERS SCREEN ───────────────────────────────────────────────────────────
