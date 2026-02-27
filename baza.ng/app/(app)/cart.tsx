@@ -169,7 +169,7 @@ export default function CartScreen() {
           </Text>
           <Pressable
             className={s.confirmBackBtn}
-            onPress={() => router.replace("/(app)/")}
+            onPress={() => router.replace("/(app)" as any)}
           >
             <Text className="text-baza-green text-xxs tracking-wide-lg font-mono">
               BACK TO HOME
