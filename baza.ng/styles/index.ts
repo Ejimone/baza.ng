@@ -336,7 +336,8 @@ export const restockMode = {
   list: "flex-1 px-5 pb-cart",
   emptyText:
     "text-[#1a2a3a] text-[11px] tracking-wide-lg text-center pt-10 font-mono",
-  itemRow: "flex-row items-center gap-3.5 py-[15px] border-b border-[#0d1220]",
+  itemRow:
+    "flex-row items-center gap-3.5 py-[15px] mb-3 border border-[#0d1220] px-3.5",
   itemThumb:
     "w-11 h-11 shrink-0 bg-[#0d1220] items-center justify-center text-xl",
   itemThumbActive: "border border-[#6ec6ff33]",

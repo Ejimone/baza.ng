@@ -10,6 +10,7 @@ interface ProductCardProps {
   onAdd: () => void;
   onIncrement: () => void;
   onDecrement: () => void;
+  onPress?: () => void;
 }
 
 export default function ProductCard({
@@ -18,13 +19,15 @@ export default function ProductCard({
   onAdd,
   onIncrement,
   onDecrement,
+  onPress,
 }: ProductCardProps) {
   const inCart = qty > 0;
 
   return (
-    <View className={s.itemRow}>
-      <View
+    <Pressable className={s.itemRow} onPress={onPress}>
+      <Pressable
         className={`${s.itemThumb} ${inCart ? s.itemThumbActive : s.itemThumbInactive}`}
+        onPress={onPress}
       >
         <ProductImage
           imageUrl={item.imageUrl}
@@ -32,7 +35,7 @@ export default function ProductCard({
           size={40}
           borderRadius={4}
         />
-      </View>
+      </Pressable>
 
       <View style={{ flex: 1 }}>
         <Text
@@ -52,14 +55,23 @@ export default function ProductCard({
         <Text className={s.itemPrice}>{formatPrice(item.price)}</Text>
 
         {qty === 0 ? (
-          <Pressable className={s.addBtn} onPress={onAdd}>
+          <Pressable
+            className={s.addBtn}
+            onPress={(e) => {
+              e.stopPropagation?.();
+              onAdd();
+            }}
+          >
             <Text className="font-mono text-baza-blue">ADD</Text>
           </Pressable>
         ) : (
           <View className={s.stepperRow}>
             <Pressable
               className={`${s.stepperDec} ${qty === 1 ? s.stepperDecRemove : s.stepperDecNormal}`}
-              onPress={onDecrement}
+              onPress={(e) => {
+                e.stopPropagation?.();
+                onDecrement();
+              }}
             >
               <Text
                 style={{
@@ -71,7 +83,13 @@ export default function ProductCard({
               </Text>
             </Pressable>
             <Text className={s.stepperValue}>{qty}</Text>
-            <Pressable className={s.stepperInc} onPress={onIncrement}>
+            <Pressable
+              className={s.stepperInc}
+              onPress={(e) => {
+                e.stopPropagation?.();
+                onIncrement();
+              }}
+            >
               <Text
                 style={{ color: "#6ec6ff", fontFamily: "NotoSerif_400Regular" }}
               >
@@ -81,6 +99,6 @@ export default function ProductCard({
           </View>
         )}
       </View>
-    </View>
+    </Pressable>
   );
 }
