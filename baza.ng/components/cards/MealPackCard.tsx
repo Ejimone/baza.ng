@@ -1,7 +1,8 @@
-import { View, Text, Pressable } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { tonightMode as s } from "../../styles";
-import { formatPrice } from "../../utils/format";
 import type { MealPack } from "../../types";
+import { formatPrice } from "../../utils/format";
+import ProductImage from "../ui/ProductImage";
 
 interface MealPackCardProps {
   pack: MealPack;
@@ -24,7 +25,12 @@ export default function MealPackCard({
       }}
       onPress={onPress}
     >
-      <Text className={s.packEmoji}>{pack.emoji}</Text>
+      <ProductImage
+        imageUrl={pack.imageUrl}
+        emoji={pack.emoji}
+        size={44}
+        borderRadius={6}
+      />
 
       <View style={{ flex: 1 }}>
         <Text className={s.packTitle}>{pack.name}</Text>

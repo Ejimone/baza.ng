@@ -14,6 +14,7 @@ export interface CreateOrderPayload {
     productId?: string;
     name: string;
     emoji: string;
+    imageUrl?: string;
     qty: number;
     unitPrice: number;
     totalPrice: number;
@@ -75,6 +76,7 @@ export function cartItemsToOrderItems(
     productId: item.productId,
     name: item.name,
     emoji: item.emoji,
+    imageUrl: item.imageUrl,
     qty: item.qty,
     unitPrice: item.unitPrice,
     totalPrice: item.totalPrice,

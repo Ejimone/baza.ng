@@ -93,6 +93,7 @@ export default function BundleDetailScreen() {
       itemType: "bundle",
       name: bundle.name,
       emoji: bundle.emoji,
+      imageUrl: bundle.imageUrl,
       qty: 1,
       unitPrice: memberTotal,
       totalPrice: memberTotal,

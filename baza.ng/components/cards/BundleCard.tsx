@@ -1,7 +1,8 @@
-import { View, Text, Pressable } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { stockUpMode as s } from "../../styles";
-import { formatPrice } from "../../utils/format";
 import type { Bundle } from "../../types";
+import { formatPrice } from "../../utils/format";
+import ProductImage from "../ui/ProductImage";
 
 interface BundleCardProps {
   bundle: Bundle;
@@ -24,7 +25,12 @@ export default function BundleCard({
       }}
       onPress={onPress}
     >
-      <Text className={s.bundleEmoji}>{bundle.emoji}</Text>
+      <ProductImage
+        imageUrl={bundle.imageUrl}
+        emoji={bundle.emoji}
+        size={44}
+        borderRadius={6}
+      />
 
       <View style={{ flex: 1 }}>
         <Text className={s.bundleTitle}>{bundle.name}</Text>

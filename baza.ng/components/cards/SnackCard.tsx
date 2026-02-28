@@ -2,6 +2,7 @@ import { Pressable, Text, View } from "react-native";
 import { snacksDrinksMode as s } from "../../styles";
 import type { SnackItem } from "../../types";
 import { formatPrice } from "../../utils/format";
+import ProductImage from "../ui/ProductImage";
 
 interface SnackCardProps {
   item: SnackItem;
@@ -25,7 +26,12 @@ export default function SnackCard({
       className={`${s.card} ${inCart ? s.cardActive : s.cardInactive}`}
       style={{ borderColor: inCart ? item.color + "44" : undefined }}
     >
-      <Text className={s.cardEmoji}>{item.emoji}</Text>
+      <ProductImage
+        imageUrl={item.imageUrl}
+        emoji={item.emoji}
+        size={40}
+        borderRadius={6}
+      />
       <Text className={s.cardName}>{item.name}</Text>
       <Text className={s.cardTag} style={{ color: item.color + "99" }}>
         {item.tag}

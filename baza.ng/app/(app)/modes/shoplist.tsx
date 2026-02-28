@@ -1,11 +1,11 @@
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
+    ActivityIndicator,
+    Pressable,
+    ScrollView,
+    Text,
+    View,
 } from "react-native";
 import ProductCard from "../../../components/cards/ProductCard";
 import FloatingCart from "../../../components/ui/FloatingCart";
@@ -64,6 +64,7 @@ export default function ShopListScreen() {
           productId: item.id,
           name: item.name,
           emoji: item.emoji,
+          imageUrl: item.imageUrl,
           qty: clamped,
           unitPrice: item.price,
           totalPrice: item.price * clamped,

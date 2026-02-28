@@ -76,6 +76,7 @@ export interface BundleItem {
   productId: string;
   name: string;
   emoji: string;
+  imageUrl?: string;
   unitPrice: number;
   defaultQty: number;
   minQty: number;
@@ -86,6 +87,7 @@ export interface Bundle {
   id: string;
   name: string;
   emoji: string;
+  imageUrl?: string;
   description: string;
   basePrice: number;
   savings: number;
@@ -99,6 +101,7 @@ export interface Bundle {
 export interface MealIngredient {
   name: string;
   emoji: string;
+  imageUrl?: string;
   unit: string;
   perPlate: number;
   pricePerPlate: number;
@@ -108,6 +111,7 @@ export interface MealPack {
   id: string;
   name: string;
   emoji: string;
+  imageUrl?: string;
   description: string;
   baseTime: number;
   basePlates: number;
@@ -123,6 +127,7 @@ export interface ReadyEatItem {
   name: string;
   kitchen: string;
   emoji: string;
+  imageUrl?: string;
   price: number;
   oldPrice?: number;
   deliveryTime: string;
@@ -137,6 +142,7 @@ export interface SnackItem {
   id: string;
   name: string;
   emoji: string;
+  imageUrl?: string;
   price: number;
   category: string;
   tag: string;
@@ -150,6 +156,7 @@ export interface RestockItem {
   name: string;
   brand: string;
   emoji: string;
+  imageUrl?: string;
   price: number;
   category: string;
 }
@@ -167,6 +174,7 @@ export interface MealPackMeta {
     id: string;
     name: string;
     emoji: string;
+    imageUrl?: string;
     qty: number;
     unitPrice: number;
   }>;
@@ -178,6 +186,7 @@ export interface CartItem {
   productId?: string;
   name: string;
   emoji: string;
+  imageUrl?: string;
   qty: number;
   unitPrice: number;
   totalPrice: number;
@@ -189,6 +198,7 @@ export interface CartItem {
 export interface OrderItemSummary {
   name: string;
   emoji: string;
+  imageUrl?: string;
   qty: number;
 }
 
@@ -197,6 +207,7 @@ export interface OrderItem {
   itemType: string;
   name: string;
   emoji: string;
+  imageUrl?: string;
   qty: number;
   unitPrice: number;
   totalPrice: number;

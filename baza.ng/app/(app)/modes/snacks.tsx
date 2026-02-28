@@ -44,6 +44,7 @@ export default function SnacksScreen() {
           itemType: "snack",
           name: item.name,
           emoji: item.emoji,
+          imageUrl: item.imageUrl,
           qty: clamped,
           unitPrice: item.price,
           totalPrice: item.price * clamped,

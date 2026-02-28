@@ -112,6 +112,7 @@ export default function MealPackDetailScreen() {
       itemType: "mealpack",
       name: pack.name,
       emoji: pack.emoji,
+      imageUrl: pack.imageUrl,
       qty: 1,
       unitPrice: price,
       totalPrice: price,

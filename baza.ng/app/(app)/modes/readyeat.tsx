@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import AddMoreItemsSheet from "../../../components/ui/AddMoreItemsSheet";
 import FloatingCart from "../../../components/ui/FloatingCart";
+import ProductImage from "../../../components/ui/ProductImage";
 import { colors } from "../../../constants/theme";
 import { useCart } from "../../../hooks/useCart";
 import { useProducts } from "../../../hooks/useProducts";
@@ -37,6 +38,7 @@ export default function ReadyEatScreen() {
       itemType: "readyeat",
       name: item.name,
       emoji: item.emoji,
+      imageUrl: item.imageUrl,
       qty: 1,
       unitPrice: item.price,
       totalPrice: item.price,
@@ -129,7 +131,12 @@ export default function ReadyEatScreen() {
                   className={s.itemEmoji}
                   style={{ backgroundColor: item.color + "12" }}
                 >
-                  <Text style={{ fontSize: 30 }}>{item.emoji}</Text>
+                  <ProductImage
+                    imageUrl={item.imageUrl}
+                    emoji={item.emoji}
+                    size={48}
+                    borderRadius={6}
+                  />
                 </View>
 
                 <View style={{ flex: 1 }}>
@@ -287,7 +294,12 @@ function ReadyEatPopup({
           className={readyEatMode.popupHero}
           style={{ backgroundColor: item.color + "15" }}
         >
-          <Text className={readyEatMode.popupHeroEmoji}>{item.emoji}</Text>
+          <ProductImage
+            imageUrl={item.imageUrl}
+            emoji={item.emoji}
+            size={120}
+            borderRadius={0}
+          />
 
           <Pressable className={readyEatMode.popupCloseBtn} onPress={onClose}>
             <Text className={readyEatMode.popupCloseText}>×</Text>

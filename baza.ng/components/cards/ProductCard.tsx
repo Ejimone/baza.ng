@@ -2,6 +2,7 @@ import { Pressable, Text, View } from "react-native";
 import { restockMode as s } from "../../styles";
 import type { RestockItem } from "../../types";
 import { formatPrice } from "../../utils/format";
+import ProductImage from "../ui/ProductImage";
 
 interface ProductCardProps {
   item: RestockItem;
@@ -25,9 +26,12 @@ export default function ProductCard({
       <View
         className={`${s.itemThumb} ${inCart ? s.itemThumbActive : s.itemThumbInactive}`}
       >
-        <Text style={{ fontSize: 20, fontFamily: "NotoSerif_400Regular" }}>
-          {item.emoji}
-        </Text>
+        <ProductImage
+          imageUrl={item.imageUrl}
+          emoji={item.emoji}
+          size={40}
+          borderRadius={4}
+        />
       </View>
 
       <View style={{ flex: 1 }}>
