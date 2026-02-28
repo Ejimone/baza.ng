@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Updated the home universal search input to use a Phosphor magnifying-glass icon and switched its visual treatment from blue to a green-neutral palette for better consistency with the app's primary design language.
+- Replaced home prompt text ("What are we doing today?") with a universal search input on the main screen. Users can now search across bundles, bundle items, meal packs, ingredients, ready-to-eat items, snacks, and restock products from one place, with tap-to-navigate results.
 - Added full-screen image preview support to Bundle Detail item list: tapping any bundle item thumbnail now opens a full-screen preview modal, including items added via "+ Add More Items" (imageUrl is now preserved for added items).
 - Updated Quick Restock UX: added visible spacing/separation between list items and enabled tap-to-open item details popup from the row/image. The popup now supports add-to-cart and quantity stepper controls, while keeping the inline list `ADD`/stepper behavior unchanged.
 - Updated Ready to Eat popup UX to match the new design: popup now opens as a fully opaque full-screen modal (background screen/components are no longer visible), includes an inline PLATES quantity stepper block, computes and shows live total price, and uses a single bottom CTA format (`ADD X PLATE(S) · ₦TOTAL`).

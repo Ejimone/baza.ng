@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -17,8 +17,10 @@ import {
 import ModeCard from "../../components/cards/ModeCard";
 import Header from "../../components/layout/Header";
 import FloatingCart from "../../components/ui/FloatingCart";
+import SearchBar from "../../components/ui/SearchBar";
 import { colors } from "../../constants/theme";
 import { useOrders } from "../../hooks/useOrders";
+import { useProducts } from "../../hooks/useProducts";
 import { useWallet } from "../../hooks/useWallet";
 import { useAuthStore } from "../../stores/authStore";
 import { intentGateBalance as s } from "../../styles";
@@ -30,7 +32,20 @@ export default function IntentGateScreen() {
   const user = useAuthStore((state) => state.user);
   const { refreshBalance } = useWallet();
   const { orders, fetchOrders, isLoading: isLoadingOrders } = useOrders();
+  const {
+    bundles,
+    mealPacks,
+    readyEat,
+    snacks,
+    restockItems,
+    fetchBundles,
+    fetchMealPacks,
+    fetchReadyEat,
+    fetchSnacks,
+    fetchRestock,
+  } = useProducts();
   const [refreshing, setRefreshing] = useState(false);
+  const [globalQuery, setGlobalQuery] = useState("");
 
   const greeting = getGreeting();
   const firstName = user?.name?.split(" ")[0] ?? "";
@@ -46,6 +61,11 @@ export default function IntentGateScreen() {
   useEffect(() => {
     refreshBalance();
     fetchOrders(1, 5);
+    fetchBundles();
+    fetchMealPacks();
+    fetchReadyEat();
+    fetchSnacks();
+    fetchRestock();
   }, []);
 
   const onRefresh = useCallback(async () => {
@@ -56,6 +76,185 @@ export default function IntentGateScreen() {
 
   const [showTopUp, setShowTopUp] = useState(false);
 
+  const universalResults = useMemo(() => {
+    const q = globalQuery.trim().toLowerCase();
+    if (q.length < 2) return [];
+
+    const results: Array<{
+      key: string;
+      title: string;
+      subtitle: string;
+      emoji: string;
+      type:
+        | "bundle"
+        | "mealpack"
+        | "ingredient"
+        | "readyeat"
+        | "snack"
+        | "restock";
+      targetId?: string;
+    }> = [];
+    const seen = new Set<string>();
+
+    const addResult = (item: {
+      key: string;
+      title: string;
+      subtitle: string;
+      emoji: string;
+      type:
+        | "bundle"
+        | "mealpack"
+        | "ingredient"
+        | "readyeat"
+        | "snack"
+        | "restock";
+      targetId?: string;
+    }) => {
+      if (seen.has(item.key)) return;
+      seen.add(item.key);
+      results.push(item);
+    };
+
+    bundles.forEach((bundle) => {
+      const haystack = [bundle.name, bundle.description, ...(bundle.tags ?? [])]
+        .join(" ")
+        .toLowerCase();
+      if (haystack.includes(q)) {
+        addResult({
+          key: `bundle:${bundle.id}`,
+          title: bundle.name,
+          subtitle: "Bundle",
+          emoji: bundle.emoji,
+          type: "bundle",
+          targetId: bundle.id,
+        });
+      }
+
+      bundle.items.forEach((item) => {
+        const itemHaystack = item.name.toLowerCase();
+        if (itemHaystack.includes(q)) {
+          addResult({
+            key: `bundle-item:${bundle.id}:${item.id}`,
+            title: item.name,
+            subtitle: `In bundle · ${bundle.name}`,
+            emoji: item.emoji,
+            type: "bundle",
+            targetId: bundle.id,
+          });
+        }
+      });
+    });
+
+    mealPacks.forEach((pack) => {
+      const haystack = [pack.name, pack.description].join(" ").toLowerCase();
+      if (haystack.includes(q)) {
+        addResult({
+          key: `mealpack:${pack.id}`,
+          title: pack.name,
+          subtitle: "Meal pack",
+          emoji: pack.emoji,
+          type: "mealpack",
+          targetId: pack.id,
+        });
+      }
+
+      pack.ingredients.forEach((ingredient) => {
+        if (ingredient.name.toLowerCase().includes(q)) {
+          addResult({
+            key: `ingredient:${pack.id}:${ingredient.name}`,
+            title: ingredient.name,
+            subtitle: `Ingredient · ${pack.name}`,
+            emoji: ingredient.emoji,
+            type: "ingredient",
+            targetId: pack.id,
+          });
+        }
+      });
+    });
+
+    readyEat.forEach((item) => {
+      const haystack = [
+        item.name,
+        item.kitchen,
+        item.description,
+        ...(item.tags ?? []),
+      ]
+        .join(" ")
+        .toLowerCase();
+      if (haystack.includes(q)) {
+        addResult({
+          key: `readyeat:${item.id}`,
+          title: item.name,
+          subtitle: `Ready to Eat · ${item.kitchen}`,
+          emoji: item.emoji,
+          type: "readyeat",
+          targetId: item.id,
+        });
+      }
+    });
+
+    snacks.forEach((item) => {
+      const haystack = [item.name, item.category, item.tag]
+        .join(" ")
+        .toLowerCase();
+      if (haystack.includes(q)) {
+        addResult({
+          key: `snack:${item.id}`,
+          title: item.name,
+          subtitle: `Snacks & Drinks · ${item.category}`,
+          emoji: item.emoji,
+          type: "snack",
+          targetId: item.id,
+        });
+      }
+    });
+
+    restockItems.forEach((item) => {
+      const haystack = [item.name, item.brand, item.category]
+        .join(" ")
+        .toLowerCase();
+      if (haystack.includes(q)) {
+        addResult({
+          key: `restock:${item.id}`,
+          title: item.name,
+          subtitle: `Product · ${item.brand}`,
+          emoji: item.emoji,
+          type: "restock",
+          targetId: item.id,
+        });
+      }
+    });
+
+    return results.slice(0, 12);
+  }, [globalQuery, bundles, mealPacks, readyEat, snacks, restockItems]);
+
+  const handleUniversalSelect = (result: {
+    type:
+      | "bundle"
+      | "mealpack"
+      | "ingredient"
+      | "readyeat"
+      | "snack"
+      | "restock";
+    targetId?: string;
+  }) => {
+    if (result.type === "bundle" && result.targetId) {
+      router.push(`/(app)/modes/stockup/${result.targetId}` as any);
+    } else if (
+      (result.type === "mealpack" || result.type === "ingredient") &&
+      result.targetId
+    ) {
+      router.push(`/(app)/modes/cookmeal/${result.targetId}` as any);
+    } else if (result.type === "readyeat") {
+      router.push("/(app)/modes/readyeat" as any);
+    } else if (result.type === "snack") {
+      router.push("/(app)/modes/snacks" as any);
+    } else if (result.type === "restock") {
+      router.push("/(app)/modes/shoplist" as any);
+    }
+    setGlobalQuery("");
+  };
+
   return (
     <View className={s.container}>
       <Header onTopUpPress={() => setShowTopUp(true)} />
@@ -64,7 +263,95 @@ export default function IntentGateScreen() {
         <Text className={s.greetingTime}>
           {greeting.toUpperCase().replace(" ", "  ")}
         </Text>
-        <Text className={s.greetingTitle}>What are we{"\n"}doing today?</Text>
+        <Text className={s.greetingTitle} style={{ marginBottom: 12 }}>
+          What do you want?
+        </Text>
+
+        <View style={{ position: "relative", zIndex: 50 }}>
+          <SearchBar
+            value={globalQuery}
+            onChangeText={setGlobalQuery}
+            placeholder="Search bundles, packs, ingredients, products..."
+            autoFocus={false}
+            variant="universal"
+          />
+
+          {globalQuery.trim().length >= 2 && (
+            <View
+              style={{
+                position: "absolute",
+                top: 58,
+                left: 0,
+                right: 0,
+                borderWidth: 1,
+                borderColor: "#1a2a1c",
+                backgroundColor: "#0d1a0f",
+                zIndex: 60,
+                maxHeight: 260,
+              }}
+            >
+              <ScrollView
+                nestedScrollEnabled
+                keyboardShouldPersistTaps="handled"
+              >
+                {universalResults.length === 0 ? (
+                  <Text
+                    style={{
+                      color: "#2a4a2a",
+                      fontSize: 10,
+                      letterSpacing: 1,
+                      paddingVertical: 12,
+                      paddingHorizontal: 12,
+                      fontFamily: "NotoSerif_400Regular",
+                    }}
+                  >
+                    NO RESULTS FOUND
+                  </Text>
+                ) : (
+                  universalResults.map((result) => (
+                    <Pressable
+                      key={result.key}
+                      onPress={() => handleUniversalSelect(result)}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 10,
+                        paddingVertical: 10,
+                        paddingHorizontal: 12,
+                        borderBottomWidth: 1,
+                        borderBottomColor: "#1a2a1c",
+                      }}
+                    >
+                      <Text style={{ fontSize: 16 }}>{result.emoji}</Text>
+                      <View style={{ flex: 1 }}>
+                        <Text
+                          style={{
+                            color: "#f5f5f0",
+                            fontSize: 13,
+                            fontFamily: "NotoSerif_400Regular",
+                          }}
+                        >
+                          {result.title}
+                        </Text>
+                        <Text
+                          style={{
+                            color: "#3a5c3a",
+                            fontSize: 10,
+                            letterSpacing: 1,
+                            marginTop: 2,
+                            fontFamily: "NotoSerif_400Regular",
+                          }}
+                        >
+                          {result.subtitle}
+                        </Text>
+                      </View>
+                    </Pressable>
+                  ))
+                )}
+              </ScrollView>
+            </View>
+          )}
+        </View>
       </View>
 
       <ScrollView

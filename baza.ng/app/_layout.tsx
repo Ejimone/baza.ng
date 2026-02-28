@@ -9,7 +9,9 @@ import "../global.css";
 import * as authService from "../services/auth";
 import { useAuthStore } from "../stores/authStore";
 
-SplashScreen.preventAutoHideAsync();
+void SplashScreen.preventAutoHideAsync().catch(() => {
+  // Ignore in environments where native splash isn't registered.
+});
 
 export default function RootLayout() {
   const [authReady, setAuthReady] = useState(false);
@@ -38,7 +40,9 @@ export default function RootLayout() {
 
   const onLayoutRootView = useCallback(async () => {
     if (fontsLoaded && authReady) {
-      await SplashScreen.hideAsync();
+      await SplashScreen.hideAsync().catch(() => {
+        // Ignore when splash is already hidden or unavailable.
+      });
     }
   }, [fontsLoaded, authReady]);
 
