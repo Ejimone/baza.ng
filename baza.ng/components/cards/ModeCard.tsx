@@ -1,6 +1,7 @@
-import { View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
+import { Image, Pressable, Text, View } from "react-native";
 import { intentGateBalance as s } from "../../styles";
+import { optimizedUrl } from "../../utils/cloudinary";
 import type { ModeConfig } from "../../utils/constants";
 
 interface ModeCardProps {
@@ -18,9 +19,21 @@ export default function ModeCard({ mode }: ModeCardProps) {
     >
       <View
         className={s.modeIcon}
-        style={{ backgroundColor: `${mode.color}15`, borderRadius: 0 }}
+        style={{
+          backgroundColor: `${mode.color}15`,
+          borderRadius: 0,
+          overflow: "hidden",
+        }}
       >
-        <Text style={{ fontSize: 22 }}>{mode.emoji}</Text>
+        {mode.imageUrl ? (
+          <Image
+            source={{ uri: optimizedUrl(mode.imageUrl, 88) }}
+            style={{ width: "100%", height: "100%" }}
+            resizeMode="cover"
+          />
+        ) : (
+          <Text style={{ fontSize: 22 }}>{mode.emoji}</Text>
+        )}
       </View>
 
       <View style={{ flex: 1 }}>
