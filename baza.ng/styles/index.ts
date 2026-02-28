@@ -889,15 +889,15 @@ export const accountSettingsScreen = {
 
 export const floatingCart = {
   button:
-    "absolute top-[52px] right-4 z-[200] bg-txt-primary py-2 px-3.5 flex-row items-center justify-between",
-  iconWrap: "flex-row items-center gap-3",
+    "absolute top-[52px] right-4 z-[200] bg-txt-primary py-3 px-5 flex-row items-center justify-between",
+  iconWrap: "flex-row items-center gap-4",
   cartIcon: "text-lg relative",
   badge:
-    "absolute -top-1.5 -right-2 w-4 h-4 rounded-full bg-baza-green border-2 border-txt-primary items-center justify-center",
-  badgeText: "text-2xs text-black font-bold font-mono",
-  label: "text-xxs text-black font-mono font-bold tracking-wide-sm",
-  sub: "text-3xs text-[#555] font-mono mt-[1px]",
-  chevron: "text-xxs font-mono font-bold text-black tracking-wide-sm",
+    "absolute -top-2 -right-2.5 w-6 h-6 rounded-full bg-baza-green border-2 border-txt-primary items-center justify-center",
+  badgeText: "text-xxs text-black font-bold font-mono",
+  label: "text-sm text-black font-mono font-bold tracking-wide-sm",
+  sub: "text-xs text-[#555] font-mono mt-[1px]",
+  chevron: "text-sm font-mono font-bold text-black tracking-wide-sm",
 };
 
 // ─── WALLET SCREEN ──────────────────────────────────────────────────────────

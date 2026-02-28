@@ -1,7 +1,7 @@
-import { View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
-import { floatingCart as s } from "../../styles";
+import { Pressable, Text, View } from "react-native";
 import { useCart } from "../../hooks/useCart";
+import { floatingCart as s } from "../../styles";
 
 export default function FloatingCart() {
   const router = useRouter();
@@ -10,13 +10,10 @@ export default function FloatingCart() {
   if (isEmpty) return null;
 
   return (
-    <Pressable
-      className={s.button}
-      onPress={() => router.push("/(app)/cart")}
-    >
+    <Pressable className={s.button} onPress={() => router.push("/(app)/cart")}>
       <View className={s.iconWrap}>
         <View className={s.cartIcon}>
-          <Text style={{ fontSize: 18 }}>🛒</Text>
+          <Text style={{ fontSize: 27 }}>🛒</Text>
           <View className={s.badge}>
             <Text className={s.badgeText}>{count}</Text>
           </View>
