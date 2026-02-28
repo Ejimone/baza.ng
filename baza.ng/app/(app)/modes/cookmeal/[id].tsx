@@ -37,12 +37,16 @@ export default function MealPackDetailScreen() {
   const [plates, setPlates] = useState(4);
   const [removedItems, setRemovedItems] = useState<string[]>([]);
   const [showAddMore, setShowAddMore] = useState(false);
-  const [imagePreview, setImagePreview] = useState(false);
+  const [previewTarget, setPreviewTarget] = useState<{
+    imageUrl?: string;
+    emoji: string;
+  } | null>(null);
   const [extraItems, setExtraItems] = useState<
     Array<{
       id: string;
       name: string;
       emoji: string;
+      imageUrl?: string;
       qty: number;
       unitPrice: number;
     }>
@@ -93,6 +97,7 @@ export default function MealPackDetailScreen() {
           id: restockItem.id,
           name: restockItem.name,
           emoji: restockItem.emoji,
+          imageUrl: restockItem.imageUrl,
           qty: 1,
           unitPrice: restockItem.price,
         },
@@ -152,27 +157,27 @@ export default function MealPackDetailScreen() {
       <StatusBar backgroundColor="#050505" barStyle="light-content" />
 
       <Modal
-        visible={imagePreview}
+        visible={Boolean(previewTarget)}
         transparent
         animationType="fade"
         statusBarTranslucent
-        onRequestClose={() => setImagePreview(false)}
+        onRequestClose={() => setPreviewTarget(null)}
       >
         <View style={previewStyles.backdrop}>
           <Pressable
             style={previewStyles.closeBtn}
-            onPress={() => setImagePreview(false)}
+            onPress={() => setPreviewTarget(null)}
           >
             <Text style={previewStyles.closeText}>×</Text>
           </Pressable>
-          {pack.imageUrl ? (
+          {previewTarget?.imageUrl ? (
             <Image
-              source={{ uri: pack.imageUrl }}
+              source={{ uri: previewTarget.imageUrl }}
               style={previewStyles.image}
               resizeMode="contain"
             />
           ) : (
-            <Text style={{ fontSize: 120 }}>{pack.emoji}</Text>
+            <Text style={{ fontSize: 120 }}>{previewTarget?.emoji ?? pack.emoji}</Text>
           )}
         </View>
       </Modal>
@@ -180,7 +185,9 @@ export default function MealPackDetailScreen() {
       <Pressable
         className={s.hero}
         style={{ backgroundColor: pack.color + "12" }}
-        onPress={() => setImagePreview(true)}
+        onPress={() =>
+          setPreviewTarget({ imageUrl: pack.imageUrl, emoji: pack.emoji })
+        }
       >
         <ProductImage
           imageUrl={pack.imageUrl}
@@ -287,7 +294,19 @@ export default function MealPackDetailScreen() {
                 borderBottomColor: pack.color + "0a",
               }}
             >
-              <Text className={s.ingredientEmoji}>{item.emoji}</Text>
+              <Pressable
+                style={previewStyles.listThumb}
+                onPress={() =>
+                  setPreviewTarget({ imageUrl: item.imageUrl, emoji: item.emoji })
+                }
+              >
+                <ProductImage
+                  imageUrl={item.imageUrl}
+                  emoji={item.emoji}
+                  size={30}
+                  borderRadius={4}
+                />
+              </Pressable>
               <View style={{ flex: 1 }}>
                 <Text
                   className={s.ingredientName}
@@ -346,7 +365,22 @@ export default function MealPackDetailScreen() {
                   borderBottomColor: pack.color + "0a",
                 }}
               >
-                <Text className={s.ingredientEmoji}>{item.emoji}</Text>
+                <Pressable
+                  style={previewStyles.listThumb}
+                  onPress={() =>
+                    setPreviewTarget({
+                      imageUrl: item.imageUrl,
+                      emoji: item.emoji,
+                    })
+                  }
+                >
+                  <ProductImage
+                    imageUrl={item.imageUrl}
+                    emoji={item.emoji}
+                    size={30}
+                    borderRadius={4}
+                  />
+                </Pressable>
                 <View style={{ flex: 1 }}>
                   <Text
                     className={s.ingredientName}
@@ -444,6 +478,12 @@ export default function MealPackDetailScreen() {
 }
 
 const previewStyles = StyleSheet.create({
+  listThumb: {
+    width: 30,
+    height: 30,
+    borderRadius: 4,
+    overflow: "hidden",
+  },
   backdrop: {
     flex: 1,
     backgroundColor: "#000",
