@@ -2,12 +2,17 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
     ActivityIndicator,
+    Image,
+    Modal,
     Pressable,
     ScrollView,
+    StatusBar,
+    StyleSheet,
     Text,
     View,
 } from "react-native";
 import AddMoreItemsSheet from "../../../../components/ui/AddMoreItemsSheet";
+import ProductImage from "../../../../components/ui/ProductImage";
 import QtyControl from "../../../../components/ui/QtyControl";
 import { useCart } from "../../../../hooks/useCart";
 import { useProducts } from "../../../../hooks/useProducts";
@@ -32,6 +37,7 @@ export default function MealPackDetailScreen() {
   const [plates, setPlates] = useState(4);
   const [removedItems, setRemovedItems] = useState<string[]>([]);
   const [showAddMore, setShowAddMore] = useState(false);
+  const [imagePreview, setImagePreview] = useState(false);
   const [extraItems, setExtraItems] = useState<
     Array<{
       id: string;
@@ -143,8 +149,50 @@ export default function MealPackDetailScreen() {
       className={s.container}
       style={{ backgroundColor: pack.color + "06" }}
     >
-      <View className={s.hero} style={{ backgroundColor: pack.color + "12" }}>
-        <Text className={s.heroEmoji}>{pack.emoji}</Text>
+      <StatusBar backgroundColor="#050505" barStyle="light-content" />
+
+      <Modal
+        visible={imagePreview}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={() => setImagePreview(false)}
+      >
+        <View style={previewStyles.backdrop}>
+          <Pressable
+            style={previewStyles.closeBtn}
+            onPress={() => setImagePreview(false)}
+          >
+            <Text style={previewStyles.closeText}>×</Text>
+          </Pressable>
+          {pack.imageUrl ? (
+            <Image
+              source={{ uri: pack.imageUrl }}
+              style={previewStyles.image}
+              resizeMode="contain"
+            />
+          ) : (
+            <Text style={{ fontSize: 120 }}>{pack.emoji}</Text>
+          )}
+        </View>
+      </Modal>
+
+      <Pressable
+        className={s.hero}
+        style={{ backgroundColor: pack.color + "12" }}
+        onPress={() => setImagePreview(true)}
+      >
+        <ProductImage
+          imageUrl={pack.imageUrl}
+          emoji={pack.emoji}
+          size={120}
+          borderRadius={0}
+        />
+        {pack.imageUrl ? (
+          <View style={previewStyles.tapHint}>
+            <Text style={previewStyles.tapHintText}>TAP TO PREVIEW</Text>
+          </View>
+        ) : null}
         <Pressable className={s.heroBackBtn} onPress={() => router.back()}>
           <Text
             style={{
@@ -157,7 +205,7 @@ export default function MealPackDetailScreen() {
             ← BACK
           </Text>
         </Pressable>
-      </View>
+      </Pressable>
 
       <View className={s.infoSection}>
         <Text className={s.cookTime} style={{ color: pack.color }}>
@@ -394,3 +442,48 @@ export default function MealPackDetailScreen() {
     </View>
   );
 }
+
+const previewStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: "#000",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  image: {
+    width: "100%",
+    height: "80%",
+  },
+  closeBtn: {
+    position: "absolute",
+    top: 52,
+    right: 20,
+    zIndex: 10,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  closeText: {
+    color: "#fff",
+    fontSize: 22,
+    lineHeight: 26,
+  },
+  tapHint: {
+    position: "absolute",
+    bottom: 8,
+    alignSelf: "center",
+    backgroundColor: "rgba(0,0,0,0.45)",
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 4,
+  },
+  tapHintText: {
+    color: "rgba(255,255,255,0.6)",
+    fontSize: 8,
+    letterSpacing: 1.5,
+    fontFamily: "NotoSerif_400Regular",
+  },
+});
