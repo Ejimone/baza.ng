@@ -288,16 +288,60 @@ function ReadyEatPopup({
   isAdded: boolean;
 }) {
   const [imagePreview, setImagePreview] = useState(false);
+  const { getItemQty, updateQty, removeItem } = useCart();
+  const qty = getItemQty(item.id);
+  const [pendingQty, setPendingQty] = useState(1);
+
+  useEffect(() => {
+    setPendingQty(qty > 0 ? qty : 1);
+  }, [item.id, qty]);
+
+  const selectedQty = qty > 0 ? qty : pendingQty;
+  const selectedTotal = item.price * selectedQty;
+
+  const handleDecrease = () => {
+    if (qty > 0) {
+      if (qty === 1) {
+        removeItem(item.id);
+      } else {
+        updateQty(item.id, qty - 1);
+      }
+      return;
+    }
+
+    setPendingQty((prev) => Math.max(1, prev - 1));
+  };
+
+  const handleIncrease = () => {
+    if (qty > 0) {
+      updateQty(item.id, qty + 1);
+      return;
+    }
+
+    setPendingQty((prev) => prev + 1);
+  };
+
+  const handleAddFromPopup = () => {
+    if (qty === 0) {
+      onAdd(item);
+      if (selectedQty > 1) {
+        updateQty(item.id, selectedQty);
+      }
+      return;
+    }
+
+    updateQty(item.id, selectedQty);
+  };
 
   return (
     <Modal
       visible
-      transparent
+      transparent={false}
       animationType="slide"
       statusBarTranslucent
       onRequestClose={onClose}
     >
-      <StatusBar backgroundColor="rgba(0,0,0,0.95)" barStyle="light-content" />
+      <StatusBar backgroundColor="#050505" barStyle="light-content" />
 
       {/* Full-screen image preview */}
       <Modal
@@ -326,129 +370,184 @@ function ReadyEatPopup({
         </View>
       </Modal>
 
-      <View style={previewStyles.overlay}>
-        {/* Tap outside to dismiss */}
-        <Pressable style={{ flex: 1 }} onPress={onClose} />
+      <View style={previewStyles.popupScreen}>
+        <View style={previewStyles.overlay}>
+          <View style={previewStyles.topMask} />
 
-        <View
-          className={readyEatMode.popupSheet}
-          style={{ backgroundColor: item.color + "0f" }}
-        >
-          {/* ── Hero (tap to preview image) ── */}
-          <Pressable
-            className={readyEatMode.popupHero}
-            style={{ backgroundColor: item.color + "20" }}
-            onPress={() => setImagePreview(true)}
+          <View
+            className={readyEatMode.popupSheet}
+            style={{ backgroundColor: item.color + "0f" }}
           >
-            <ProductImage
-              imageUrl={item.imageUrl}
-              emoji={item.emoji}
-              size={140}
-              borderRadius={0}
-            />
-
-            {item.imageUrl ? (
-              <View style={previewStyles.tapHint}>
-                <Text style={previewStyles.tapHintText}>TAP TO PREVIEW</Text>
-              </View>
-            ) : null}
-
-            {/* Close button lives inside hero so it's above the image */}
+            {/* ── Hero (tap to preview image) ── */}
             <Pressable
-              className={readyEatMode.popupCloseBtn}
-              onPress={(e) => {
-                e.stopPropagation?.();
-                onClose();
-              }}
+              className={readyEatMode.popupHero}
+              style={{ backgroundColor: item.color + "20" }}
+              onPress={() => setImagePreview(true)}
             >
-              <Text className={readyEatMode.popupCloseText}>×</Text>
-            </Pressable>
+              <ProductImage
+                imageUrl={item.imageUrl}
+                emoji={item.emoji}
+                size={140}
+                borderRadius={0}
+              />
 
-            <View
-              className={readyEatMode.popupTimeBadge}
-              style={{
-                backgroundColor: item.color + "22",
-                borderWidth: 1,
-                borderColor: item.color + "44",
-              }}
-            >
-              <Text
-                className={readyEatMode.popupTimeText}
-                style={{ color: item.color }}
-              >
-                🕐 {item.deliveryTime}
-              </Text>
-            </View>
-          </Pressable>
-
-          {/* ── Content ── */}
-          <View className={readyEatMode.popupContent}>
-            <Text
-              className={readyEatMode.popupKitchen}
-              style={{ color: item.color }}
-            >
-              {item.kitchen.toUpperCase()}
-            </Text>
-            <Text className={readyEatMode.popupName}>{item.name}</Text>
-            <Text className={readyEatMode.popupDesc}>{item.description}</Text>
-
-            <View className={readyEatMode.popupTags}>
-              {item.tags.map((tag) => (
-                <View
-                  key={tag}
-                  style={{
-                    backgroundColor: item.color + "12",
-                    borderWidth: 1,
-                    borderColor: item.color + "33",
-                  }}
-                >
-                  <Text
-                    className={readyEatMode.popupTag}
-                    style={{ color: item.color + "cc" }}
-                  >
-                    {tag}
-                  </Text>
+              {item.imageUrl ? (
+                <View style={previewStyles.tapHint}>
+                  <Text style={previewStyles.tapHintText}>TAP TO PREVIEW</Text>
                 </View>
-              ))}
-            </View>
+              ) : null}
 
-            <View className={readyEatMode.popupPriceRow}>
-              <View>
-                {item.oldPrice && (
-                  <Text className={readyEatMode.popupOldPrice}>
-                    {formatPrice(item.oldPrice)}
-                  </Text>
-                )}
-                <Text className={readyEatMode.popupFreeDelivery}>
-                  FREE DELIVERY · MEMBERS
-                </Text>
-              </View>
-              <Text className={readyEatMode.popupPrice}>
-                {formatPrice(item.price)}
-              </Text>
-            </View>
-
-            <Pressable
-              className={readyEatMode.popupAddBtn}
-              style={{ backgroundColor: isAdded ? "#4caf7d" : item.color }}
-              onPress={() => {
-                if (!isAdded) onAdd(item);
-                onClose();
-              }}
-            >
-              <Text
-                style={{
-                  color: "#000",
-                  textAlign: "center",
-                  fontFamily: "NotoSerif_400Regular",
-                  fontSize: 11,
-                  fontWeight: "bold",
-                  letterSpacing: 2,
+              {/* Close button lives inside hero so it's above the image */}
+              <Pressable
+                className={readyEatMode.popupCloseBtn}
+                onPress={(e) => {
+                  e.stopPropagation?.();
+                  onClose();
                 }}
               >
-                {isAdded ? "✓ ADDED TO CART" : "ADD 1 PLATE"}
-              </Text>
+                <Text className={readyEatMode.popupCloseText}>×</Text>
+              </Pressable>
+
+              <View
+                className={readyEatMode.popupTimeBadge}
+                style={{
+                  backgroundColor: item.color + "22",
+                  borderWidth: 1,
+                  borderColor: item.color + "44",
+                }}
+              >
+                <Text
+                  className={readyEatMode.popupTimeText}
+                  style={{ color: item.color }}
+                >
+                  🕐 {item.deliveryTime}
+                </Text>
+              </View>
             </Pressable>
+
+            {/* ── Content ── */}
+            <View className={readyEatMode.popupContent}>
+              <Text
+                className={readyEatMode.popupKitchen}
+                style={{ color: item.color }}
+              >
+                {item.kitchen.toUpperCase()}
+              </Text>
+              <Text className={readyEatMode.popupName}>{item.name}</Text>
+              <Text className={readyEatMode.popupDesc}>{item.description}</Text>
+
+              <View className={readyEatMode.popupTags}>
+                {item.tags.map((tag) => (
+                  <View
+                    key={tag}
+                    style={{
+                      backgroundColor: item.color + "12",
+                      borderWidth: 1,
+                      borderColor: item.color + "33",
+                    }}
+                  >
+                    <Text
+                      className={readyEatMode.popupTag}
+                      style={{ color: item.color + "cc" }}
+                    >
+                      {tag}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              <View
+                className={readyEatMode.popupPlatesBox}
+                style={{ borderWidth: 1, borderColor: item.color + "33" }}
+              >
+                <View>
+                  <Text className={readyEatMode.popupPlatesLabel}>PLATES</Text>
+                  <Text className={readyEatMode.popupPlatesEach}>
+                    {formatPrice(item.price)} each
+                  </Text>
+                </View>
+
+                <View
+                  className={readyEatMode.popupPlatesStepper}
+                  style={{ borderWidth: 1, borderColor: item.color + "55" }}
+                >
+                  <Pressable
+                    className={readyEatMode.popupPlatesBtn}
+                    onPress={handleDecrease}
+                    style={{
+                      backgroundColor:
+                        selectedQty === 1 ? "#2a0a0a" : item.color + "12",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: selectedQty === 1 ? "#e85c3a" : item.color,
+                        fontFamily: "NotoSerif_400Regular",
+                        fontSize: 18,
+                      }}
+                    >
+                      {selectedQty === 1 ? "−" : "−"}
+                    </Text>
+                  </Pressable>
+
+                  <Text className={readyEatMode.popupPlatesValue}>
+                    {selectedQty}
+                  </Text>
+
+                  <Pressable
+                    className={readyEatMode.popupPlatesBtn}
+                    onPress={handleIncrease}
+                    style={{ backgroundColor: item.color + "12" }}
+                  >
+                    <Text
+                      style={{
+                        color: item.color,
+                        fontFamily: "NotoSerif_400Regular",
+                        fontSize: 18,
+                      }}
+                    >
+                      +
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+
+              <View className={readyEatMode.popupPriceRow}>
+                <View>
+                  {item.oldPrice && (
+                    <Text className={readyEatMode.popupOldPrice}>
+                      {formatPrice(item.oldPrice)}
+                    </Text>
+                  )}
+                  <Text className={readyEatMode.popupFreeDelivery}>
+                    FREE DELIVERY · MEMBERS
+                  </Text>
+                </View>
+                <Text className={readyEatMode.popupPrice}>
+                  {formatPrice(selectedTotal)}
+                </Text>
+              </View>
+
+              <Pressable
+                className={readyEatMode.popupAddBtn}
+                style={{ backgroundColor: item.color }}
+                onPress={handleAddFromPopup}
+              >
+                <Text
+                  style={{
+                    color: "#000",
+                    textAlign: "center",
+                    fontFamily: "NotoSerif_400Regular",
+                    fontSize: 11,
+                    fontWeight: "bold",
+                    letterSpacing: 2,
+                  }}
+                >
+                  ADD {selectedQty} {selectedQty === 1 ? "PLATE" : "PLATES"} ·{" "}
+                  {formatPrice(selectedTotal)}
+                </Text>
+              </Pressable>
+            </View>
           </View>
         </View>
       </View>
@@ -457,10 +556,18 @@ function ReadyEatPopup({
 }
 
 const previewStyles = StyleSheet.create({
+  popupScreen: {
+    flex: 1,
+    backgroundColor: "#050505",
+  },
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.95)",
+    backgroundColor: "#050505",
     justifyContent: "flex-end",
+  },
+  topMask: {
+    flex: 1,
+    backgroundColor: "#050505",
   },
   backdrop: {
     flex: 1,
