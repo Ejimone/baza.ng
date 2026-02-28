@@ -288,6 +288,7 @@ function ReadyEatPopup({
   isAdded: boolean;
 }) {
   const [imagePreview, setImagePreview] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const { getItemQty, updateQty, removeItem } = useCart();
   const qty = getItemQty(item.id);
   const [pendingQty, setPendingQty] = useState(1);
@@ -333,13 +334,20 @@ function ReadyEatPopup({
     updateQty(item.id, selectedQty);
   };
 
+  const handleDismiss = () => {
+    setIsVisible(false);
+    setTimeout(() => {
+      onClose();
+    }, 220);
+  };
+
   return (
     <Modal
-      visible
+      visible={isVisible}
       transparent={false}
       animationType="slide"
       statusBarTranslucent
-      onRequestClose={onClose}
+      onRequestClose={handleDismiss}
     >
       <StatusBar backgroundColor="#050505" barStyle="light-content" />
 
@@ -372,7 +380,7 @@ function ReadyEatPopup({
 
       <View style={previewStyles.popupScreen}>
         <View style={previewStyles.overlay}>
-          <View style={previewStyles.topMask} />
+          <Pressable style={previewStyles.topMask} onPress={handleDismiss} />
 
           <View
             className={readyEatMode.popupSheet}
@@ -402,7 +410,7 @@ function ReadyEatPopup({
                 className={readyEatMode.popupCloseBtn}
                 onPress={(e) => {
                   e.stopPropagation?.();
-                  onClose();
+                  handleDismiss();
                 }}
               >
                 <Text className={readyEatMode.popupCloseText}>×</Text>
