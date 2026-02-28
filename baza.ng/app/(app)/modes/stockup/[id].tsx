@@ -2,12 +2,17 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
     ActivityIndicator,
+    Image,
+    Modal,
     Pressable,
     ScrollView,
+    StatusBar,
+    StyleSheet,
     Text,
     View,
 } from "react-native";
 import AddMoreItemsSheet from "../../../../components/ui/AddMoreItemsSheet";
+import ProductImage from "../../../../components/ui/ProductImage";
 import QtyControl from "../../../../components/ui/QtyControl";
 import { useCart } from "../../../../hooks/useCart";
 import { useProducts } from "../../../../hooks/useProducts";
@@ -35,6 +40,10 @@ export default function BundleDetailScreen() {
 
   const [items, setItems] = useState<EditableItem[]>([]);
   const [showAddMore, setShowAddMore] = useState(false);
+  const [previewTarget, setPreviewTarget] = useState<{
+    imageUrl?: string;
+    emoji: string;
+  } | null>(null);
 
   useEffect(() => {
     if (bundle) {
@@ -75,6 +84,7 @@ export default function BundleDetailScreen() {
         productId: restockItem.id,
         name: restockItem.name,
         emoji: restockItem.emoji,
+        imageUrl: restockItem.imageUrl,
         unitPrice: restockItem.price,
         defaultQty: 1,
         minQty: 0,
@@ -127,6 +137,36 @@ export default function BundleDetailScreen() {
       className={s.container}
       style={{ backgroundColor: bundle.color + "08" }}
     >
+      <StatusBar backgroundColor="#050505" barStyle="light-content" />
+
+      <Modal
+        visible={Boolean(previewTarget)}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={() => setPreviewTarget(null)}
+      >
+        <View style={previewStyles.backdrop}>
+          <Pressable
+            style={previewStyles.closeBtn}
+            onPress={() => setPreviewTarget(null)}
+          >
+            <Text style={previewStyles.closeText}>×</Text>
+          </Pressable>
+          {previewTarget?.imageUrl ? (
+            <Image
+              source={{ uri: previewTarget.imageUrl }}
+              style={previewStyles.image}
+              resizeMode="contain"
+            />
+          ) : (
+            <Text style={{ fontSize: 120 }}>
+              {previewTarget?.emoji ?? "🍲"}
+            </Text>
+          )}
+        </View>
+      </Modal>
+
       <View className={s.header}>
         <Pressable onPress={() => router.back()}>
           <Text className={s.backButton} style={{ color: bundle.color + "aa" }}>
@@ -167,7 +207,19 @@ export default function BundleDetailScreen() {
             className={s.itemRow}
             style={{ opacity: item.qty === 0 ? 0.35 : 1 }}
           >
-            <Text className={s.itemEmoji}>{item.emoji}</Text>
+            <Pressable
+              style={previewStyles.itemThumb}
+              onPress={() =>
+                setPreviewTarget({ imageUrl: item.imageUrl, emoji: item.emoji })
+              }
+            >
+              <ProductImage
+                imageUrl={item.imageUrl}
+                emoji={item.emoji}
+                size={28}
+                borderRadius={4}
+              />
+            </Pressable>
             <View style={{ flex: 1 }}>
               <Text className={s.itemName}>{item.name}</Text>
               <Text className={s.itemPrice}>
@@ -273,3 +325,40 @@ export default function BundleDetailScreen() {
     </View>
   );
 }
+
+const previewStyles = StyleSheet.create({
+  itemThumb: {
+    width: 28,
+    height: 28,
+    borderRadius: 4,
+    overflow: "hidden",
+    marginRight: 4,
+  },
+  backdrop: {
+    flex: 1,
+    backgroundColor: "#000",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  image: {
+    width: "100%",
+    height: "80%",
+  },
+  closeBtn: {
+    position: "absolute",
+    top: 52,
+    right: 20,
+    zIndex: 10,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  closeText: {
+    color: "#fff",
+    fontSize: 22,
+    lineHeight: 26,
+  },
+});

@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Added full-screen image preview support to Bundle Detail item list: tapping any bundle item thumbnail now opens a full-screen preview modal, including items added via "+ Add More Items" (imageUrl is now preserved for added items).
 - Updated Quick Restock UX: added visible spacing/separation between list items and enabled tap-to-open item details popup from the row/image. The popup now supports add-to-cart and quantity stepper controls, while keeping the inline list `ADD`/stepper behavior unchanged.
 - Updated Ready to Eat popup UX to match the new design: popup now opens as a fully opaque full-screen modal (background screen/components are no longer visible), includes an inline PLATES quantity stepper block, computes and shows live total price, and uses a single bottom CTA format (`ADD X PLATE(S) · ₦TOTAL`).
 - Added dual payment method support at checkout: users can now choose between **Wallet** and **Pay with Card** (Paystack) on the cart screen. Added `PaymentMethodSelector` component (two side-by-side option cards), `InsufficientFundsSheet` component (bottom sheet with "Pay with Card" / "Fund Wallet" options when wallet balance is low), extended `CreateOrderPayload` with `paymentMethod` and `callbackUrl` fields, added `verifyOrderPayment` service function, and updated `useOrders` hook with `verifyPayment` method. Card payments use Paystack Direct flow via `expo-web-browser` (same proven pattern as wallet top-up). See `docs/direct-payment-checkout.md` for full details.
