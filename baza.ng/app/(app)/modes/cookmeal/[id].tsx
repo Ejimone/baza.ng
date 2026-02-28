@@ -177,7 +177,9 @@ export default function MealPackDetailScreen() {
               resizeMode="contain"
             />
           ) : (
-            <Text style={{ fontSize: 120 }}>{previewTarget?.emoji ?? pack.emoji}</Text>
+            <Text style={{ fontSize: 120 }}>
+              {previewTarget?.emoji ?? pack.emoji}
+            </Text>
           )}
         </View>
       </Modal>
@@ -297,7 +299,10 @@ export default function MealPackDetailScreen() {
               <Pressable
                 style={previewStyles.listThumb}
                 onPress={() =>
-                  setPreviewTarget({ imageUrl: item.imageUrl, emoji: item.emoji })
+                  setPreviewTarget({
+                    imageUrl: item.imageUrl,
+                    emoji: item.emoji,
+                  })
                 }
               >
                 <ProductImage
