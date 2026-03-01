@@ -255,11 +255,28 @@ export default function IntentGateScreen() {
     setGlobalQuery("");
   };
 
+  const isSearchOpen = globalQuery.trim().length >= 2;
+
   return (
     <View className={s.container}>
       <Header onTopUpPress={() => setShowTopUp(true)} />
 
-      <View className={s.greeting}>
+      {isSearchOpen && (
+        <Pressable
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.46)",
+            zIndex: 40,
+          }}
+          onPress={() => setGlobalQuery("")}
+        />
+      )}
+
+      <View className={s.greeting} style={{ position: "relative", zIndex: 50 }}>
         <Text className={s.greetingTime}>
           {greeting.toUpperCase().replace(" ", "  ")}
         </Text>
@@ -276,7 +293,7 @@ export default function IntentGateScreen() {
             variant="universal"
           />
 
-          {globalQuery.trim().length >= 2 && (
+          {isSearchOpen && (
             <View
               style={{
                 position: "absolute",
