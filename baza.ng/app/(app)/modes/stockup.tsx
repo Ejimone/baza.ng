@@ -107,15 +107,19 @@ export default function StockUpScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 100 }}
         >
-          {bundles.map((bundle) => (
-            <BundleCard
+          {bundles.map((bundle, index) => (
+            <View
               key={bundle.id}
-              bundle={bundle}
-              onPress={() =>
-                router.push(`/(app)/modes/stockup/${bundle.id}` as any)
-              }
-              isInCart={isInCart(bundle.id)}
-            />
+              style={{ marginBottom: index === bundles.length - 1 ? 0 : 14 }}
+            >
+              <BundleCard
+                bundle={bundle}
+                onPress={() =>
+                  router.push(`/(app)/modes/stockup/${bundle.id}` as any)
+                }
+                isInCart={isInCart(bundle.id)}
+              />
+            </View>
           ))}
         </ScrollView>
       )}

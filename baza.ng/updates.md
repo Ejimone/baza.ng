@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Moved the Light/Dark mode switcher from Account Settings to the Profile screen for better discoverability; users can now toggle theme directly from Profile without navigating into settings (`app/(app)/profile.tsx`), and the toggle section was removed from Account Settings (`app/(app)/settings/account.tsx`).
+
 - Improved app startup and perceived speed with background prefetch + caching: added shared in-memory TTL caching and in-flight request de-duplication for product, order, and wallet service fetches (`services/products.ts`, `services/orders.ts`, `services/wallet.ts`), seeded product hook state from cache (`hooks/useProducts.ts`), and added authenticated app warmup prefetch on app stack mount (`app/(app)/_layout.tsx`) so data is loaded in the background before users navigate.
 - Fixed Stock Up theme responsiveness in light mode by applying token-based background/header/text/border styling on the mode list screen (`app/(app)/modes/stockup.tsx`) and aligned detail status/loading colors with theme palette (`app/(app)/modes/stockup/[id].tsx`).
 

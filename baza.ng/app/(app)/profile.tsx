@@ -3,16 +3,16 @@ import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Animated,
-    Keyboard,
-    Platform,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Alert,
+  Animated,
+  Keyboard,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import ScreenWrapper from "../../components/layout/ScreenWrapper";
 import WalletCard from "../../components/wallet/WalletCard";
@@ -39,7 +39,9 @@ export default function ProfileScreen() {
   } = useWallet();
   const { orders, fetchOrders } = useOrders();
   const mode = useThemeStore((state) => state.mode);
+  const toggleMode = useThemeStore((state) => state.toggleMode);
   const palette = getThemePalette(mode);
+  const isLight = mode === "light";
 
   const [showTopUp, setShowTopUp] = useState(false);
   const [selectedAmt, setSelectedAmt] = useState<number | null>(null);
@@ -325,6 +327,48 @@ export default function ProfileScreen() {
             </Text>
           </Pressable>
         ))}
+
+        <View
+          className={s.navRow}
+          style={{
+            backgroundColor: palette.card,
+            borderColor: palette.border,
+          }}
+        >
+          <View className="flex-row items-center gap-3.5 flex-1">
+            <Text className={s.navRowIcon}>{"🌓"}</Text>
+            <View style={{ flex: 1 }}>
+              <Text
+                className={s.navRowLabel}
+                style={{ color: palette.textPrimary }}
+              >
+                Theme Mode
+              </Text>
+              <Text
+                className={s.navRowSub}
+                style={{ color: palette.textSecondary }}
+              >
+                {isLight ? "LIGHT MODE" : "DARK MODE"}
+              </Text>
+            </View>
+          </View>
+
+          <Pressable
+            onPress={() => {
+              void toggleMode();
+            }}
+            className="w-[52px] h-[30px] rounded-full px-1 justify-center"
+            style={{ backgroundColor: isLight ? "#4caf7d" : palette.border }}
+          >
+            <View
+              className="w-[22px] h-[22px] rounded-full"
+              style={{
+                alignSelf: isLight ? "flex-end" : "flex-start",
+                backgroundColor: isLight ? "#f4fff7" : "#f5f5f0",
+              }}
+            />
+          </Pressable>
+        </View>
 
         {/* Settings divider */}
         <Text

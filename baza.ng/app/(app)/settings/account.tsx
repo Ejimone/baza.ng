@@ -1,12 +1,12 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    Alert,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import ScreenWrapper from "../../../components/layout/ScreenWrapper";
 import { getThemePalette } from "../../../constants/appTheme";
@@ -20,10 +20,8 @@ export default function AccountScreen() {
   const user = useAuthStore((st) => st.user);
   const updateUser = useAuthStore((st) => st.updateUser);
   const mode = useThemeStore((st) => st.mode);
-  const toggleMode = useThemeStore((st) => st.toggleMode);
 
   const palette = getThemePalette(mode);
-  const isLight = mode === "light";
 
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
@@ -140,53 +138,6 @@ export default function AccountScreen() {
         <Text className={s.phoneHint} style={{ color: palette.textSecondary }}>
           Phone number cannot be changed here. Contact support to update.
         </Text>
-
-        <View
-          className="mt-6 p-4"
-          style={{
-            backgroundColor: palette.card,
-            borderWidth: 1,
-            borderColor: palette.border,
-          }}
-        >
-          <Text
-            className="text-xs tracking-wide-xl font-mono"
-            style={{ color: palette.textPrimary }}
-          >
-            APP THEME
-          </Text>
-          <Text
-            className="text-3xs mt-1 tracking-wide-sm font-mono"
-            style={{ color: palette.textSecondary }}
-          >
-            Switch between Light mode and Dark mode.
-          </Text>
-
-          <View className="mt-4 flex-row items-center justify-between">
-            <Text
-              className="text-2xs tracking-wide-md font-mono"
-              style={{ color: palette.textSecondary }}
-            >
-              {isLight ? "LIGHT MODE" : "DARK MODE"}
-            </Text>
-
-            <Pressable
-              onPress={() => {
-                void toggleMode();
-              }}
-              className="w-[52px] h-[30px] rounded-full px-1 justify-center"
-              style={{ backgroundColor: isLight ? "#4caf7d" : palette.border }}
-            >
-              <View
-                className="w-[22px] h-[22px] rounded-full"
-                style={{
-                  alignSelf: isLight ? "flex-end" : "flex-start",
-                  backgroundColor: isLight ? "#f4fff7" : "#f5f5f0",
-                }}
-              />
-            </Pressable>
-          </View>
-        </View>
 
         <View className="mt-6">
           <Pressable
