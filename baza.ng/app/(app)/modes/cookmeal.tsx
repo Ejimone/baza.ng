@@ -72,7 +72,7 @@ export default function CookMealScreen() {
           >
             {error}
           </Text>
-          <Pressable onPress={fetchMealPacks} style={{ marginTop: 16 }}>
+          <Pressable onPress={() => fetchMealPacks()} style={{ marginTop: 16 }}>
             <Text
               style={{
                 color: colors.accent.green,
@@ -107,15 +107,19 @@ export default function CookMealScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 100 }}
         >
-          {mealPacks.map((pack) => (
-            <MealPackCard
+          {mealPacks.map((pack, index) => (
+            <View
               key={pack.id}
-              pack={pack}
-              onPress={() =>
-                router.push(`/(app)/modes/cookmeal/${pack.id}` as any)
-              }
-              isInCart={isInCart(pack.id)}
-            />
+              style={{ marginBottom: index === mealPacks.length - 1 ? 0 : 14 }}
+            >
+              <MealPackCard
+                pack={pack}
+                onPress={() =>
+                  router.push(`/(app)/modes/cookmeal/${pack.id}` as any)
+                }
+                isInCart={isInCart(pack.id)}
+              />
+            </View>
           ))}
         </ScrollView>
       )}

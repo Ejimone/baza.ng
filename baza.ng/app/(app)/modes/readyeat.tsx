@@ -109,7 +109,7 @@ export default function ReadyEatScreen() {
           >
             {error}
           </Text>
-          <Pressable onPress={fetchReadyEat} style={{ marginTop: 16 }}>
+          <Pressable onPress={() => fetchReadyEat()} style={{ marginTop: 16 }}>
             <Text
               style={{
                 color: colors.accent.green,
@@ -144,148 +144,155 @@ export default function ReadyEatScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 100 }}
         >
-          {readyEat.map((item) => {
+          {readyEat.map((item, index) => {
             const qty = getItemQty(item.id);
             const inCart = qty > 0;
 
             return (
-              <Pressable
+              <View
                 key={item.id}
-                className={s.itemRow}
-                style={{
-                  backgroundColor: item.color + "08",
-                  borderWidth: 1,
-                  borderColor: inCart ? item.color + "44" : item.color + "15",
-                }}
-                onPress={() => setSelected(item)}
+                style={{ marginBottom: index === readyEat.length - 1 ? 0 : 14 }}
               >
-                <View
-                  className={s.itemEmoji}
-                  style={{ backgroundColor: item.color + "12" }}
+                <Pressable
+                  className={s.itemRow}
+                  style={{
+                    backgroundColor: item.color + "08",
+                    borderWidth: 1,
+                    borderColor: inCart ? item.color + "44" : item.color + "15",
+                  }}
+                  onPress={() => setSelected(item)}
                 >
-                  <ProductImage
-                    imageUrl={item.imageUrl}
-                    emoji={item.emoji}
-                    size={48}
-                    borderRadius={6}
-                  />
-                </View>
+                  <View
+                    className={s.itemEmoji}
+                    style={{ backgroundColor: item.color + "12" }}
+                  >
+                    <ProductImage
+                      imageUrl={item.imageUrl}
+                      emoji={item.emoji}
+                      size={48}
+                      borderRadius={6}
+                    />
+                  </View>
 
-                <View style={{ flex: 1 }}>
-                  <Text
-                    className={s.itemKitchen}
-                    style={{ color: item.color + "99" }}
-                  >
-                    {item.kitchen.toUpperCase()}
-                  </Text>
-                  <Text
-                    className={s.itemName}
-                    style={{ color: palette.textPrimary }}
-                  >
-                    {item.name}
-                  </Text>
-                  <View className={s.itemMeta}>
+                  <View style={{ flex: 1 }}>
                     <Text
-                      className={s.itemTime}
-                      style={{ color: palette.textSecondary }}
+                      className={s.itemKitchen}
+                      style={{ color: item.color + "99" }}
                     >
-                      {item.deliveryTime}
+                      {item.kitchen.toUpperCase()}
                     </Text>
-                    {item.oldPrice && (
-                      <Text
-                        className={s.itemOldPrice}
-                        style={{ color: palette.textSecondary }}
-                      >
-                        {formatPrice(item.oldPrice)}
-                      </Text>
-                    )}
                     <Text
-                      className={s.itemPrice}
+                      className={s.itemName}
                       style={{ color: palette.textPrimary }}
                     >
-                      {formatPrice(item.price)}
+                      {item.name}
                     </Text>
+                    <View className={s.itemMeta}>
+                      <Text
+                        className={s.itemTime}
+                        style={{ color: palette.textSecondary }}
+                      >
+                        {item.deliveryTime}
+                      </Text>
+                      {item.oldPrice && (
+                        <Text
+                          className={s.itemOldPrice}
+                          style={{ color: palette.textSecondary }}
+                        >
+                          {formatPrice(item.oldPrice)}
+                        </Text>
+                      )}
+                      <Text
+                        className={s.itemPrice}
+                        style={{ color: palette.textPrimary }}
+                      >
+                        {formatPrice(item.price)}
+                      </Text>
+                    </View>
                   </View>
-                </View>
 
-                {!inCart ? (
-                  <Pressable
-                    className={s.addBtn}
-                    style={{
-                      borderWidth: 1,
-                      borderColor: item.color + "55",
-                    }}
-                    onPress={(e) => {
-                      e.stopPropagation?.();
-                      handleAdd(item);
-                    }}
-                  >
-                    <Text
+                  {!inCart ? (
+                    <Pressable
+                      className={s.addBtn}
                       style={{
-                        color: item.color,
-                        fontSize: 10,
-                        letterSpacing: 1,
-                        fontFamily: "NotoSerif_400Regular",
+                        borderWidth: 1,
+                        borderColor: item.color + "55",
+                      }}
+                      onPress={(e) => {
+                        e.stopPropagation?.();
+                        handleAdd(item);
                       }}
                     >
-                      ADD
-                    </Text>
-                  </Pressable>
-                ) : (
-                  <View className={s.stepperCol}>
-                    <View
-                      className={s.stepperRow}
-                      style={{ borderWidth: 1, borderColor: item.color + "44" }}
-                    >
-                      <Pressable
-                        className={s.stepperBtn}
+                      <Text
                         style={{
-                          backgroundColor:
-                            qty === 1 ? "#2a0a0a" : item.color + "12",
-                        }}
-                        onPress={(e) => {
-                          e.stopPropagation?.();
-                          if (qty === 1) removeItem(item.id);
-                          else updateQty(item.id, qty - 1);
+                          color: item.color,
+                          fontSize: 10,
+                          letterSpacing: 1,
+                          fontFamily: "NotoSerif_400Regular",
                         }}
                       >
-                        <Text
-                          style={{
-                            color: qty === 1 ? "#e85c3a" : item.color,
-                            fontFamily: "NotoSerif_400Regular",
-                          }}
-                        >
-                          {qty === 1 ? "×" : "−"}
-                        </Text>
-                      </Pressable>
-                      <Text className={s.stepperValue}>{qty}</Text>
-                      <Pressable
-                        className={s.stepperBtn}
-                        style={{ backgroundColor: item.color + "12" }}
-                        onPress={(e) => {
-                          e.stopPropagation?.();
-                          updateQty(item.id, qty + 1);
+                        ADD
+                      </Text>
+                    </Pressable>
+                  ) : (
+                    <View className={s.stepperCol}>
+                      <View
+                        className={s.stepperRow}
+                        style={{
+                          borderWidth: 1,
+                          borderColor: item.color + "44",
                         }}
                       >
-                        <Text
+                        <Pressable
+                          className={s.stepperBtn}
                           style={{
-                            color: item.color,
-                            fontFamily: "NotoSerif_400Regular",
+                            backgroundColor:
+                              qty === 1 ? "#2a0a0a" : item.color + "12",
+                          }}
+                          onPress={(e) => {
+                            e.stopPropagation?.();
+                            if (qty === 1) removeItem(item.id);
+                            else updateQty(item.id, qty - 1);
                           }}
                         >
-                          +
-                        </Text>
-                      </Pressable>
+                          <Text
+                            style={{
+                              color: qty === 1 ? "#e85c3a" : item.color,
+                              fontFamily: "NotoSerif_400Regular",
+                            }}
+                          >
+                            {qty === 1 ? "×" : "−"}
+                          </Text>
+                        </Pressable>
+                        <Text className={s.stepperValue}>{qty}</Text>
+                        <Pressable
+                          className={s.stepperBtn}
+                          style={{ backgroundColor: item.color + "12" }}
+                          onPress={(e) => {
+                            e.stopPropagation?.();
+                            updateQty(item.id, qty + 1);
+                          }}
+                        >
+                          <Text
+                            style={{
+                              color: item.color,
+                              fontFamily: "NotoSerif_400Regular",
+                            }}
+                          >
+                            +
+                          </Text>
+                        </Pressable>
+                      </View>
+                      <Text
+                        className={s.stepperLabel}
+                        style={{ color: item.color + "88" }}
+                      >
+                        {formatPrice(item.price * qty)}
+                      </Text>
                     </View>
-                    <Text
-                      className={s.stepperLabel}
-                      style={{ color: item.color + "88" }}
-                    >
-                      {formatPrice(item.price * qty)}
-                    </Text>
-                  </View>
-                )}
-              </Pressable>
+                  )}
+                </Pressable>
+              </View>
             );
           })}
 
