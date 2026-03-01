@@ -1,4 +1,6 @@
 import { Pressable, Text, View } from "react-native";
+import { getThemePalette } from "../../constants/appTheme";
+import { useThemeStore } from "../../stores/themeStore";
 import { restockMode as s } from "../../styles";
 import type { RestockItem } from "../../types";
 import { formatPrice } from "../../utils/format";
@@ -22,9 +24,15 @@ export default function ProductCard({
   onPress,
 }: ProductCardProps) {
   const inCart = qty > 0;
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
 
   return (
-    <Pressable className={s.itemRow} onPress={onPress}>
+    <Pressable
+      className={s.itemRow}
+      onPress={onPress}
+      style={{ backgroundColor: palette.card, borderColor: palette.border }}
+    >
       <Pressable
         className={`${s.itemThumb} ${inCart ? s.itemThumbActive : s.itemThumbInactive}`}
         onPress={onPress}
@@ -40,19 +48,27 @@ export default function ProductCard({
       <View style={{ flex: 1 }}>
         <Text
           className={`${s.itemName} ${inCart ? s.itemNameActive : s.itemNameInactive}`}
+          style={{ color: palette.textPrimary }}
         >
           {item.name}
         </Text>
-        <Text className={s.itemBrand}>{item.brand}</Text>
+        <Text className={s.itemBrand} style={{ color: palette.textSecondary }}>
+          {item.brand}
+        </Text>
         {inCart && (
-          <Text className={s.itemTotal}>
+          <Text
+            className={s.itemTotal}
+            style={{ color: palette.textSecondary }}
+          >
             {formatPrice(item.price * qty)} total
           </Text>
         )}
       </View>
 
       <View className={s.itemRight}>
-        <Text className={s.itemPrice}>{formatPrice(item.price)}</Text>
+        <Text className={s.itemPrice} style={{ color: palette.textPrimary }}>
+          {formatPrice(item.price)}
+        </Text>
 
         {qty === 0 ? (
           <Pressable
@@ -82,7 +98,12 @@ export default function ProductCard({
                 {qty === 1 ? "×" : "−"}
               </Text>
             </Pressable>
-            <Text className={s.stepperValue}>{qty}</Text>
+            <Text
+              className={s.stepperValue}
+              style={{ color: palette.textPrimary }}
+            >
+              {qty}
+            </Text>
             <Pressable
               className={s.stepperInc}
               onPress={(e) => {

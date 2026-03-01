@@ -8,7 +8,9 @@ import {
     TextInput,
     View,
 } from "react-native";
+import { getThemePalette } from "../../constants/appTheme";
 import { useAuth } from "../../hooks/useAuth";
+import { useThemeStore } from "../../stores/themeStore";
 import { authScreen as s } from "../../styles";
 import { OTP_LENGTH, OTP_RESEND_COOLDOWN_SECONDS } from "../../utils/constants";
 
@@ -21,6 +23,8 @@ export default function OTPScreen() {
   }>();
 
   const { verifyOtp, requestOtp, isLoading, error, clearError } = useAuth();
+  const modeTheme = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(modeTheme);
 
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [cooldown, setCooldown] = useState(OTP_RESEND_COOLDOWN_SECONDS);
@@ -154,7 +158,8 @@ export default function OTPScreen() {
           disabled={!isComplete || isLoading}
         >
           <Text
-            className={`text-[11px] tracking-wide-2xl font-mono font-bold text-center ${isComplete ? "text-black" : "text-[#2a3a2a]"}`}
+            className={`text-[11px] tracking-wide-2xl font-mono font-bold text-center ${isComplete ? "text-black" : ""}`}
+            style={!isComplete ? { color: palette.textSecondary } : undefined}
           >
             {isLoading ? "VERIFYING..." : "VERIFY →"}
           </Text>

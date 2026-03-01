@@ -7,9 +7,11 @@ import {
     Text,
     View,
 } from "react-native";
+import { getThemePalette } from "../../constants/appTheme";
 import { colors } from "../../constants/theme";
 import { useCart } from "../../hooks/useCart";
 import { useProducts } from "../../hooks/useProducts";
+import { useThemeStore } from "../../stores/themeStore";
 import { addMoreSheet as s } from "../../styles";
 import type { RestockItem } from "../../types";
 import ProductCard from "../cards/ProductCard";
@@ -33,6 +35,8 @@ export default function AddMoreItemsSheet({
   onItemSelected,
   onItemRemoved,
 }: AddMoreItemsSheetProps) {
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
   const { restockItems, restockCategories, isLoading, error, fetchRestock } =
     useProducts();
   const { addItem, getItemQty, updateQty, removeItem } = useCart();
@@ -129,13 +133,19 @@ export default function AddMoreItemsSheet({
   const categories = restockCategories.length > 0 ? restockCategories : ["All"];
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} heroColor="#070a12">
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      heroColor={palette.background}
+    >
       <View style={{ height: SHEET_HEIGHT }}>
         {/* Handle */}
         <View className={s.handle} />
 
         {/* Title */}
-        <Text className={s.title}>Add More Items</Text>
+        <Text className={s.title} style={{ color: palette.textPrimary }}>
+          Add More Items
+        </Text>
 
         {/* Search */}
         <View className={s.searchWrap}>
@@ -163,7 +173,10 @@ export default function AddMoreItemsSheet({
               >
                 <Text
                   style={{
-                    color: activeCat === cat ? "#6ec6ff" : "#5a7aaa",
+                    color:
+                      activeCat === cat
+                        ? colors.accent.blue
+                        : palette.textSecondary,
                     fontSize: 11,
                     letterSpacing: 1.2,
                     fontFamily: "NotoSerif_400Regular",
@@ -198,7 +211,7 @@ export default function AddMoreItemsSheet({
             >
               <Text
                 style={{
-                  color: "#3a5a8a",
+                  color: palette.textSecondary,
                   fontSize: 11,
                   letterSpacing: 1,
                   fontFamily: "NotoSerif_400Regular",
@@ -253,16 +266,16 @@ export default function AddMoreItemsSheet({
                         gap: 14,
                         paddingVertical: 15,
                         borderBottomWidth: 1,
-                        borderBottomColor: "#0d1220",
+                        borderBottomColor: palette.border,
                       }}
                     >
                       <View
                         style={{
                           width: 44,
                           height: 44,
-                          backgroundColor: "#0d1220",
+                          backgroundColor: palette.background,
                           borderWidth: 1,
-                          borderColor: wasAdded ? "#4caf7d33" : "#1a2540",
+                          borderColor: wasAdded ? "#4caf7d33" : palette.border,
                           alignItems: "center",
                           justifyContent: "center",
                         }}
@@ -279,7 +292,7 @@ export default function AddMoreItemsSheet({
                       <View style={{ flex: 1 }}>
                         <Text
                           style={{
-                            color: wasAdded ? "#f0f8f0" : "#c8d8f0",
+                            color: palette.textPrimary,
                             fontSize: 14,
                             fontFamily: "NotoSerif_400Regular",
                           }}
@@ -288,7 +301,7 @@ export default function AddMoreItemsSheet({
                         </Text>
                         <Text
                           style={{
-                            color: "#2a4060",
+                            color: palette.textSecondary,
                             fontSize: 9,
                             letterSpacing: 1,
                             marginTop: 3,
@@ -359,7 +372,7 @@ export default function AddMoreItemsSheet({
                           >
                             <Text
                               style={{
-                                color: "#f0f8f0",
+                                color: palette.textPrimary,
                                 fontSize: 11,
                                 fontFamily: "NotoSerif_400Regular",
                               }}

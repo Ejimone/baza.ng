@@ -1,4 +1,6 @@
 import { Pressable, Text, View } from "react-native";
+import { getThemePalette } from "../../constants/appTheme";
+import { useThemeStore } from "../../stores/themeStore";
 import { snacksDrinksMode as s } from "../../styles";
 import type { SnackItem } from "../../types";
 import { formatPrice } from "../../utils/format";
@@ -19,12 +21,17 @@ export default function SnackCard({
   onIncrement,
   onDecrement,
 }: SnackCardProps) {
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
   const inCart = qty > 0;
 
   return (
     <View
       className={`${s.card} ${inCart ? s.cardActive : s.cardInactive}`}
-      style={{ borderColor: inCart ? item.color + "44" : undefined }}
+      style={{
+        backgroundColor: palette.card,
+        borderColor: inCart ? item.color + "44" : palette.border,
+      }}
     >
       <ProductImage
         imageUrl={item.imageUrl}
@@ -32,13 +39,17 @@ export default function SnackCard({
         size={40}
         borderRadius={6}
       />
-      <Text className={s.cardName}>{item.name}</Text>
+      <Text className={s.cardName} style={{ color: palette.textPrimary }}>
+        {item.name}
+      </Text>
       <Text className={s.cardTag} style={{ color: item.color + "99" }}>
         {item.tag}
       </Text>
 
       <View className={s.cardFooter}>
-        <Text className={s.cardPrice}>{formatPrice(item.price)}</Text>
+        <Text className={s.cardPrice} style={{ color: palette.textPrimary }}>
+          {formatPrice(item.price)}
+        </Text>
 
         {qty === 0 ? (
           <Pressable
@@ -72,7 +83,12 @@ export default function SnackCard({
                 {qty === 1 ? "×" : "−"}
               </Text>
             </Pressable>
-            <Text className={s.stepperValue}>{qty}</Text>
+            <Text
+              className={s.stepperValue}
+              style={{ color: palette.textPrimary }}
+            >
+              {qty}
+            </Text>
             <Pressable className={s.stepperInc} onPress={onIncrement}>
               <Text
                 style={{ color: "#c77dff", fontFamily: "NotoSerif_400Regular" }}

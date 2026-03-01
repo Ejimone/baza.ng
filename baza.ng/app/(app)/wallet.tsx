@@ -3,23 +3,25 @@ import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Animated,
-  FlatList,
-  Keyboard,
-  Platform,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
+    ActivityIndicator,
+    Alert,
+    Animated,
+    FlatList,
+    Keyboard,
+    Platform,
+    Pressable,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 import ScreenWrapper from "../../components/layout/ScreenWrapper";
 import TransactionItem from "../../components/wallet/TransactionItem";
+import { getThemePalette } from "../../constants/appTheme";
 import { colors } from "../../constants/theme";
 import { useWallet } from "../../hooks/useWallet";
+import { useThemeStore } from "../../stores/themeStore";
 import { walletScreen as s } from "../../styles";
 import type { WalletTransaction, WalletTxnType } from "../../types";
 import { formatPrice } from "../../utils/format";
@@ -63,6 +65,8 @@ export default function WalletScreen() {
     startPolling,
     stopPolling,
   } = useWallet();
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
 
   const [copied, setCopied] = useState(false);
   const [showTopUp, setShowTopUp] = useState(false);
@@ -193,9 +197,24 @@ export default function WalletScreen() {
   const listHeader = (
     <View>
       <View className={s.balanceSection}>
-        <Text className={s.balanceLabel}>BAZA WALLET</Text>
-        <Text className={s.balanceAmount}>{formattedBalance}</Text>
-        <Text className={s.balanceAvailable}>AVAILABLE BALANCE</Text>
+        <Text
+          className={s.balanceLabel}
+          style={{ color: palette.textSecondary }}
+        >
+          BAZA WALLET
+        </Text>
+        <Text
+          className={s.balanceAmount}
+          style={{ color: palette.textPrimary }}
+        >
+          {formattedBalance}
+        </Text>
+        <Text
+          className={s.balanceAvailable}
+          style={{ color: palette.textSecondary }}
+        >
+          AVAILABLE BALANCE
+        </Text>
         <View className={s.topUpRow}>
           <Pressable
             className={s.topUpCardBtn}
@@ -205,11 +224,15 @@ export default function WalletScreen() {
           </Pressable>
           <Pressable
             className={s.topUpTransferBtn}
+            style={{ borderColor: palette.border }}
             onPress={() => {
               if (accountNumber) handleCopy();
             }}
           >
-            <Text className={s.topUpTransferBtnText}>
+            <Text
+              className={s.topUpTransferBtnText}
+              style={{ color: palette.textSecondary }}
+            >
               {copied ? "COPIED ✓" : "COPY ACCT NO."}
             </Text>
           </Pressable>
@@ -217,26 +240,47 @@ export default function WalletScreen() {
       </View>
 
       {accountNumber && (
-        <View className={s.acctBox}>
-          <Text className={s.acctLabel}>YOUR DEDICATED ACCOUNT</Text>
+        <View
+          className={s.acctBox}
+          style={{ backgroundColor: palette.card, borderColor: palette.border }}
+        >
+          <Text
+            className={s.acctLabel}
+            style={{ color: palette.textSecondary }}
+          >
+            YOUR DEDICATED ACCOUNT
+          </Text>
           <View className={s.acctRow}>
             <View>
-              <Text className={s.acctNumber}>{accountNumber}</Text>
-              <Text className={s.acctBank}>
+              <Text
+                className={s.acctNumber}
+                style={{ color: palette.textPrimary }}
+              >
+                {accountNumber}
+              </Text>
+              <Text
+                className={s.acctBank}
+                style={{ color: palette.textSecondary }}
+              >
                 {bankName ?? "PROVIDUS BANK"} · {accountName ?? "BAZA NG LTD"}
               </Text>
-              <Text className={s.acctHint}>
+              <Text
+                className={s.acctHint}
+                style={{ color: palette.textSecondary }}
+              >
                 Transfer here to fund your wallet instantly
               </Text>
             </View>
             <Pressable onPress={handleCopy}>
               <View
                 className={`${s.acctCopyBtn} ${copied ? s.acctCopyBtnActive : ""}`}
+                style={!copied ? { borderColor: palette.border } : undefined}
               >
                 <Text
                   className={
                     copied ? s.acctCopyBtnTextActive : s.acctCopyBtnText
                   }
+                  style={!copied ? { color: palette.textSecondary } : undefined}
                 >
                   {copied ? "COPIED ✓" : "COPY"}
                 </Text>
@@ -274,7 +318,7 @@ export default function WalletScreen() {
         <Text className={s.txTitle}>
           {activeFilter === "ALL" ? "TRANSACTION HISTORY" : activeFilter}
         </Text>
-        <Text className={s.txCount}>
+        <Text className={s.txCount} style={{ color: palette.textSecondary }}>
           {filteredTransactions.length} TRANSACTION
           {filteredTransactions.length !== 1 ? "S" : ""}
         </Text>
@@ -298,7 +342,12 @@ export default function WalletScreen() {
     <ScreenWrapper className="bg-[#060c07]">
       <View className={s.header}>
         <Pressable onPress={() => router.back()}>
-          <Text className={s.backButton}>← BACK</Text>
+          <Text
+            className={s.backButton}
+            style={{ color: palette.textSecondary }}
+          >
+            ← BACK
+          </Text>
         </Pressable>
       </View>
 
@@ -344,10 +393,29 @@ export default function WalletScreen() {
               keyboardShouldPersistTaps="handled"
               style={{ flexGrow: 0 }}
             >
-              <View className={s.topUpSheetInner}>
-                <View className={s.topUpHandle} />
-                <Text className={s.topUpLabel}>ADD FUNDS</Text>
-                <Text className={s.topUpTitle}>How much?</Text>
+              <View
+                className={s.topUpSheetInner}
+                style={{
+                  backgroundColor: palette.background,
+                  borderTopColor: palette.border,
+                }}
+              >
+                <View
+                  className={s.topUpHandle}
+                  style={{ backgroundColor: palette.border }}
+                />
+                <Text
+                  className={s.topUpLabel}
+                  style={{ color: palette.textSecondary }}
+                >
+                  ADD FUNDS
+                </Text>
+                <Text
+                  className={s.topUpTitle}
+                  style={{ color: palette.textPrimary }}
+                >
+                  How much?
+                </Text>
 
                 <View className={s.topUpGrid}>
                   {TOP_UP_AMOUNTS.map((amt) => (
@@ -363,7 +431,10 @@ export default function WalletScreen() {
                     >
                       <Text
                         style={{
-                          color: selectedAmt === amt ? "#4caf7d" : "#5a8a5a",
+                          color:
+                            selectedAmt === amt
+                              ? "#4caf7d"
+                              : palette.textSecondary,
                           fontFamily: "NotoSerif_400Regular",
                           fontSize: 13,
                         }}
@@ -379,12 +450,16 @@ export default function WalletScreen() {
                 </Text>
                 <View
                   className={`${s.topUpCustomRow} ${isCustom ? s.topUpCustomRowActive : ""}`}
+                  style={
+                    !isCustom ? { borderColor: palette.border } : undefined
+                  }
                 >
                   <Text className={s.topUpCustomPrefix}>₦</Text>
                   <TextInput
                     className={s.topUpCustomInput}
+                    style={{ color: palette.textPrimary }}
                     placeholder="e.g. 2500"
-                    placeholderTextColor="#2a4a2a"
+                    placeholderTextColor={palette.textSecondary}
                     keyboardType="decimal-pad"
                     value={customAmount}
                     onFocus={handleCustomFocus}
@@ -394,12 +469,29 @@ export default function WalletScreen() {
                 </View>
 
                 {accountNumber && (
-                  <View className={s.topUpTransferBox}>
-                    <Text className={s.topUpTransferLabel}>OR TRANSFER TO</Text>
-                    <Text className={s.topUpTransferNumber}>
+                  <View
+                    className={s.topUpTransferBox}
+                    style={{
+                      backgroundColor: palette.card,
+                      borderColor: palette.border,
+                    }}
+                  >
+                    <Text
+                      className={s.topUpTransferLabel}
+                      style={{ color: palette.textSecondary }}
+                    >
+                      OR TRANSFER TO
+                    </Text>
+                    <Text
+                      className={s.topUpTransferNumber}
+                      style={{ color: palette.textPrimary }}
+                    >
                       {accountNumber}
                     </Text>
-                    <Text className={s.topUpTransferBank}>
+                    <Text
+                      className={s.topUpTransferBank}
+                      style={{ color: palette.textSecondary }}
+                    >
                       {bankName ?? "PROVIDUS BANK"} ·{" "}
                       {accountName ?? "BAZA NG LTD"}
                     </Text>
@@ -419,7 +511,7 @@ export default function WalletScreen() {
                   ) : (
                     <Text
                       style={{
-                        color: canConfirm ? "#000" : "#2a3a2a",
+                        color: canConfirm ? "#000" : palette.textSecondary,
                         fontFamily: "NotoSerif_400Regular",
                         fontSize: 11,
                         fontWeight: "bold",
@@ -444,7 +536,10 @@ export default function WalletScreen() {
                 >
                   <Text
                     className={s.topUpCancelBtn}
-                    style={{ textAlign: "center" }}
+                    style={{
+                      textAlign: "center",
+                      color: palette.textSecondary,
+                    }}
                   >
                     CANCEL
                   </Text>

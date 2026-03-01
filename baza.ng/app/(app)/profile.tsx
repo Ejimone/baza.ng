@@ -3,22 +3,24 @@ import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Animated,
-  Keyboard,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
+    ActivityIndicator,
+    Alert,
+    Animated,
+    Keyboard,
+    Platform,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 import ScreenWrapper from "../../components/layout/ScreenWrapper";
 import WalletCard from "../../components/wallet/WalletCard";
+import { getThemePalette } from "../../constants/appTheme";
 import { useAuth } from "../../hooks/useAuth";
 import { useOrders } from "../../hooks/useOrders";
 import { useWallet } from "../../hooks/useWallet";
+import { useThemeStore } from "../../stores/themeStore";
 import { profileScreen as s } from "../../styles/index";
 import { formatPrice } from "../../utils/format";
 
@@ -36,6 +38,8 @@ export default function ProfileScreen() {
     verifyTopup,
   } = useWallet();
   const { orders, fetchOrders } = useOrders();
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
 
   const [showTopUp, setShowTopUp] = useState(false);
   const [selectedAmt, setSelectedAmt] = useState<number | null>(null);
@@ -185,19 +189,40 @@ export default function ProfileScreen() {
 
   return (
     <ScreenWrapper className="bg-[#060c07]">
-      <View className={s.header}>
+      <View className={s.header} style={{ borderBottomColor: palette.border }}>
         <Pressable onPress={() => router.back()}>
-          <Text className={s.backButton}>{"← HOME"}</Text>
+          <Text
+            className={s.backButton}
+            style={{ color: palette.textSecondary }}
+          >
+            {"← HOME"}
+          </Text>
         </Pressable>
         <View className={s.avatarRow}>
-          <View className={s.avatar}>
-            <Text className="text-[22px] font-serif">
+          <View
+            className={s.avatar}
+            style={{
+              backgroundColor: palette.card,
+              borderColor: palette.border,
+            }}
+          >
+            <Text
+              className="text-[22px] font-serif"
+              style={{ color: palette.textPrimary }}
+            >
               {user?.name ? user.name.charAt(0).toUpperCase() : "🌿"}
             </Text>
           </View>
           <View>
-            <Text className={s.userName}>{user?.name ?? "Member"}</Text>
-            <Text className={s.memberSince}>MEMBER SINCE {memberYear}</Text>
+            <Text className={s.userName} style={{ color: palette.textPrimary }}>
+              {user?.name ?? "Member"}
+            </Text>
+            <Text
+              className={s.memberSince}
+              style={{ color: palette.textSecondary }}
+            >
+              MEMBER SINCE {memberYear}
+            </Text>
           </View>
         </View>
       </View>
@@ -207,15 +232,37 @@ export default function ProfileScreen() {
 
         {/* DVA Account Box */}
         {accountNumber && (
-          <View className={s.acctBox}>
-            <Text className={s.acctLabel}>YOUR DEDICATED ACCOUNT</Text>
+          <View
+            className={s.acctBox}
+            style={{
+              backgroundColor: palette.card,
+              borderColor: palette.border,
+            }}
+          >
+            <Text
+              className={s.acctLabel}
+              style={{ color: palette.textSecondary }}
+            >
+              YOUR DEDICATED ACCOUNT
+            </Text>
             <View className={s.acctRow}>
               <View>
-                <Text className={s.acctNumber}>{accountNumber}</Text>
-                <Text className={s.acctBank}>
+                <Text
+                  className={s.acctNumber}
+                  style={{ color: palette.textPrimary }}
+                >
+                  {accountNumber}
+                </Text>
+                <Text
+                  className={s.acctBank}
+                  style={{ color: palette.textSecondary }}
+                >
                   {bankName ?? "PROVIDUS BANK"} · BAZA NG LTD
                 </Text>
-                <Text className={s.acctHint}>
+                <Text
+                  className={s.acctHint}
+                  style={{ color: palette.textSecondary }}
+                >
                   Transfer here to fund your wallet instantly
                 </Text>
               </View>
@@ -225,6 +272,14 @@ export default function ProfileScreen() {
                     copied
                       ? `${s.acctCopyBtn} ${s.acctCopyBtnActive}`
                       : s.acctCopyBtn
+                  }
+                  style={
+                    !copied
+                      ? {
+                          borderColor: palette.border,
+                          color: palette.textSecondary,
+                        }
+                      : undefined
                   }
                 >
                   {copied ? "COPIED ✓" : "COPY"}
@@ -239,34 +294,74 @@ export default function ProfileScreen() {
           <Pressable
             key={row.label}
             className={s.navRow}
+            style={{
+              backgroundColor: palette.card,
+              borderColor: palette.border,
+            }}
             onPress={() => router.push(row.route as any)}
           >
             <View className="flex-row items-center gap-3.5">
               <Text className={s.navRowIcon}>{row.icon}</Text>
               <View>
-                <Text className={s.navRowLabel}>{row.label}</Text>
-                <Text className={s.navRowSub}>{row.sub}</Text>
+                <Text
+                  className={s.navRowLabel}
+                  style={{ color: palette.textPrimary }}
+                >
+                  {row.label}
+                </Text>
+                <Text
+                  className={s.navRowSub}
+                  style={{ color: palette.textSecondary }}
+                >
+                  {row.sub}
+                </Text>
               </View>
             </View>
-            <Text className={s.navRowChevron}>{"›"}</Text>
+            <Text
+              className={s.navRowChevron}
+              style={{ color: palette.textSecondary }}
+            >
+              {"›"}
+            </Text>
           </Pressable>
         ))}
 
         {/* Settings divider */}
-        <Text className={s.settingsLabel}>SETTINGS</Text>
+        <Text
+          className={s.settingsLabel}
+          style={{ color: palette.textSecondary }}
+        >
+          SETTINGS
+        </Text>
 
         <Pressable
           className={s.settingsRow}
+          style={{ backgroundColor: palette.card, borderColor: palette.border }}
           onPress={() => router.push("/(app)/settings/account" as any)}
         >
           <View className="flex-row items-center gap-3.5">
             <Text className={s.settingsIcon}>{"⚙️"}</Text>
             <View>
-              <Text className={s.settingsRowLabel}>Account Settings</Text>
-              <Text className={s.settingsRowSub}>NAME · EMAIL · PHONE</Text>
+              <Text
+                className={s.settingsRowLabel}
+                style={{ color: palette.textPrimary }}
+              >
+                Account Settings
+              </Text>
+              <Text
+                className={s.settingsRowSub}
+                style={{ color: palette.textSecondary }}
+              >
+                NAME · EMAIL · PHONE
+              </Text>
             </View>
           </View>
-          <Text className={s.navRowChevron}>{"›"}</Text>
+          <Text
+            className={s.navRowChevron}
+            style={{ color: palette.textSecondary }}
+          >
+            {"›"}
+          </Text>
         </Pressable>
 
         {/* Sign Out */}
@@ -295,10 +390,29 @@ export default function ProfileScreen() {
           <Animated.View
             style={{ transform: [{ translateY: keyboardTranslateY }] }}
           >
-            <View className={s.topUpSheetInner}>
-              <View className={s.topUpHandle} />
-              <Text className={s.topUpLabel}>ADD FUNDS</Text>
-              <Text className={s.topUpTitle}>How much?</Text>
+            <View
+              className={s.topUpSheetInner}
+              style={{
+                backgroundColor: palette.background,
+                borderTopColor: palette.border,
+              }}
+            >
+              <View
+                className={s.topUpHandle}
+                style={{ backgroundColor: palette.border }}
+              />
+              <Text
+                className={s.topUpLabel}
+                style={{ color: palette.textSecondary }}
+              >
+                ADD FUNDS
+              </Text>
+              <Text
+                className={s.topUpTitle}
+                style={{ color: palette.textPrimary }}
+              >
+                How much?
+              </Text>
 
               <View className={s.topUpGrid}>
                 {TOP_UP_AMOUNTS.map((amt) => (
@@ -316,7 +430,12 @@ export default function ProfileScreen() {
                       className={
                         selectedAmt === amt
                           ? "text-[#4caf7d] text-[13px] font-mono"
-                          : "text-[#5a8a5a] text-[13px] font-mono"
+                          : "text-[13px] font-mono"
+                      }
+                      style={
+                        selectedAmt === amt
+                          ? undefined
+                          : { color: palette.textSecondary }
                       }
                     >
                       {formatPrice(amt)}
@@ -328,12 +447,14 @@ export default function ProfileScreen() {
               <Text className={s.topUpCustomLabel}>OR ENTER CUSTOM AMOUNT</Text>
               <View
                 className={`${s.topUpCustomRow} ${isCustom ? s.topUpCustomRowActive : ""}`}
+                style={!isCustom ? { borderColor: palette.border } : undefined}
               >
                 <Text className={s.topUpCustomPrefix}>₦</Text>
                 <TextInput
                   className={s.topUpCustomInput}
+                  style={{ color: palette.textPrimary }}
                   placeholder="e.g. 2500"
-                  placeholderTextColor="#2a4a2a"
+                  placeholderTextColor={palette.textSecondary}
                   keyboardType="decimal-pad"
                   value={customAmount}
                   onFocus={handleCustomFocus}
@@ -343,10 +464,29 @@ export default function ProfileScreen() {
               </View>
 
               {accountNumber && (
-                <View className={s.topUpTransferBox}>
-                  <Text className={s.topUpTransferLabel}>TRANSFER TO</Text>
-                  <Text className={s.topUpTransferNumber}>{accountNumber}</Text>
-                  <Text className={s.topUpTransferBank}>
+                <View
+                  className={s.topUpTransferBox}
+                  style={{
+                    backgroundColor: palette.card,
+                    borderColor: palette.border,
+                  }}
+                >
+                  <Text
+                    className={s.topUpTransferLabel}
+                    style={{ color: palette.textSecondary }}
+                  >
+                    TRANSFER TO
+                  </Text>
+                  <Text
+                    className={s.topUpTransferNumber}
+                    style={{ color: palette.textPrimary }}
+                  >
+                    {accountNumber}
+                  </Text>
+                  <Text
+                    className={s.topUpTransferBank}
+                    style={{ color: palette.textSecondary }}
+                  >
                     {bankName ?? "PROVIDUS BANK"} · BAZA NG LTD
                   </Text>
                 </View>
@@ -367,7 +507,10 @@ export default function ProfileScreen() {
                     className={
                       canConfirm
                         ? "text-black text-[11px] tracking-[0.3em] font-mono font-bold"
-                        : "text-[#2a3a2a] text-[11px] tracking-[0.3em] font-mono font-bold"
+                        : "text-[11px] tracking-[0.3em] font-mono font-bold"
+                    }
+                    style={
+                      canConfirm ? undefined : { color: palette.textSecondary }
                     }
                   >
                     {canConfirm
@@ -387,7 +530,7 @@ export default function ProfileScreen() {
               >
                 <Text
                   className={s.topUpCancelBtn}
-                  style={{ textAlign: "center" }}
+                  style={{ textAlign: "center", color: palette.textSecondary }}
                 >
                   CANCEL
                 </Text>

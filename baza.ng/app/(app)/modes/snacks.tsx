@@ -9,9 +9,11 @@ import {
 } from "react-native";
 import SnackCard from "../../../components/cards/SnackCard";
 import FloatingCart from "../../../components/ui/FloatingCart";
+import { getThemePalette } from "../../../constants/appTheme";
 import { colors } from "../../../constants/theme";
 import { useCart } from "../../../hooks/useCart";
 import { useProducts } from "../../../hooks/useProducts";
+import { useThemeStore } from "../../../stores/themeStore";
 import { snacksDrinksMode as s } from "../../../styles";
 import type { SnackItem } from "../../../types";
 import { SNACK_CATEGORIES } from "../../../utils/constants";
@@ -20,6 +22,8 @@ export default function SnacksScreen() {
   const router = useRouter();
   const { snacks, isLoading, error, fetchSnacks } = useProducts();
   const { addItem, getItemQty, updateQty, removeItem } = useCart();
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
   const [activeCat, setActiveCat] = useState("All");
 
   useEffect(() => {
@@ -57,13 +61,25 @@ export default function SnacksScreen() {
   );
 
   return (
-    <View className={s.container}>
+    <View
+      className={s.container}
+      style={{ backgroundColor: palette.background }}
+    >
       <View className={s.header}>
         <Pressable onPress={() => router.back()}>
-          <Text className={s.backButton}>← BACK</Text>
+          <Text
+            className={s.backButton}
+            style={{ color: palette.textSecondary }}
+          >
+            ← BACK
+          </Text>
         </Pressable>
-        <Text className={s.title}>Quickies</Text>
-        <Text className={s.subtitle}>IMPULSE BUYS · GRAB & GO</Text>
+        <Text className={s.title} style={{ color: palette.textPrimary }}>
+          Quickies
+        </Text>
+        <Text className={s.subtitle} style={{ color: palette.textSecondary }}>
+          IMPULSE BUYS · GRAB & GO
+        </Text>
       </View>
 
       <ScrollView
@@ -77,11 +93,22 @@ export default function SnacksScreen() {
             <Pressable
               key={cat}
               className={`${s.catButton} ${activeCat === cat ? s.catButtonActive : s.catButtonInactive}`}
+              style={{
+                backgroundColor:
+                  activeCat === cat
+                    ? `${colors.accent.purple}18`
+                    : "transparent",
+                borderWidth: 1,
+                borderColor:
+                  activeCat === cat
+                    ? `${colors.accent.purple}66`
+                    : palette.border,
+              }}
               onPress={() => setActiveCat(cat)}
             >
               <Text
                 style={{
-                  color: activeCat === cat ? "#c77dff" : "#4a2a6a",
+                  color: activeCat === cat ? "#c77dff" : palette.textSecondary,
                   fontSize: 9,
                   letterSpacing: 1,
                   fontFamily: "NotoSerif_400Regular",
@@ -106,7 +133,7 @@ export default function SnacksScreen() {
         >
           <Text
             style={{
-              color: "#3a1a5a",
+              color: palette.textSecondary,
               fontSize: 11,
               letterSpacing: 1,
               fontFamily: "NotoSerif_400Regular",
@@ -133,7 +160,7 @@ export default function SnacksScreen() {
         >
           <Text
             style={{
-              color: "#3a1a5a",
+              color: palette.textSecondary,
               fontSize: 11,
               letterSpacing: 1,
               textAlign: "center",

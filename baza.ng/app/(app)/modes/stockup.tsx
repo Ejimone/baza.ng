@@ -1,23 +1,27 @@
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
+    ActivityIndicator,
+    Pressable,
+    ScrollView,
+    Text,
+    View,
 } from "react-native";
 import BundleCard from "../../../components/cards/BundleCard";
 import FloatingCart from "../../../components/ui/FloatingCart";
+import { getThemePalette } from "../../../constants/appTheme";
 import { colors } from "../../../constants/theme";
 import { useCart } from "../../../hooks/useCart";
 import { useProducts } from "../../../hooks/useProducts";
+import { useThemeStore } from "../../../stores/themeStore";
 import { stockUpMode as s } from "../../../styles";
 
 export default function StockUpScreen() {
   const router = useRouter();
   const { bundles, isLoading, error, fetchBundles } = useProducts();
   const { isInCart } = useCart();
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
 
   useEffect(() => {
     fetchBundles();
@@ -45,7 +49,7 @@ export default function StockUpScreen() {
         >
           <Text
             style={{
-              color: "#2a4a2a",
+              color: palette.textSecondary,
               fontSize: 11,
               letterSpacing: 1,
               fontFamily: "NotoSerif_400Regular",
@@ -72,7 +76,7 @@ export default function StockUpScreen() {
         >
           <Text
             style={{
-              color: "#2a4a2a",
+              color: palette.textSecondary,
               fontSize: 11,
               letterSpacing: 1,
               textAlign: "center",

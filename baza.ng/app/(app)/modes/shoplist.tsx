@@ -15,9 +15,11 @@ import ProductCard from "../../../components/cards/ProductCard";
 import FloatingCart from "../../../components/ui/FloatingCart";
 import ProductImage from "../../../components/ui/ProductImage";
 import SearchBar from "../../../components/ui/SearchBar";
+import { getThemePalette } from "../../../constants/appTheme";
 import { colors } from "../../../constants/theme";
 import { useCart } from "../../../hooks/useCart";
 import { useProducts } from "../../../hooks/useProducts";
+import { useThemeStore } from "../../../stores/themeStore";
 import { restockMode as s } from "../../../styles";
 import type { RestockItem } from "../../../types";
 import { formatPrice } from "../../../utils/format";
@@ -27,6 +29,8 @@ export default function ShopListScreen() {
   const { restockItems, restockCategories, isLoading, error, fetchRestock } =
     useProducts();
   const { addItem, getItemQty, updateQty, removeItem } = useCart();
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
 
   const [query, setQuery] = useState("");
   const [activeCat, setActiveCat] = useState("All");
@@ -86,19 +90,34 @@ export default function ShopListScreen() {
   const categories = restockCategories.length > 0 ? restockCategories : ["All"];
 
   return (
-    <View className={s.container}>
-      <View className={s.header}>
+    <View
+      className={s.container}
+      style={{ backgroundColor: palette.background }}
+    >
+      <View
+        className={s.header}
+        style={{ borderBottomWidth: 1, borderBottomColor: palette.border }}
+      >
         <Pressable onPress={() => router.back()}>
-          <Text className={s.backButton}>← BACK</Text>
+          <Text
+            className={s.backButton}
+            style={{ color: palette.textSecondary }}
+          >
+            ← BACK
+          </Text>
         </Pressable>
-        <Text className={s.title}>Quick Restock</Text>
+        <Text className={s.title} style={{ color: palette.textPrimary }}>
+          Quick Restock
+        </Text>
 
         <SearchBar
           value={query}
           onChangeText={handleQueryChange}
           placeholder="What do you need?"
         />
-        <Text className={s.searchHint}>SEARCH OR BROWSE BY CATEGORY</Text>
+        <Text className={s.searchHint} style={{ color: palette.textSecondary }}>
+          SEARCH OR BROWSE BY CATEGORY
+        </Text>
       </View>
 
       <ScrollView
@@ -116,7 +135,10 @@ export default function ShopListScreen() {
             >
               <Text
                 style={{
-                  color: activeCat === cat ? "#6ec6ff" : "#3a5a8a",
+                  color:
+                    activeCat === cat
+                      ? colors.accent.blue
+                      : palette.textSecondary,
                   fontSize: 9,
                   letterSpacing: 1,
                   fontFamily: "NotoSerif_400Regular",
@@ -141,7 +163,7 @@ export default function ShopListScreen() {
         >
           <Text
             style={{
-              color: "#3a5a8a",
+              color: palette.textSecondary,
               fontSize: 11,
               letterSpacing: 1,
               fontFamily: "NotoSerif_400Regular",
@@ -169,7 +191,12 @@ export default function ShopListScreen() {
         <View
           style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
         >
-          <Text className={s.emptyText}>NOT IN STOCK YET.</Text>
+          <Text
+            className={s.emptyText}
+            style={{ color: palette.textSecondary }}
+          >
+            NOT IN STOCK YET.
+          </Text>
         </View>
       ) : (
         <ScrollView
@@ -208,6 +235,8 @@ export default function ShopListScreen() {
           onDecrement={() =>
             handleSetQty(selectedItem, getItemQty(selectedItem.id) - 1)
           }
+          palette={palette}
+          isLight={mode === "light"}
         />
       ) : null}
     </View>
@@ -221,6 +250,8 @@ function RestockItemPopup({
   onAdd,
   onIncrement,
   onDecrement,
+  palette,
+  isLight,
 }: {
   item: RestockItem;
   qty: number;
@@ -228,6 +259,8 @@ function RestockItemPopup({
   onAdd: () => void;
   onIncrement: () => void;
   onDecrement: () => void;
+  palette: ReturnType<typeof getThemePalette>;
+  isLight: boolean;
 }) {
   const [imagePreview, setImagePreview] = useState(false);
 
@@ -239,7 +272,12 @@ function RestockItemPopup({
       statusBarTranslucent
       onRequestClose={onClose}
     >
-      <StatusBar backgroundColor="rgba(0,0,0,0.92)" barStyle="light-content" />
+      <StatusBar
+        backgroundColor={
+          isLight ? "rgba(255,255,255,0.92)" : "rgba(0,0,0,0.92)"
+        }
+        barStyle={isLight ? "dark-content" : "light-content"}
+      />
 
       <Modal
         visible={imagePreview}
@@ -248,12 +286,24 @@ function RestockItemPopup({
         statusBarTranslucent
         onRequestClose={() => setImagePreview(false)}
       >
-        <View style={popupStyles.previewBackdrop}>
+        <View
+          style={[
+            popupStyles.previewBackdrop,
+            { backgroundColor: isLight ? "#ffffff" : "#000000" },
+          ]}
+        >
           <Pressable
             style={popupStyles.previewCloseBtn}
             onPress={() => setImagePreview(false)}
           >
-            <Text style={popupStyles.previewCloseText}>×</Text>
+            <Text
+              style={[
+                popupStyles.previewCloseText,
+                { color: palette.textPrimary },
+              ]}
+            >
+              ×
+            </Text>
           </Pressable>
           {item.imageUrl ? (
             <Image
@@ -267,12 +317,43 @@ function RestockItemPopup({
         </View>
       </Modal>
 
-      <View style={popupStyles.overlay}>
+      <View
+        style={[
+          popupStyles.overlay,
+          {
+            backgroundColor: isLight
+              ? "rgba(255,255,255,0.92)"
+              : "rgba(0,0,0,0.92)",
+          },
+        ]}
+      >
         <Pressable style={{ flex: 1 }} onPress={onClose} />
 
-        <View style={popupStyles.sheet}>
-          <Pressable style={popupStyles.closeBtn} onPress={onClose}>
-            <Text style={popupStyles.closeText}>×</Text>
+        <View
+          style={[
+            popupStyles.sheet,
+            {
+              backgroundColor: palette.card,
+              borderColor: palette.border,
+            },
+          ]}
+        >
+          <Pressable
+            style={[
+              popupStyles.closeBtn,
+              {
+                backgroundColor: isLight
+                  ? "rgba(0,0,0,0.08)"
+                  : "rgba(255,255,255,0.08)",
+              },
+            ]}
+            onPress={onClose}
+          >
+            <Text
+              style={[popupStyles.closeText, { color: palette.textSecondary }]}
+            >
+              ×
+            </Text>
           </Pressable>
 
           <Pressable
@@ -287,26 +368,56 @@ function RestockItemPopup({
             />
             {item.imageUrl ? (
               <View style={popupStyles.tapHint}>
-                <Text style={popupStyles.tapHintText}>TAP TO PREVIEW</Text>
+                <Text
+                  style={[
+                    popupStyles.tapHintText,
+                    {
+                      color: isLight
+                        ? "rgba(0,0,0,0.6)"
+                        : "rgba(255,255,255,0.6)",
+                    },
+                  ]}
+                >
+                  TAP TO PREVIEW
+                </Text>
               </View>
             ) : null}
           </Pressable>
 
-          <Text style={popupStyles.name}>{item.name}</Text>
-          <Text style={popupStyles.brand}>{item.brand}</Text>
+          <Text style={[popupStyles.name, { color: palette.textPrimary }]}>
+            {item.name}
+          </Text>
+          <Text style={[popupStyles.brand, { color: palette.textSecondary }]}>
+            {item.brand}
+          </Text>
 
           <View style={popupStyles.priceRow}>
-            <Text style={popupStyles.price}>{formatPrice(item.price)}</Text>
+            <Text style={[popupStyles.price, { color: palette.textPrimary }]}>
+              {formatPrice(item.price)}
+            </Text>
             {qty > 0 ? (
-              <Text style={popupStyles.total}>
+              <Text style={[popupStyles.total, { color: colors.accent.blue }]}>
                 {formatPrice(item.price * qty)} total
               </Text>
             ) : null}
           </View>
 
           {qty === 0 ? (
-            <Pressable style={popupStyles.addBtn} onPress={onAdd}>
-              <Text style={popupStyles.addBtnText}>ADD TO CART</Text>
+            <Pressable
+              style={[
+                popupStyles.addBtn,
+                {
+                  borderColor: `${colors.accent.blue}66`,
+                  backgroundColor: isLight ? "#e8f4ff" : "#102034",
+                },
+              ]}
+              onPress={onAdd}
+            >
+              <Text
+                style={[popupStyles.addBtnText, { color: colors.accent.blue }]}
+              >
+                ADD TO CART
+              </Text>
             </Pressable>
           ) : (
             <View style={popupStyles.stepperRow}>
@@ -316,6 +427,16 @@ function RestockItemPopup({
                   qty === 1
                     ? popupStyles.stepperDanger
                     : popupStyles.stepperNormal,
+                  {
+                    backgroundColor:
+                      qty === 1
+                        ? isLight
+                          ? "#ffeaea"
+                          : "#1a0a0a"
+                        : isLight
+                          ? "#e8f4ff"
+                          : "#0d1a2a",
+                  },
                 ]}
                 onPress={onDecrement}
               >
@@ -330,9 +451,20 @@ function RestockItemPopup({
                   {qty === 1 ? "×" : "−"}
                 </Text>
               </Pressable>
-              <Text style={popupStyles.stepperValue}>{qty}</Text>
+              <Text
+                style={[
+                  popupStyles.stepperValue,
+                  { color: palette.textPrimary },
+                ]}
+              >
+                {qty}
+              </Text>
               <Pressable
-                style={[popupStyles.stepperBtn, popupStyles.stepperNormal]}
+                style={[
+                  popupStyles.stepperBtn,
+                  popupStyles.stepperNormal,
+                  { backgroundColor: isLight ? "#e8f4ff" : "#0d1a2a" },
+                ]}
                 onPress={onIncrement}
               >
                 <Text

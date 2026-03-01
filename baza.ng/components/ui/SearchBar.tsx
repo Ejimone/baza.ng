@@ -1,6 +1,8 @@
 import { MagnifyingGlass } from "phosphor-react-native";
 import { useEffect, useRef } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
+import { getThemePalette } from "../../constants/appTheme";
+import { useThemeStore } from "../../stores/themeStore";
 import { restockMode as s } from "../../styles";
 
 interface SearchBarProps {
@@ -22,6 +24,8 @@ export default function SearchBar({
 }: SearchBarProps) {
   const inputRef = useRef<TextInput>(null);
   const isUniversal = variant === "universal";
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
 
   useEffect(() => {
     if (autoFocus) {
@@ -32,40 +36,35 @@ export default function SearchBar({
   return (
     <View
       className={isUniversal ? undefined : s.searchBox}
-      style={
-        isUniversal
-          ? {
-              backgroundColor: "#0d1a0f",
-              borderWidth: 1,
-              borderColor: "#1a2a1c",
-              flexDirection: "row",
-              alignItems: "center",
-              minHeight: 52,
-              paddingVertical: 12,
-              paddingHorizontal: 14,
-              gap: 10,
-            }
-          : undefined
-      }
+      style={{
+        backgroundColor: palette.card,
+        borderWidth: 1,
+        borderColor: palette.border,
+        flexDirection: "row",
+        alignItems: "center",
+        minHeight: 52,
+        paddingVertical: 12,
+        paddingHorizontal: 14,
+        gap: 10,
+      }}
     >
-      <MagnifyingGlass size={18} color={isUniversal ? "#4caf7d" : "#3a5a8a"} />
+      <MagnifyingGlass
+        size={18}
+        color={isUniversal ? "#4caf7d" : palette.textSecondary}
+      />
       <TextInput
         ref={inputRef}
         className={isUniversal ? undefined : s.searchInput}
-        style={
-          isUniversal
-            ? {
-                flex: 1,
-                color: "#d9e8dc",
-                fontSize: 14,
-                fontFamily: "NotoSerif_400Regular",
-              }
-            : undefined
-        }
+        style={{
+          flex: 1,
+          color: palette.textPrimary,
+          fontSize: isUniversal ? 14 : 13,
+          fontFamily: "NotoSerif_400Regular",
+        }}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={isUniversal ? "#3a5c3a" : "#3a5a8a"}
+        placeholderTextColor={palette.textSecondary}
         returnKeyType="search"
       />
       {value.length > 0 && (
@@ -85,7 +84,12 @@ export default function SearchBar({
                     lineHeight: 18,
                     fontFamily: "NotoSerif_400Regular",
                   }
-                : undefined
+                : {
+                    color: palette.textSecondary,
+                    fontSize: 18,
+                    lineHeight: 18,
+                    fontFamily: "NotoSerif_400Regular",
+                  }
             }
           >
             ×

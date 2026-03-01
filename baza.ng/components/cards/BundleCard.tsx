@@ -1,4 +1,6 @@
 import { Pressable, Text, View } from "react-native";
+import { getThemePalette } from "../../constants/appTheme";
+import { useThemeStore } from "../../stores/themeStore";
 import { stockUpMode as s } from "../../styles";
 import type { Bundle } from "../../types";
 import { formatPrice } from "../../utils/format";
@@ -15,6 +17,9 @@ export default function BundleCard({
   onPress,
   isInCart,
 }: BundleCardProps) {
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
+
   return (
     <Pressable
       className={s.bundleButton}
@@ -33,11 +38,15 @@ export default function BundleCard({
       />
 
       <View style={{ flex: 1 }}>
-        <Text className={s.bundleTitle}>{bundle.name}</Text>
+        <Text className={s.bundleTitle} style={{ color: palette.textPrimary }}>
+          {bundle.name}
+        </Text>
         <Text className={s.bundleMeta} style={{ color: bundle.color + "aa" }}>
           {bundle.items.length} items · {bundle.savings}% savings
         </Text>
-        <Text className={s.bundleDesc}>{bundle.description}</Text>
+        <Text className={s.bundleDesc} style={{ color: palette.textSecondary }}>
+          {bundle.description}
+        </Text>
         {isInCart ? (
           <Text className={s.bundleInCart}>✓ IN CART</Text>
         ) : (
@@ -51,7 +60,9 @@ export default function BundleCard({
       </View>
 
       <View className={s.bundlePriceCol}>
-        <Text className={s.bundlePrice}>{formatPrice(bundle.basePrice)}</Text>
+        <Text className={s.bundlePrice} style={{ color: palette.textPrimary }}>
+          {formatPrice(bundle.basePrice)}
+        </Text>
       </View>
     </Pressable>
   );

@@ -1,5 +1,7 @@
 import { Image, Pressable, Text, View } from "react-native";
+import { getThemePalette } from "../../constants/appTheme";
 import { colors } from "../../constants/theme";
+import { useThemeStore } from "../../stores/themeStore";
 import { ordersScreen as styles } from "../../styles/index";
 import type { Order, OrderStatus } from "../../types";
 import { optimizedUrl } from "../../utils/cloudinary";
@@ -12,11 +14,17 @@ interface OrderCardProps {
 }
 
 export default function OrderCard({ order, onPress }: OrderCardProps) {
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
   const statusColor =
     colors.status[order.status as OrderStatus] ?? colors.accent.green;
 
   return (
-    <Pressable className={styles.orderCard} onPress={() => onPress(order.id)}>
+    <Pressable
+      className={styles.orderCard}
+      style={{ backgroundColor: palette.card, borderColor: palette.border }}
+      onPress={() => onPress(order.id)}
+    >
       <View className={styles.orderHeader}>
         <View>
           <Text className={styles.orderId}>
@@ -74,7 +82,10 @@ export default function OrderCard({ order, onPress }: OrderCardProps) {
 
       {order.note ? (
         <View className={styles.orderNote}>
-          <Text className="text-[10px] text-[#3a5c3a] leading-relaxed tracking-[0.05em] font-mono">
+          <Text
+            className="text-[10px] leading-relaxed tracking-[0.05em] font-mono"
+            style={{ color: palette.textSecondary }}
+          >
             {'💬 "'}
             {order.note}
             {'"'}

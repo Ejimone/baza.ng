@@ -1,19 +1,23 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    Text,
-    TextInput,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
+import { getThemePalette } from "../../constants/appTheme";
 import { useAuth } from "../../hooks/useAuth";
+import { useThemeStore } from "../../stores/themeStore";
 import { authScreen as s } from "../../styles";
 
 export default function SignInScreen() {
   const [phone, setPhone] = useState("");
   const { requestOtp, isLoading, error, clearError } = useAuth();
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
 
   const isValid = phone.replace(/\s/g, "").length >= 8;
 
@@ -50,7 +54,7 @@ export default function SignInScreen() {
           value={phone}
           onChangeText={setPhone}
           placeholder="+234 800 000 0000"
-          placeholderTextColor="#2a4a2a"
+          placeholderTextColor={palette.textSecondary}
           keyboardType="phone-pad"
           autoFocus
           className={s.signinInput}
@@ -68,14 +72,15 @@ export default function SignInScreen() {
           disabled={!isValid || isLoading}
         >
           <Text
-            className={`text-[11px] tracking-wide-2xl font-mono font-bold text-center ${isValid ? "text-black" : "text-[#2a3a2a]"}`}
+            className={`text-[11px] tracking-wide-2xl font-mono font-bold text-center ${isValid ? "text-black" : ""}`}
+            style={!isValid ? { color: palette.textSecondary } : undefined}
           >
             {isLoading ? "SENDING..." : "SEND CODE"}
           </Text>
         </Pressable>
 
         <Text className={s.signinSwitch}>
-          Don't have an account?{" "}
+          Don’t have an account?{" "}
           <Text
             onPress={() => router.replace("/(auth)/signup")}
             className={s.signinSwitchLink}

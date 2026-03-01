@@ -1,36 +1,55 @@
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import {
-    ActivityIndicator,
-    Pressable,
-    ScrollView,
-    Text,
-    View,
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
 } from "react-native";
 import MealPackCard from "../../../components/cards/MealPackCard";
 import FloatingCart from "../../../components/ui/FloatingCart";
+import { getThemePalette } from "../../../constants/appTheme";
 import { colors } from "../../../constants/theme";
 import { useCart } from "../../../hooks/useCart";
 import { useProducts } from "../../../hooks/useProducts";
+import { useThemeStore } from "../../../stores/themeStore";
 import { tonightMode as s } from "../../../styles";
 
 export default function CookMealScreen() {
   const router = useRouter();
   const { mealPacks, isLoading, error, fetchMealPacks } = useProducts();
   const { isInCart } = useCart();
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
 
   useEffect(() => {
     fetchMealPacks();
   }, []);
 
   return (
-    <View className={s.container}>
-      <View className={s.header}>
+    <View
+      className={s.container}
+      style={{ backgroundColor: palette.background }}
+    >
+      <View
+        className={s.header}
+        style={{ borderBottomWidth: 1, borderBottomColor: palette.border }}
+      >
         <Pressable onPress={() => router.back()}>
-          <Text className={s.backButton}>← BACK</Text>
+          <Text
+            className={s.backButton}
+            style={{ color: palette.textSecondary }}
+          >
+            ← BACK
+          </Text>
         </Pressable>
-        <Text className={s.title}>Cook a Meal</Text>
-        <Text className={s.subtitle}>CHOOSE A MEAL PACK · SET YOUR PLATES</Text>
+        <Text className={s.title} style={{ color: palette.textPrimary }}>
+          Cook a Meal
+        </Text>
+        <Text className={s.subtitle} style={{ color: palette.textSecondary }}>
+          CHOOSE A MEAL PACK · SET YOUR PLATES
+        </Text>
       </View>
 
       {isLoading && mealPacks.length === 0 ? (
@@ -45,7 +64,7 @@ export default function CookMealScreen() {
         >
           <Text
             style={{
-              color: "#4a6a2a",
+              color: palette.textSecondary,
               fontSize: 11,
               letterSpacing: 1,
               fontFamily: "NotoSerif_400Regular",
@@ -72,7 +91,7 @@ export default function CookMealScreen() {
         >
           <Text
             style={{
-              color: "#4a6a2a",
+              color: palette.textSecondary,
               fontSize: 11,
               letterSpacing: 1,
               textAlign: "center",

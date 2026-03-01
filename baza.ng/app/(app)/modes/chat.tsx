@@ -9,7 +9,9 @@ import {
     TextInput,
     View,
 } from "react-native";
+import { getThemePalette } from "../../../constants/appTheme";
 import * as supportService from "../../../services/support";
+import { useThemeStore } from "../../../stores/themeStore";
 import { chatMode as s } from "../../../styles";
 import type { SupportMessage } from "../../../types";
 
@@ -28,6 +30,8 @@ const QUICK_REPLIES = [
 
 export default function ChatScreen() {
   const router = useRouter();
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "welcome",
@@ -139,7 +143,7 @@ export default function ChatScreen() {
               >
                 <Text
                   style={{
-                    color: "#d0d8e0",
+                    color: palette.textPrimary,
                     fontSize: 12,
                     lineHeight: 20,
                     fontFamily: "NotoSerif_400Regular",
@@ -176,7 +180,7 @@ export default function ChatScreen() {
               >
                 <Text
                   style={{
-                    color: "#6ec6ff",
+                    color: palette.textSecondary,
                     fontSize: 10,
                     letterSpacing: 0.5,
                     fontFamily: "NotoSerif_400Regular",
@@ -195,7 +199,7 @@ export default function ChatScreen() {
             value={input}
             onChangeText={setInput}
             placeholder="Type anything..."
-            placeholderTextColor="#3a5a8a"
+            placeholderTextColor={palette.textSecondary}
             returnKeyType="send"
             onSubmitEditing={() => send()}
           />

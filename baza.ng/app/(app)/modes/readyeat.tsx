@@ -14,9 +14,11 @@ import {
 import AddMoreItemsSheet from "../../../components/ui/AddMoreItemsSheet";
 import FloatingCart from "../../../components/ui/FloatingCart";
 import ProductImage from "../../../components/ui/ProductImage";
+import { getThemePalette } from "../../../constants/appTheme";
 import { colors } from "../../../constants/theme";
 import { useCart } from "../../../hooks/useCart";
 import { useProducts } from "../../../hooks/useProducts";
+import { useThemeStore } from "../../../stores/themeStore";
 import {
   addMoreButton,
   readyEatMode,
@@ -29,6 +31,8 @@ export default function ReadyEatScreen() {
   const router = useRouter();
   const { readyEat, isLoading, error, fetchReadyEat } = useProducts();
   const { addItem, isInCart, getItemQty, updateQty, removeItem } = useCart();
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
   const [selected, setSelected] = useState<ReadyEatItem | null>(null);
   const [showAddMore, setShowAddMore] = useState(false);
 
@@ -50,13 +54,26 @@ export default function ReadyEatScreen() {
   };
 
   return (
-    <View className={s.container}>
-      <View className={s.header}>
+    <View
+      className={s.container}
+      style={{ backgroundColor: palette.background }}
+    >
+      <View
+        className={s.header}
+        style={{ borderBottomWidth: 1, borderBottomColor: palette.border }}
+      >
         <Pressable onPress={() => router.back()}>
-          <Text className={s.backButton}>← BACK</Text>
+          <Text
+            className={s.backButton}
+            style={{ color: palette.textSecondary }}
+          >
+            ← BACK
+          </Text>
         </Pressable>
-        <Text className={s.title}>Ready to Eat</Text>
-        <Text className={s.subtitle}>
+        <Text className={s.title} style={{ color: palette.textPrimary }}>
+          Ready to Eat
+        </Text>
+        <Text className={s.subtitle} style={{ color: palette.textSecondary }}>
           HOT FOOD · DELIVERED FAST · FROM LOCAL KITCHENS
         </Text>
       </View>
@@ -73,7 +90,7 @@ export default function ReadyEatScreen() {
         >
           <Text
             style={{
-              color: "#4a2a1a",
+              color: palette.textSecondary,
               fontSize: 11,
               letterSpacing: 1,
               fontFamily: "NotoSerif_400Regular",
@@ -100,7 +117,7 @@ export default function ReadyEatScreen() {
         >
           <Text
             style={{
-              color: "#4a2a1a",
+              color: palette.textSecondary,
               fontSize: 11,
               letterSpacing: 1,
               textAlign: "center",
@@ -150,15 +167,31 @@ export default function ReadyEatScreen() {
                   >
                     {item.kitchen.toUpperCase()}
                   </Text>
-                  <Text className={s.itemName}>{item.name}</Text>
+                  <Text
+                    className={s.itemName}
+                    style={{ color: palette.textPrimary }}
+                  >
+                    {item.name}
+                  </Text>
                   <View className={s.itemMeta}>
-                    <Text className={s.itemTime}>{item.deliveryTime}</Text>
+                    <Text
+                      className={s.itemTime}
+                      style={{ color: palette.textSecondary }}
+                    >
+                      {item.deliveryTime}
+                    </Text>
                     {item.oldPrice && (
-                      <Text className={s.itemOldPrice}>
+                      <Text
+                        className={s.itemOldPrice}
+                        style={{ color: palette.textSecondary }}
+                      >
                         {formatPrice(item.oldPrice)}
                       </Text>
                     )}
-                    <Text className={s.itemPrice}>
+                    <Text
+                      className={s.itemPrice}
+                      style={{ color: palette.textPrimary }}
+                    >
                       {formatPrice(item.price)}
                     </Text>
                   </View>
@@ -247,10 +280,17 @@ export default function ReadyEatScreen() {
 
           <Pressable
             className={addMoreButton.wrapper}
-            style={{ borderColor: "#7a3a1a55" }}
+            style={{
+              borderColor: mode === "light" ? palette.border : "#7a3a1a55",
+            }}
             onPress={() => setShowAddMore(true)}
           >
-            <Text className={addMoreButton.text} style={{ color: "#7a3a1a" }}>
+            <Text
+              className={addMoreButton.text}
+              style={{
+                color: mode === "light" ? palette.textSecondary : "#7a3a1a",
+              }}
+            >
               + ADD MORE ITEMS
             </Text>
           </Pressable>
@@ -270,6 +310,8 @@ export default function ReadyEatScreen() {
           onClose={() => setSelected(null)}
           onAdd={handleAdd}
           isAdded={isInCart(selected.id)}
+          isLight={mode === "light"}
+          palette={palette}
         />
       )}
     </View>
@@ -281,11 +323,15 @@ function ReadyEatPopup({
   onClose,
   onAdd,
   isAdded,
+  isLight,
+  palette,
 }: {
   item: ReadyEatItem;
   onClose: () => void;
   onAdd: (item: ReadyEatItem) => void;
   isAdded: boolean;
+  isLight: boolean;
+  palette: ReturnType<typeof getThemePalette>;
 }) {
   const [imagePreview, setImagePreview] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -349,7 +395,10 @@ function ReadyEatPopup({
       statusBarTranslucent
       onRequestClose={handleDismiss}
     >
-      <StatusBar backgroundColor="#050505" barStyle="light-content" />
+      <StatusBar
+        backgroundColor={isLight ? "#ffffff" : palette.background}
+        barStyle={isLight ? "dark-content" : "light-content"}
+      />
 
       {/* Full-screen image preview */}
       <Modal
@@ -359,7 +408,12 @@ function ReadyEatPopup({
         statusBarTranslucent
         onRequestClose={() => setImagePreview(false)}
       >
-        <View style={previewStyles.backdrop}>
+        <View
+          style={[
+            previewStyles.backdrop,
+            { backgroundColor: isLight ? "#ffffff" : "#000000" },
+          ]}
+        >
           <Pressable
             style={previewStyles.closeBtn}
             onPress={() => setImagePreview(false)}
@@ -378,9 +432,25 @@ function ReadyEatPopup({
         </View>
       </Modal>
 
-      <View style={previewStyles.popupScreen}>
-        <View style={previewStyles.overlay}>
-          <Pressable style={previewStyles.topMask} onPress={handleDismiss} />
+      <View
+        style={[
+          previewStyles.popupScreen,
+          { backgroundColor: palette.background },
+        ]}
+      >
+        <View
+          style={[
+            previewStyles.overlay,
+            { backgroundColor: isLight ? "#ffffff" : palette.background },
+          ]}
+        >
+          <Pressable
+            style={[
+              previewStyles.topMask,
+              { backgroundColor: palette.background },
+            ]}
+            onPress={handleDismiss}
+          />
 
           <View
             className={readyEatMode.popupSheet}
@@ -441,8 +511,18 @@ function ReadyEatPopup({
               >
                 {item.kitchen.toUpperCase()}
               </Text>
-              <Text className={readyEatMode.popupName}>{item.name}</Text>
-              <Text className={readyEatMode.popupDesc}>{item.description}</Text>
+              <Text
+                className={readyEatMode.popupName}
+                style={{ color: palette.textPrimary }}
+              >
+                {item.name}
+              </Text>
+              <Text
+                className={readyEatMode.popupDesc}
+                style={{ color: palette.textSecondary }}
+              >
+                {item.description}
+              </Text>
 
               <View className={readyEatMode.popupTags}>
                 {item.tags.map((tag) => (
@@ -470,7 +550,10 @@ function ReadyEatPopup({
               >
                 <View>
                   <Text className={readyEatMode.popupPlatesLabel}>PLATES</Text>
-                  <Text className={readyEatMode.popupPlatesEach}>
+                  <Text
+                    className={readyEatMode.popupPlatesEach}
+                    style={{ color: palette.textSecondary }}
+                  >
                     {formatPrice(item.price)} each
                   </Text>
                 </View>
@@ -498,7 +581,10 @@ function ReadyEatPopup({
                     </Text>
                   </Pressable>
 
-                  <Text className={readyEatMode.popupPlatesValue}>
+                  <Text
+                    className={readyEatMode.popupPlatesValue}
+                    style={{ color: palette.textPrimary }}
+                  >
                     {selectedQty}
                   </Text>
 

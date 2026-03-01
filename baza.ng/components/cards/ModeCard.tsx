@@ -1,5 +1,7 @@
 import { useRouter } from "expo-router";
 import { Image, Pressable, Text, View } from "react-native";
+import { getThemePalette } from "../../constants/appTheme";
+import { useThemeStore } from "../../stores/themeStore";
 import { intentGateBalance as s } from "../../styles";
 import { optimizedUrl } from "../../utils/cloudinary";
 import type { ModeConfig } from "../../utils/constants";
@@ -10,11 +12,16 @@ interface ModeCardProps {
 
 export default function ModeCard({ mode }: ModeCardProps) {
   const router = useRouter();
+  const themeMode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(themeMode);
 
   return (
     <Pressable
       className={s.modeButton}
-      style={{ backgroundColor: mode.bg, borderColor: `${mode.color}22` }}
+      style={{
+        backgroundColor: themeMode === "light" ? palette.card : mode.bg,
+        borderColor: themeMode === "light" ? palette.border : `${mode.color}22`,
+      }}
       onPress={() => router.push(mode.route as any)}
     >
       <View
@@ -37,8 +44,16 @@ export default function ModeCard({ mode }: ModeCardProps) {
       </View>
 
       <View style={{ flex: 1 }}>
-        <Text className={s.modeTitle}>{mode.title}</Text>
-        <Text className={s.modeDesc} style={{ color: `${mode.color}88` }}>
+        <Text className={s.modeTitle} style={{ color: palette.textPrimary }}>
+          {mode.title}
+        </Text>
+        <Text
+          className={s.modeDesc}
+          style={{
+            color:
+              themeMode === "light" ? palette.textSecondary : `${mode.color}88`,
+          }}
+        >
           {mode.subtitle}
         </Text>
       </View>

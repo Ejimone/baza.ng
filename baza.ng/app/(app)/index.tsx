@@ -18,11 +18,13 @@ import ModeCard from "../../components/cards/ModeCard";
 import Header from "../../components/layout/Header";
 import FloatingCart from "../../components/ui/FloatingCart";
 import SearchBar from "../../components/ui/SearchBar";
+import { getThemePalette } from "../../constants/appTheme";
 import { colors } from "../../constants/theme";
 import { useOrders } from "../../hooks/useOrders";
 import { useProducts } from "../../hooks/useProducts";
 import { useWallet } from "../../hooks/useWallet";
 import { useAuthStore } from "../../stores/authStore";
+import { useThemeStore } from "../../stores/themeStore";
 import { intentGateBalance as s } from "../../styles";
 import { SHOPPING_MODES } from "../../utils/constants";
 import { formatPrice, getGreeting } from "../../utils/format";
@@ -30,6 +32,8 @@ import { formatPrice, getGreeting } from "../../utils/format";
 export default function IntentGateScreen() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
   const { refreshBalance } = useWallet();
   const { orders, fetchOrders, isLoading: isLoadingOrders } = useOrders();
   const {
@@ -258,7 +262,10 @@ export default function IntentGateScreen() {
   const isSearchOpen = globalQuery.trim().length >= 2;
 
   return (
-    <View className={s.container}>
+    <View
+      className={s.container}
+      style={{ backgroundColor: palette.background }}
+    >
       <Header onTopUpPress={() => setShowTopUp(true)} />
 
       {isSearchOpen && (
@@ -269,7 +276,8 @@ export default function IntentGateScreen() {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: "rgba(0,0,0,0.46)",
+            backgroundColor:
+              mode === "dark" ? "rgba(0,0,0,0.46)" : "rgba(0,0,0,0.16)",
             zIndex: 40,
           }}
           onPress={() => setGlobalQuery("")}
@@ -277,10 +285,16 @@ export default function IntentGateScreen() {
       )}
 
       <View className={s.greeting} style={{ position: "relative", zIndex: 50 }}>
-        <Text className={s.greetingTime}>
+        <Text
+          className={s.greetingTime}
+          style={{ color: palette.textSecondary }}
+        >
           {greeting.toUpperCase().replace(" ", "  ")}
         </Text>
-        <Text className={s.greetingTitle} style={{ marginBottom: 12 }}>
+        <Text
+          className={s.greetingTitle}
+          style={{ marginBottom: 12, color: palette.textPrimary }}
+        >
           What do you want?
         </Text>
 
@@ -301,8 +315,8 @@ export default function IntentGateScreen() {
                 left: 0,
                 right: 0,
                 borderWidth: 1,
-                borderColor: "#1a2a1c",
-                backgroundColor: "#0d1a0f",
+                borderColor: palette.border,
+                backgroundColor: palette.card,
                 zIndex: 60,
                 maxHeight: 260,
               }}
@@ -314,7 +328,7 @@ export default function IntentGateScreen() {
                 {universalResults.length === 0 ? (
                   <Text
                     style={{
-                      color: "#2a4a2a",
+                      color: palette.textSecondary,
                       fontSize: 10,
                       letterSpacing: 1,
                       paddingVertical: 12,
@@ -336,14 +350,14 @@ export default function IntentGateScreen() {
                         paddingVertical: 10,
                         paddingHorizontal: 12,
                         borderBottomWidth: 1,
-                        borderBottomColor: "#1a2a1c",
+                        borderBottomColor: palette.border,
                       }}
                     >
                       <Text style={{ fontSize: 16 }}>{result.emoji}</Text>
                       <View style={{ flex: 1 }}>
                         <Text
                           style={{
-                            color: "#f5f5f0",
+                            color: palette.textPrimary,
                             fontSize: 13,
                             fontFamily: "NotoSerif_400Regular",
                           }}
@@ -352,7 +366,7 @@ export default function IntentGateScreen() {
                         </Text>
                         <Text
                           style={{
-                            color: "#3a5c3a",
+                            color: palette.textSecondary,
                             fontSize: 10,
                             letterSpacing: 1,
                             marginTop: 2,
@@ -386,6 +400,10 @@ export default function IntentGateScreen() {
         {activeOrder && (
           <Pressable
             className={s.orderCard}
+            style={{
+              backgroundColor: palette.card,
+              borderColor: palette.border,
+            }}
             onPress={() =>
               router.push(`/(app)/orders/${activeOrder.id}` as any)
             }
@@ -394,8 +412,16 @@ export default function IntentGateScreen() {
               <Text style={{ fontSize: 16 }}>📦</Text>
             </View>
             <View style={{ flex: 1 }}>
-              <Text className={s.orderLabel}>ACTIVE ORDER</Text>
-              <Text className={s.orderTitle}>
+              <Text
+                className={s.orderLabel}
+                style={{ color: palette.textSecondary }}
+              >
+                ACTIVE ORDER
+              </Text>
+              <Text
+                className={s.orderTitle}
+                style={{ color: palette.textPrimary }}
+              >
                 {activeOrder.items
                   .slice(0, 2)
                   .map((i) => `${i.emoji} ${i.name}`)
@@ -405,7 +431,12 @@ export default function IntentGateScreen() {
                   : ""}
               </Text>
               {activeOrder.eta && (
-                <Text className={s.orderEta}>{activeOrder.eta}</Text>
+                <Text
+                  className={s.orderEta}
+                  style={{ color: palette.textSecondary }}
+                >
+                  {activeOrder.eta}
+                </Text>
               )}
             </View>
             <View style={{ alignItems: "flex-end" }}>
@@ -420,7 +451,12 @@ export default function IntentGateScreen() {
               >
                 {activeOrder.status}
               </Text>
-              <Text className={s.orderView}>View →</Text>
+              <Text
+                className={s.orderView}
+                style={{ color: palette.textSecondary }}
+              >
+                View →
+              </Text>
             </View>
           </Pressable>
         )}
@@ -440,6 +476,8 @@ export default function IntentGateScreen() {
 }
 
 function TopUpSheet({ onClose }: { onClose: () => void }) {
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
   const {
     accountNumber,
     bankName,
@@ -540,7 +578,13 @@ function TopUpSheet({ onClose }: { onClose: () => void }) {
   }, [keyboardTranslateY]);
 
   return (
-    <View className={s.topUpSheet}>
+    <View
+      className={s.topUpSheet}
+      style={{
+        backgroundColor:
+          mode === "dark" ? "rgba(0,0,0,0.85)" : "rgba(0,0,0,0.35)",
+      }}
+    >
       <Pressable style={{ flex: 1 }} onPress={onClose} />
       <Animated.View
         style={{ transform: [{ translateY: keyboardTranslateY }] }}
@@ -550,10 +594,29 @@ function TopUpSheet({ onClose }: { onClose: () => void }) {
           keyboardShouldPersistTaps="handled"
           style={{ flexGrow: 0 }}
         >
-          <View className={s.topUpSheetInner}>
-            <View className={s.topUpHandle} />
-            <Text className={s.topUpLabel}>FUND YOUR WALLET</Text>
-            <Text className={s.topUpTitle}>How much?</Text>
+          <View
+            className={s.topUpSheetInner}
+            style={{
+              backgroundColor: palette.background,
+              borderColor: palette.border,
+            }}
+          >
+            <View
+              className={s.topUpHandle}
+              style={{ backgroundColor: palette.border }}
+            />
+            <Text
+              className={s.topUpLabel}
+              style={{ color: palette.textSecondary }}
+            >
+              FUND YOUR WALLET
+            </Text>
+            <Text
+              className={s.topUpTitle}
+              style={{ color: palette.textPrimary }}
+            >
+              How much?
+            </Text>
 
             <View className={s.topUpGrid}>
               {quickAmounts.map((amount) => (
@@ -567,13 +630,16 @@ function TopUpSheet({ onClose }: { onClose: () => void }) {
                       selectedAmount === amount ? "#4caf7d18" : "transparent",
                     borderWidth: 1,
                     borderColor:
-                      selectedAmount === amount ? "#4caf7d66" : "#1a2a1c",
+                      selectedAmount === amount ? "#4caf7d66" : palette.border,
                   }}
                   onPress={() => handleSelectQuick(amount)}
                 >
                   <Text
                     style={{
-                      color: selectedAmount === amount ? "#4caf7d" : "#5a8a5a",
+                      color:
+                        selectedAmount === amount
+                          ? "#4caf7d"
+                          : palette.textSecondary,
                       fontFamily: "NotoSerif_400Regular",
                       fontSize: 13,
                     }}
@@ -584,28 +650,62 @@ function TopUpSheet({ onClose }: { onClose: () => void }) {
               ))}
             </View>
 
-            <Text className={s.topUpCustomLabel}>OR ENTER CUSTOM AMOUNT</Text>
+            <Text
+              className={s.topUpCustomLabel}
+              style={{ color: palette.textSecondary }}
+            >
+              OR ENTER CUSTOM AMOUNT
+            </Text>
             <View
               className={`${s.topUpCustomRow} ${isCustom ? s.topUpCustomRowActive : ""}`}
+              style={{
+                borderColor: isCustom ? "#4caf7d66" : palette.border,
+                backgroundColor: isCustom ? "#4caf7d08" : "transparent",
+              }}
             >
-              <Text className={s.topUpCustomPrefix}>₦</Text>
+              <Text
+                className={s.topUpCustomPrefix}
+                style={{ color: palette.textSecondary }}
+              >
+                ₦
+              </Text>
               <TextInput
                 className={s.topUpCustomInput}
                 placeholder="e.g. 2500"
-                placeholderTextColor="#2a4a2a"
+                placeholderTextColor={palette.textSecondary}
                 keyboardType="decimal-pad"
                 value={customAmount}
                 onFocus={handleCustomFocus}
                 onChangeText={handleCustomChange}
                 selectionColor="#4caf7d"
+                style={{ color: palette.textPrimary }}
               />
             </View>
 
             {accountNumber && (
-              <View className={s.topUpAcctBox}>
-                <Text className={s.topUpAcctLabel}>OR TRANSFER TO</Text>
-                <Text className={s.topUpAcctNumber}>{accountNumber}</Text>
-                <Text className={s.topUpAcctBank}>
+              <View
+                className={s.topUpAcctBox}
+                style={{
+                  backgroundColor: palette.card,
+                  borderColor: palette.border,
+                }}
+              >
+                <Text
+                  className={s.topUpAcctLabel}
+                  style={{ color: palette.textSecondary }}
+                >
+                  OR TRANSFER TO
+                </Text>
+                <Text
+                  className={s.topUpAcctNumber}
+                  style={{ color: palette.textPrimary }}
+                >
+                  {accountNumber}
+                </Text>
+                <Text
+                  className={s.topUpAcctBank}
+                  style={{ color: palette.textSecondary }}
+                >
                   {bankName ?? "Providus Bank"} · {accountName ?? "Baza NG Ltd"}
                 </Text>
               </View>
@@ -614,7 +714,7 @@ function TopUpSheet({ onClose }: { onClose: () => void }) {
             <Pressable
               className={s.topUpConfirmBtn}
               style={{
-                backgroundColor: canConfirm ? "#4caf7d" : "#1a2a1c",
+                backgroundColor: canConfirm ? "#4caf7d" : palette.card,
                 alignItems: "center",
               }}
               onPress={handleConfirm}
@@ -625,7 +725,7 @@ function TopUpSheet({ onClose }: { onClose: () => void }) {
               ) : (
                 <Text
                   style={{
-                    color: canConfirm ? "#000" : "#2a3a2a",
+                    color: canConfirm ? "#000" : palette.textSecondary,
                     textAlign: "center",
                     fontFamily: "NotoSerif_400Regular",
                     fontSize: 11,
@@ -643,7 +743,7 @@ function TopUpSheet({ onClose }: { onClose: () => void }) {
             <Pressable onPress={onClose}>
               <Text
                 className={s.topUpCancelBtn}
-                style={{ textAlign: "center" }}
+                style={{ textAlign: "center", color: palette.textSecondary }}
               >
                 CANCEL
               </Text>

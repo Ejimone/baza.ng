@@ -1,21 +1,23 @@
+import * as Clipboard from "expo-clipboard";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  TextInput,
-  Share,
-  Alert,
+    Alert,
+    Pressable,
+    ScrollView,
+    Share,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
-import { useRouter } from "expo-router";
-import * as Clipboard from "expo-clipboard";
-import * as referralService from "../../../services/referral";
-import { referScreen as s } from "../../../styles/index";
-import type { ReferralStats, Referral } from "../../../types";
 import ScreenWrapper from "../../../components/layout/ScreenWrapper";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
+import { getThemePalette } from "../../../constants/appTheme";
 import { colors } from "../../../constants/theme";
+import * as referralService from "../../../services/referral";
+import { useThemeStore } from "../../../stores/themeStore";
+import { referScreen as s } from "../../../styles/index";
+import type { Referral, ReferralStats } from "../../../types";
 
 const PERKS = [
   { who: "YOU", earn: "₦2,000", when: "Friend places first order" },
@@ -24,6 +26,8 @@ const PERKS = [
 
 export default function ReferScreen() {
   const router = useRouter();
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
   const [stats, setStats] = useState<ReferralStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -71,29 +75,63 @@ export default function ReferScreen() {
 
   return (
     <ScreenWrapper className="bg-[#0a0a08]">
-      <View className={s.header}>
+      <View className={s.header} style={{ borderBottomColor: palette.border }}>
         <Pressable onPress={() => router.back()}>
-          <Text className={s.backButton}>{"← PROFILE"}</Text>
+          <Text
+            className={s.backButton}
+            style={{ color: palette.textSecondary }}
+          >
+            {"← PROFILE"}
+          </Text>
         </Pressable>
-        <Text className={s.title}>Refer a Friend</Text>
-        <Text className={s.subtitle}>BOTH OF YOU WIN</Text>
+        <Text className={s.title} style={{ color: palette.textPrimary }}>
+          Refer a Friend
+        </Text>
+        <Text className={s.subtitle} style={{ color: palette.textSecondary }}>
+          BOTH OF YOU WIN
+        </Text>
       </View>
 
       <ScrollView className={s.scrollBody} showsVerticalScrollIndicator={false}>
         {/* Perk Cards */}
         <View className={s.perkGrid}>
           {PERKS.map((perk) => (
-            <View key={perk.who} className={s.perkCard}>
-              <Text className={s.perkLabel}>{perk.who} GET</Text>
+            <View
+              key={perk.who}
+              className={s.perkCard}
+              style={{
+                backgroundColor: palette.card,
+                borderColor: palette.border,
+              }}
+            >
+              <Text
+                className={s.perkLabel}
+                style={{ color: palette.textSecondary }}
+              >
+                {perk.who} GET
+              </Text>
               <Text className={s.perkAmount}>{perk.earn}</Text>
-              <Text className={s.perkWhen}>{perk.when}</Text>
+              <Text
+                className={s.perkWhen}
+                style={{ color: palette.textSecondary }}
+              >
+                {perk.when}
+              </Text>
             </View>
           ))}
         </View>
 
         {/* Referral Code Box */}
-        <View className={s.codeBox}>
-          <Text className={s.codeLabel}>YOUR REFERRAL CODE</Text>
+        <View
+          className={s.codeBox}
+          style={{ backgroundColor: palette.card, borderColor: palette.border }}
+        >
+          <Text
+            className={s.codeLabel}
+            style={{ color: palette.textSecondary }}
+          >
+            YOUR REFERRAL CODE
+          </Text>
           <View className={s.codeRow}>
             <Text className={s.codeValue}>
               {stats?.code?.toUpperCase() ?? "---"}
@@ -103,6 +141,14 @@ export default function ReferScreen() {
                 className={`${s.codeCopyBtn} ${
                   copied ? s.codeCopyActive : s.codeCopyInactive
                 }`}
+                style={
+                  !copied
+                    ? {
+                        borderColor: palette.border,
+                        color: palette.textSecondary,
+                      }
+                    : undefined
+                }
               >
                 {copied ? "COPIED ✓" : "COPY"}
               </Text>
@@ -111,12 +157,22 @@ export default function ReferScreen() {
         </View>
 
         {/* Invite by Phone */}
-        <Text className={s.inviteLabel}>SHARE YOUR CODE</Text>
+        <Text
+          className={s.inviteLabel}
+          style={{ color: palette.textSecondary }}
+        >
+          SHARE YOUR CODE
+        </Text>
         <View className={s.inviteRow}>
           <TextInput
             className={s.inviteInput}
+            style={{
+              backgroundColor: palette.card,
+              borderColor: palette.border,
+              color: palette.textPrimary,
+            }}
             placeholder="+234 800 000 0000"
-            placeholderTextColor="#5a5a3a"
+            placeholderTextColor={palette.textSecondary}
             value={inputPhone}
             onChangeText={setInputPhone}
             keyboardType="phone-pad"
@@ -129,7 +185,10 @@ export default function ReferScreen() {
         {/* Referral List */}
         {stats && stats.referrals.length > 0 && (
           <>
-            <Text className={s.sentLabel}>
+            <Text
+              className={s.sentLabel}
+              style={{ color: palette.textSecondary }}
+            >
               REFERRED ({stats.totalReferrals})
             </Text>
             {stats.referrals.map((ref: Referral, idx: number) => (
@@ -137,10 +196,16 @@ export default function ReferScreen() {
                 <Text className={s.sentCheck}>
                   {ref.firstOrderPlaced ? "✓" : "○"}
                 </Text>
-                <Text className="text-[11px] text-[#5a5a3a] font-mono">
+                <Text
+                  className="text-[11px] font-mono"
+                  style={{ color: palette.textSecondary }}
+                >
                   {ref.name}
                 </Text>
-                <Text className={s.sentStatus}>
+                <Text
+                  className={s.sentStatus}
+                  style={{ color: palette.textSecondary }}
+                >
                   {ref.firstOrderPlaced ? "FIRST ORDER ✓" : "PENDING"}
                 </Text>
               </View>
@@ -148,8 +213,14 @@ export default function ReferScreen() {
           </>
         )}
 
-        <Text className={s.disclaimer}>
-          Reward credited within 24hrs of friend's first delivery.{"\n"}
+        <Text
+          className={s.disclaimer}
+          style={{
+            color: palette.textSecondary,
+            borderTopColor: palette.border,
+          }}
+        >
+          Reward credited within 24hrs of friend’s first delivery.{"\n"}
           No cap on referrals. Invite as many as you want.
         </Text>
       </ScrollView>

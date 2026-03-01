@@ -1,9 +1,33 @@
-import { Text, View } from "react-native";
+import { View, type ViewProps } from "react-native";
+import { getThemePalette } from "../../constants/appTheme";
+import { useThemeStore } from "../../stores/themeStore";
 
-export default function Card() {
+interface CardProps extends ViewProps {
+  padded?: boolean;
+}
+
+export default function Card({
+  padded = true,
+  style,
+  children,
+  ...rest
+}: CardProps) {
+  const mode = useThemeStore((s) => s.mode);
+  const palette = getThemePalette(mode);
+
   return (
-    <View>
-      <Text className="font-mono">Card</Text>
+    <View
+      className={padded ? "border p-4" : "border"}
+      style={[
+        {
+          backgroundColor: palette.card,
+          borderColor: palette.border,
+        },
+        style,
+      ]}
+      {...rest}
+    >
+      {children}
     </View>
   );
 }

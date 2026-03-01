@@ -14,8 +14,10 @@ import {
 import AddMoreItemsSheet from "../../../../components/ui/AddMoreItemsSheet";
 import ProductImage from "../../../../components/ui/ProductImage";
 import QtyControl from "../../../../components/ui/QtyControl";
+import { getThemePalette } from "../../../../constants/appTheme";
 import { useCart } from "../../../../hooks/useCart";
 import { useProducts } from "../../../../hooks/useProducts";
+import { useThemeStore } from "../../../../stores/themeStore";
 import { addMoreButton, bundleDetail as s } from "../../../../styles";
 import type { BundleItem, RestockItem } from "../../../../types";
 import { formatPrice } from "../../../../utils/format";
@@ -29,6 +31,8 @@ export default function BundleDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { bundles, fetchBundles } = useProducts();
   const { addItem } = useCart();
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
 
   const bundle = bundles.find((b) => b.id === id);
 
@@ -122,7 +126,10 @@ export default function BundleDetailScreen() {
 
   if (!bundle) {
     return (
-      <View className={s.container} style={{ backgroundColor: "#070e08" }}>
+      <View
+        className={s.container}
+        style={{ backgroundColor: palette.background }}
+      >
         <View
           style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
         >
@@ -137,7 +144,10 @@ export default function BundleDetailScreen() {
       className={s.container}
       style={{ backgroundColor: bundle.color + "08" }}
     >
-      <StatusBar backgroundColor="#050505" barStyle="light-content" />
+      <StatusBar
+        backgroundColor={mode === "light" ? "#ffffff" : "#050505"}
+        barStyle={mode === "light" ? "dark-content" : "light-content"}
+      />
 
       <Modal
         visible={Boolean(previewTarget)}
@@ -247,7 +257,7 @@ export default function BundleDetailScreen() {
         <View className={s.retailRow}>
           <Text
             style={{
-              color: "#2a3a2a",
+              color: palette.textSecondary,
               fontSize: 9,
               letterSpacing: 1,
               fontFamily: "NotoSerif_400Regular",
@@ -290,7 +300,7 @@ export default function BundleDetailScreen() {
         >
           <Text
             style={{
-              color: activeItems.length > 0 ? "#000" : "#2a3a2a",
+              color: activeItems.length > 0 ? "#000" : palette.textSecondary,
               textAlign: "center",
               fontFamily: "NotoSerif_400Regular",
               fontSize: 11,

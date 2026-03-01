@@ -9,9 +9,11 @@ import {
 } from "react-native";
 import ScreenWrapper from "../../../components/layout/ScreenWrapper";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
+import { getThemePalette } from "../../../constants/appTheme";
 import { colors } from "../../../constants/theme";
 import { useOrders } from "../../../hooks/useOrders";
 import * as ordersService from "../../../services/orders";
+import { useThemeStore } from "../../../stores/themeStore";
 import type { Order, OrderStatus } from "../../../types";
 import { ORDER_STATUS_LABELS } from "../../../utils/constants";
 import { formatDate, formatPrice } from "../../../utils/format";
@@ -33,6 +35,8 @@ export default function OrderDetailScreen() {
   const [expandedDetails, setExpandedDetails] = useState<Record<string, any>>(
     {},
   );
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
 
   useEffect(() => {
     if (id) fetchOrder(id);
@@ -51,7 +55,7 @@ export default function OrderDetailScreen() {
 
   if (isLoading && !currentOrder) {
     return (
-      <ScreenWrapper className="bg-[#050a06]">
+      <ScreenWrapper className="" backgroundColor={palette.background}>
         <LoadingSpinner message="LOADING ORDER" />
       </ScreenWrapper>
     );
@@ -59,23 +63,36 @@ export default function OrderDetailScreen() {
 
   if (error && !currentOrder) {
     return (
-      <ScreenWrapper className="bg-[#050a06]">
-        <View className="pt-[52px] px-6 pb-4 border-b border-[#0a120a]">
+      <ScreenWrapper className="" backgroundColor={palette.background}>
+        <View
+          className="pt-[52px] px-6 pb-4 border-b"
+          style={{ borderColor: palette.border }}
+        >
           <Pressable onPress={() => router.back()}>
-            <Text className="bg-transparent text-[11px] text-[#3a5c3a] tracking-[0.2em] mb-3 p-0 font-mono">
+            <Text
+              className="bg-transparent text-[11px] tracking-[0.2em] mb-3 p-0 font-mono"
+              style={{ color: palette.textSecondary }}
+            >
               {"← ORDERS"}
             </Text>
           </Pressable>
         </View>
         <View className="flex-1 items-center justify-center px-6">
-          <Text className="text-[#e85c3a] text-[11px] tracking-[0.15em] text-center font-mono">
+          <Text
+            className="text-[11px] tracking-[0.15em] text-center font-mono"
+            style={{ color: colors.accent.red }}
+          >
             {error}
           </Text>
           <Pressable
             onPress={() => id && fetchOrder(id)}
-            className="mt-4 py-2 px-4 border border-[#1a2a1c]"
+            className="mt-4 py-2 px-4 border"
+            style={{ borderColor: palette.border }}
           >
-            <Text className="text-[#3a5c3a] text-[10px] tracking-[0.2em] font-mono">
+            <Text
+              className="text-[10px] tracking-[0.2em] font-mono"
+              style={{ color: palette.textSecondary }}
+            >
               RETRY
             </Text>
           </Pressable>
@@ -93,14 +110,23 @@ export default function OrderDetailScreen() {
   const currentStepIdx = STATUS_STEPS.indexOf(order.status as OrderStatus);
 
   return (
-    <ScreenWrapper className="bg-[#050a06]">
-      <View className="px-6 pb-4 border-b border-[#0a120a]">
+    <ScreenWrapper className="" backgroundColor={palette.background}>
+      <View
+        className="px-6 pb-4 border-b"
+        style={{ borderColor: palette.border }}
+      >
         <Pressable onPress={() => router.back()}>
-          <Text className="bg-transparent text-[11px] text-[#3a5c3a] tracking-[0.2em] mb-3 p-0 font-mono">
+          <Text
+            className="bg-transparent text-[11px] tracking-[0.2em] mb-3 p-0 font-mono"
+            style={{ color: palette.textSecondary }}
+          >
             {"← ORDERS"}
           </Text>
         </Pressable>
-        <Text className="text-[26px] text-[#f5f5f0] font-serif tracking-[-1px]">
+        <Text
+          className="text-[26px] font-serif tracking-[-1px]"
+          style={{ color: palette.textPrimary }}
+        >
           Order Detail
         </Text>
       </View>
@@ -114,13 +140,22 @@ export default function OrderDetailScreen() {
         }}
       >
         {/* Status & ID header */}
-        <View className="bg-[#0a120a] border border-[#1a2a1c] p-4 mb-3">
+        <View
+          className="border p-4 mb-3"
+          style={{ backgroundColor: palette.card, borderColor: palette.border }}
+        >
           <View className="flex-row justify-between items-start mb-3">
             <View>
-              <Text className="text-[9px] text-[#2a4a2a] tracking-[0.2em] font-mono mb-1">
+              <Text
+                className="text-[9px] tracking-[0.2em] font-mono mb-1"
+                style={{ color: palette.textSecondary }}
+              >
                 ORDER ID
               </Text>
-              <Text className="text-[12px] text-[#f5f5f0] tracking-[0.1em] font-mono">
+              <Text
+                className="text-[12px] tracking-[0.1em] font-mono"
+                style={{ color: palette.textPrimary }}
+              >
                 {order.id.slice(0, 13).toUpperCase()}
               </Text>
             </View>
@@ -134,7 +169,10 @@ export default function OrderDetailScreen() {
                     ORDER_STATUS_LABELS[order.status] ?? order.status
                   ).toUpperCase()}
               </Text>
-              <Text className="text-[9px] text-[#2a4a2a] tracking-[0.15em] font-mono mt-1">
+              <Text
+                className="text-[9px] tracking-[0.15em] font-mono mt-1"
+                style={{ color: palette.textSecondary }}
+              >
                 {formatDate(order.createdAt)}
               </Text>
             </View>
@@ -145,9 +183,9 @@ export default function OrderDetailScreen() {
             <View className="flex-row items-center mt-2 mb-1">
               {STATUS_STEPS.map((step, idx) => {
                 const reached = currentStepIdx >= idx;
-                const stepColor = reached ? statusColor : "#1a2a1c";
+                const stepColor = reached ? statusColor : palette.border;
                 const lineReached = currentStepIdx > idx;
-                const lineColor = lineReached ? statusColor : "#1a2a1c";
+                const lineColor = lineReached ? statusColor : palette.border;
                 return (
                   <View
                     key={step}
@@ -181,8 +219,8 @@ export default function OrderDetailScreen() {
                   style={{
                     color:
                       currentStepIdx >= STATUS_STEPS.indexOf(step)
-                        ? "#3a5c3a"
-                        : "#1a2a1c",
+                        ? statusColor
+                        : palette.textSecondary,
                   }}
                 >
                   {ORDER_STATUS_LABELS[step]?.toUpperCase()}
@@ -192,8 +230,14 @@ export default function OrderDetailScreen() {
           )}
 
           {isCancelled && (
-            <View className="bg-[#1a0a0a] border border-[#e85c3a22] p-2.5 mt-2">
-              <Text className="text-[10px] text-[#e85c3a] tracking-[0.1em] font-mono text-center">
+            <View
+              className="border p-2.5 mt-2"
+              style={{ backgroundColor: "#1a0a0a", borderColor: "#e85c3a22" }}
+            >
+              <Text
+                className="text-[10px] tracking-[0.1em] font-mono text-center"
+                style={{ color: colors.accent.red }}
+              >
                 THIS ORDER WAS CANCELLED
               </Text>
             </View>
@@ -202,13 +246,22 @@ export default function OrderDetailScreen() {
 
         {/* ETA */}
         {order.eta && !isCancelled && (
-          <View className="bg-[#0d1a0f] border border-[#4caf7d22] p-3 px-4 mb-3 flex-row items-center">
+          <View
+            className="border p-3 px-4 mb-3 flex-row items-center"
+            style={{ backgroundColor: palette.card, borderColor: "#4caf7d22" }}
+          >
             <Text className="text-base mr-2">{"📦"}</Text>
             <View>
-              <Text className="text-[9px] text-[#2a4a2a] tracking-[0.2em] font-mono mb-[2px]">
+              <Text
+                className="text-[9px] tracking-[0.2em] font-mono mb-[2px]"
+                style={{ color: palette.textSecondary }}
+              >
                 ESTIMATED DELIVERY
               </Text>
-              <Text className="text-[12px] text-[#f5f5f0] tracking-[0.05em] font-mono">
+              <Text
+                className="text-[12px] tracking-[0.05em] font-mono"
+                style={{ color: palette.textPrimary }}
+              >
                 {order.eta}
               </Text>
             </View>
@@ -217,32 +270,51 @@ export default function OrderDetailScreen() {
 
         {/* Items */}
         <View className="mb-3">
-          <Text className="text-[9px] text-[#2a4a2a] tracking-[0.2em] font-mono mb-2">
+          <Text
+            className="text-[9px] tracking-[0.2em] font-mono mb-2"
+            style={{ color: palette.textSecondary }}
+          >
             ITEMS ({order.items.length})
           </Text>
           {order.items.map((item, idx) => (
             <View
               key={item.id ?? idx}
-              className="bg-[#0a120a] border border-[#1a2a1c] p-3 px-4 mb-[6px] flex-row items-center justify-between"
+              className="border p-3 px-4 mb-[6px] flex-row items-center justify-between"
+              style={{
+                backgroundColor: palette.card,
+                borderColor: palette.border,
+              }}
             >
               <View className="flex-row items-center gap-3 flex-1">
                 <Text className="text-lg">{item.emoji}</Text>
                 <View className="flex-1">
-                  <Text className="text-[11px] text-[#d0e0d0] font-mono">
+                  <Text
+                    className="text-[11px] font-mono"
+                    style={{ color: palette.textPrimary }}
+                  >
                     {item.name}
                   </Text>
-                  <Text className="text-[9px] text-[#2a3a2a] mt-[2px] tracking-[0.2em] font-mono uppercase">
+                  <Text
+                    className="text-[9px] mt-[2px] tracking-[0.2em] font-mono uppercase"
+                    style={{ color: palette.textSecondary }}
+                  >
                     {item.itemType}
                     {item.qty > 1 ? ` × ${item.qty}` : ""}
                   </Text>
                 </View>
               </View>
               <View style={{ alignItems: "flex-end" }}>
-                <Text className="text-[12px] text-[#f5f5f0] font-mono">
+                <Text
+                  className="text-[12px] font-mono"
+                  style={{ color: palette.textPrimary }}
+                >
                   {formatPrice(item.totalPrice)}
                 </Text>
                 {item.qty > 1 && (
-                  <Text className="text-[9px] text-[#2a4a2a] mt-[2px] tracking-[0.1em] font-mono">
+                  <Text
+                    className="text-[9px] mt-[2px] tracking-[0.1em] font-mono"
+                    style={{ color: palette.textSecondary }}
+                  >
                     {formatPrice(item.unitPrice)} each
                   </Text>
                 )}
@@ -253,11 +325,23 @@ export default function OrderDetailScreen() {
 
         {/* Note */}
         {order.note ? (
-          <View className="bg-[#050a06] border border-[#0f1a10] p-3 px-3.5 mb-3">
-            <Text className="text-[9px] text-[#2a4a2a] tracking-[0.2em] font-mono mb-1.5">
+          <View
+            className="border p-3 px-3.5 mb-3"
+            style={{
+              backgroundColor: palette.background,
+              borderColor: palette.border,
+            }}
+          >
+            <Text
+              className="text-[9px] tracking-[0.2em] font-mono mb-1.5"
+              style={{ color: palette.textSecondary }}
+            >
               ORDER NOTE
             </Text>
-            <Text className="text-[10px] text-[#3a5c3a] leading-relaxed tracking-[0.05em] font-mono">
+            <Text
+              className="text-[10px] leading-relaxed tracking-[0.05em] font-mono"
+              style={{ color: palette.textSecondary }}
+            >
               {'💬 "'}
               {order.note}
               {'"'}
@@ -266,17 +350,29 @@ export default function OrderDetailScreen() {
         ) : null}
 
         {/* Total */}
-        <View className="bg-[#0a120a] border border-[#1a2a1c] p-4 mb-3">
+        <View
+          className="border p-4 mb-3"
+          style={{ backgroundColor: palette.card, borderColor: palette.border }}
+        >
           <View className="flex-row justify-between mb-1">
-            <Text className="text-[9px] text-[#2a3a2a] tracking-[0.2em] font-mono">
+            <Text
+              className="text-[9px] tracking-[0.2em] font-mono"
+              style={{ color: palette.textSecondary }}
+            >
               SUBTOTAL
             </Text>
-            <Text className="text-[11px] text-[#f5f5f0] font-mono">
+            <Text
+              className="text-[11px] font-mono"
+              style={{ color: palette.textPrimary }}
+            >
               {formatPrice(order.total)}
             </Text>
           </View>
           <View className="flex-row justify-between mb-3">
-            <Text className="text-[9px] text-[#2a3a2a] tracking-[0.2em] font-mono">
+            <Text
+              className="text-[9px] tracking-[0.2em] font-mono"
+              style={{ color: palette.textSecondary }}
+            >
               DELIVERY
             </Text>
             <Text
@@ -286,11 +382,20 @@ export default function OrderDetailScreen() {
               FREE
             </Text>
           </View>
-          <View className="border-t border-[#1a2a1c] pt-3 flex-row justify-between">
-            <Text className="text-[9px] text-[#3a5c3a] tracking-[0.2em] font-mono font-bold">
+          <View
+            className="border-t pt-3 flex-row justify-between"
+            style={{ borderColor: palette.border }}
+          >
+            <Text
+              className="text-[9px] tracking-[0.2em] font-mono font-bold"
+              style={{ color: palette.textSecondary }}
+            >
               TOTAL PAID
             </Text>
-            <Text className="text-[16px] text-[#f5f5f0] font-mono font-bold">
+            <Text
+              className="text-[16px] font-mono font-bold"
+              style={{ color: palette.textPrimary }}
+            >
               {formatPrice(order.total)}
             </Text>
           </View>
@@ -298,7 +403,10 @@ export default function OrderDetailScreen() {
 
         {/* Order History */}
         <View className="mt-4 mb-3">
-          <Text className="text-[9px] text-[#2a4a2a] tracking-[0.2em] font-mono mb-2">
+          <Text
+            className="text-[9px] tracking-[0.2em] font-mono mb-2"
+            style={{ color: palette.textSecondary }}
+          >
             ORDER HISTORY
           </Text>
           {loadingHistory ? (
@@ -306,8 +414,17 @@ export default function OrderDetailScreen() {
               <ActivityIndicator size="small" color={colors.accent.green} />
             </View>
           ) : pastOrders.filter((o) => o.id !== order.id).length === 0 ? (
-            <View className="bg-[#0a120a] border border-[#1a2a1c] p-4 items-center">
-              <Text className="text-[10px] text-[#2a4a2a] tracking-[0.15em] font-mono">
+            <View
+              className="border p-4 items-center"
+              style={{
+                backgroundColor: palette.card,
+                borderColor: palette.border,
+              }}
+            >
+              <Text
+                className="text-[10px] tracking-[0.15em] font-mono"
+                style={{ color: palette.textSecondary }}
+              >
                 NO OTHER ORDERS YET
               </Text>
             </View>
@@ -323,7 +440,11 @@ export default function OrderDetailScreen() {
                 return (
                   <View key={pastOrder.id}>
                     <Pressable
-                      className="bg-[#0a120a] border border-[#1a2a1c] p-3.5 px-4 mb-[6px]"
+                      className="border p-3.5 px-4 mb-[6px]"
+                      style={{
+                        backgroundColor: palette.card,
+                        borderColor: palette.border,
+                      }}
                       onPress={async () => {
                         if (isExpanded) {
                           setExpandedOrderId(null);
@@ -345,10 +466,16 @@ export default function OrderDetailScreen() {
                     >
                       <View className="flex-row justify-between items-start mb-2">
                         <View>
-                          <Text className="text-[10px] text-[#f5f5f0] tracking-[0.1em] font-mono">
+                          <Text
+                            className="text-[10px] tracking-[0.1em] font-mono"
+                            style={{ color: palette.textPrimary }}
+                          >
                             {pastOrder.id.slice(0, 13).toUpperCase()}
                           </Text>
-                          <Text className="text-[9px] text-[#2a4a2a] tracking-[0.1em] font-mono mt-[2px]">
+                          <Text
+                            className="text-[9px] tracking-[0.1em] font-mono mt-[2px]"
+                            style={{ color: palette.textSecondary }}
+                          >
                             {formatDate(pastOrder.createdAt)}
                           </Text>
                         </View>
@@ -363,7 +490,10 @@ export default function OrderDetailScreen() {
                                 pastOrder.status
                               ).toUpperCase()}
                           </Text>
-                          <Text className="text-[11px] text-[#f5f5f0] font-mono mt-[2px]">
+                          <Text
+                            className="text-[11px] font-mono mt-[2px]"
+                            style={{ color: palette.textPrimary }}
+                          >
                             {formatPrice(pastOrder.total)}
                           </Text>
                         </View>
@@ -373,7 +503,8 @@ export default function OrderDetailScreen() {
                           {pastOrder.items.slice(0, 3).map((item, idx) => (
                             <Text
                               key={idx}
-                              className="text-[9px] text-[#3a5c3a] tracking-[0.05em] font-mono"
+                              className="text-[9px] tracking-[0.05em] font-mono"
+                              style={{ color: palette.textSecondary }}
                             >
                               {item.emoji} {item.name}
                               {idx < Math.min(pastOrder.items.length, 3) - 1
@@ -382,19 +513,31 @@ export default function OrderDetailScreen() {
                             </Text>
                           ))}
                           {pastOrder.items.length > 3 && (
-                            <Text className="text-[9px] text-[#2a4a2a] tracking-[0.1em] font-mono">
+                            <Text
+                              className="text-[9px] tracking-[0.1em] font-mono"
+                              style={{ color: palette.textSecondary }}
+                            >
                               +{pastOrder.items.length - 3} more
                             </Text>
                           )}
                         </View>
-                        <Text className="text-[10px] text-[#3a5c3a] font-mono ml-2">
+                        <Text
+                          className="text-[10px] font-mono ml-2"
+                          style={{ color: palette.textSecondary }}
+                        >
                           {isExpanded ? "▲" : "▼"}
                         </Text>
                       </View>
                     </Pressable>
 
                     {isExpanded && (
-                      <View className="bg-[#080e08] border border-[#1a2a1c] border-t-0 px-4 pt-3 pb-4 mb-[6px] -mt-[6px]">
+                      <View
+                        className="border border-t-0 px-4 pt-3 pb-4 mb-[6px] -mt-[6px]"
+                        style={{
+                          backgroundColor: palette.background,
+                          borderColor: palette.border,
+                        }}
+                      >
                         {!detail ? (
                           <View className="py-3 items-center">
                             <ActivityIndicator
@@ -404,40 +547,68 @@ export default function OrderDetailScreen() {
                           </View>
                         ) : (
                           <>
-                            <Text className="text-[9px] text-[#2a4a2a] tracking-[0.2em] font-mono mb-2">
+                            <Text
+                              className="text-[9px] tracking-[0.2em] font-mono mb-2"
+                              style={{ color: palette.textSecondary }}
+                            >
                               ITEMS ({detail.items.length})
                             </Text>
                             {detail.items.map((item: any, idx: number) => (
                               <View
                                 key={item.id ?? idx}
-                                className="bg-[#0a120a] border border-[#1a2a1c] p-2.5 px-3 mb-[4px] flex-row items-center justify-between"
+                                className="border p-2.5 px-3 mb-[4px] flex-row items-center justify-between"
+                                style={{
+                                  backgroundColor: palette.card,
+                                  borderColor: palette.border,
+                                }}
                               >
                                 <View className="flex-row items-center gap-2.5 flex-1">
                                   <Text className="text-base">
                                     {item.emoji}
                                   </Text>
                                   <View className="flex-1">
-                                    <Text className="text-[10px] text-[#d0e0d0] font-mono">
+                                    <Text
+                                      className="text-[10px] font-mono"
+                                      style={{ color: palette.textPrimary }}
+                                    >
                                       {item.name}
                                     </Text>
-                                    <Text className="text-[8px] text-[#2a3a2a] mt-[1px] tracking-[0.15em] font-mono uppercase">
+                                    <Text
+                                      className="text-[8px] mt-[1px] tracking-[0.15em] font-mono uppercase"
+                                      style={{ color: palette.textSecondary }}
+                                    >
                                       {item.itemType}
                                       {item.qty > 1 ? ` × ${item.qty}` : ""}
                                     </Text>
                                   </View>
                                 </View>
-                                <Text className="text-[11px] text-[#f5f5f0] font-mono">
+                                <Text
+                                  className="text-[11px] font-mono"
+                                  style={{ color: palette.textPrimary }}
+                                >
                                   {formatPrice(item.totalPrice)}
                                 </Text>
                               </View>
                             ))}
 
                             {detail.note ? (
-                              <View className="bg-[#050a06] border border-[#0f1a10] p-2.5 px-3 mt-2">
-                                <Text className="text-[9px] text-[#2a4a2a] tracking-[0.2em] font-mono mb-1">
+                              <View
+                                className="border p-2.5 px-3 mt-2"
+                                style={{
+                                  backgroundColor: palette.background,
+                                  borderColor: palette.border,
+                                }}
+                              >
+                                <Text
+                                  className="text-[9px] tracking-[0.2em] font-mono mb-1"
+                                  style={{ color: palette.textSecondary }}
+                                >
                                   NOTE
                                 </Text>
-                                <Text className="text-[9px] text-[#3a5c3a] leading-relaxed tracking-[0.05em] font-mono">
+                                <Text
+                                  className="text-[9px] leading-relaxed tracking-[0.05em] font-mono"
+                                  style={{ color: palette.textSecondary }}
+                                >
                                   {'💬 "'}
                                   {detail.note}
                                   {'"'}
@@ -445,17 +616,32 @@ export default function OrderDetailScreen() {
                               </View>
                             ) : null}
 
-                            <View className="bg-[#0a120a] border border-[#1a2a1c] p-3 mt-2">
+                            <View
+                              className="border p-3 mt-2"
+                              style={{
+                                backgroundColor: palette.card,
+                                borderColor: palette.border,
+                              }}
+                            >
                               <View className="flex-row justify-between mb-1">
-                                <Text className="text-[8px] text-[#2a3a2a] tracking-[0.2em] font-mono">
+                                <Text
+                                  className="text-[8px] tracking-[0.2em] font-mono"
+                                  style={{ color: palette.textSecondary }}
+                                >
                                   SUBTOTAL
                                 </Text>
-                                <Text className="text-[10px] text-[#f5f5f0] font-mono">
+                                <Text
+                                  className="text-[10px] font-mono"
+                                  style={{ color: palette.textPrimary }}
+                                >
                                   {formatPrice(detail.total)}
                                 </Text>
                               </View>
                               <View className="flex-row justify-between mb-2">
-                                <Text className="text-[8px] text-[#2a3a2a] tracking-[0.2em] font-mono">
+                                <Text
+                                  className="text-[8px] tracking-[0.2em] font-mono"
+                                  style={{ color: palette.textSecondary }}
+                                >
                                   DELIVERY
                                 </Text>
                                 <Text
@@ -465,11 +651,20 @@ export default function OrderDetailScreen() {
                                   FREE
                                 </Text>
                               </View>
-                              <View className="border-t border-[#1a2a1c] pt-2 flex-row justify-between">
-                                <Text className="text-[8px] text-[#3a5c3a] tracking-[0.2em] font-mono font-bold">
+                              <View
+                                className="border-t pt-2 flex-row justify-between"
+                                style={{ borderColor: palette.border }}
+                              >
+                                <Text
+                                  className="text-[8px] tracking-[0.2em] font-mono font-bold"
+                                  style={{ color: palette.textSecondary }}
+                                >
                                   TOTAL PAID
                                 </Text>
-                                <Text className="text-[14px] text-[#f5f5f0] font-mono font-bold">
+                                <Text
+                                  className="text-[14px] font-mono font-bold"
+                                  style={{ color: palette.textPrimary }}
+                                >
                                   {formatPrice(detail.total)}
                                 </Text>
                               </View>
@@ -487,7 +682,8 @@ export default function OrderDetailScreen() {
         {/* View all orders */}
         <Pressable
           onPress={() => router.push("/(app)/orders" as any)}
-          className="py-3 border border-[#1a2a1c] items-center mb-2"
+          className="py-3 border items-center mb-2"
+          style={{ borderColor: palette.border }}
         >
           <Text
             className="text-[10px] tracking-[0.2em] font-mono"
@@ -500,7 +696,8 @@ export default function OrderDetailScreen() {
         {/* Back to orders button */}
         <Pressable
           onPress={() => router.back()}
-          className="py-3 border border-[#1a2a1c] items-center mt-2"
+          className="py-3 border items-center mt-2"
+          style={{ borderColor: palette.border }}
         >
           <Text
             className="text-[10px] tracking-[0.2em] font-mono"

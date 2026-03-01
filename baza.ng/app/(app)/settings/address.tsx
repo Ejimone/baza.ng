@@ -1,23 +1,27 @@
-import { useEffect, useState, useCallback } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  TextInput,
-  Alert,
-  RefreshControl,
-} from "react-native";
 import { useRouter } from "expo-router";
-import * as userService from "../../../services/user";
-import { deliveryAddressScreen as s } from "../../../styles/index";
-import { colors } from "../../../constants/theme";
-import type { Address } from "../../../types";
+import { useCallback, useEffect, useState } from "react";
+import {
+    Alert,
+    Pressable,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TextInput,
+    View,
+} from "react-native";
 import ScreenWrapper from "../../../components/layout/ScreenWrapper";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
+import { getThemePalette } from "../../../constants/appTheme";
+import { colors } from "../../../constants/theme";
+import * as userService from "../../../services/user";
+import { useThemeStore } from "../../../stores/themeStore";
+import { deliveryAddressScreen as s } from "../../../styles/index";
+import type { Address } from "../../../types";
 
 export default function DeliveryAddressScreen() {
   const router = useRouter();
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -101,19 +105,31 @@ export default function DeliveryAddressScreen() {
   if (isLoading) {
     return (
       <ScreenWrapper className="bg-[#070a0c]">
-        <LoadingSpinner message="LOADING ADDRESSES" color={colors.accent.blue} />
+        <LoadingSpinner
+          message="LOADING ADDRESSES"
+          color={colors.accent.blue}
+        />
       </ScreenWrapper>
     );
   }
 
   return (
     <ScreenWrapper className="bg-[#070a0c]">
-      <View className={s.header}>
+      <View className={s.header} style={{ borderBottomColor: palette.border }}>
         <Pressable onPress={() => router.back()}>
-          <Text className={s.backButton}>{"← PROFILE"}</Text>
+          <Text
+            className={s.backButton}
+            style={{ color: palette.textSecondary }}
+          >
+            {"← PROFILE"}
+          </Text>
         </Pressable>
-        <Text className={s.title}>Delivery Address</Text>
-        <Text className={s.subtitle}>WHERE SHOULD WE BRING YOUR ORDER?</Text>
+        <Text className={s.title} style={{ color: palette.textPrimary }}>
+          Delivery Address
+        </Text>
+        <Text className={s.subtitle} style={{ color: palette.textSecondary }}>
+          WHERE SHOULD WE BRING YOUR ORDER?
+        </Text>
       </View>
 
       <ScrollView
@@ -134,26 +150,50 @@ export default function DeliveryAddressScreen() {
             className={`${s.addressCard} ${
               addr.isDefault ? s.addressCardDefault : s.addressCardNormal
             }`}
+            style={
+              addr.isDefault
+                ? undefined
+                : { backgroundColor: palette.card, borderColor: palette.border }
+            }
           >
             <View className={s.addressHeader}>
               <View className={s.addressIconRow}>
                 <Text className={s.addressIcon}>
                   {addr.label?.toLowerCase().includes("home") ? "🏠" : "🏢"}
                 </Text>
-                <Text className={s.addressLabel}>{addr.label}</Text>
+                <Text
+                  className={s.addressLabel}
+                  style={{ color: palette.textPrimary }}
+                >
+                  {addr.label}
+                </Text>
               </View>
               {addr.isDefault ? (
                 <Text className={s.defaultBadge}>DEFAULT</Text>
               ) : (
                 <Pressable onPress={() => handleSetDefault(addr.id)}>
-                  <Text className={s.setDefaultBtn}>SET DEFAULT</Text>
+                  <Text
+                    className={s.setDefaultBtn}
+                    style={{ color: palette.textSecondary }}
+                  >
+                    SET DEFAULT
+                  </Text>
                 </Pressable>
               )}
             </View>
-            <Text className={s.addressText}>{addr.address}</Text>
+            <Text
+              className={s.addressText}
+              style={{ color: palette.textPrimary }}
+            >
+              {addr.address}
+            </Text>
             {addr.landmark && (
-              <Text className={s.addressLandmark}>
-                {"📍 "}{addr.landmark}
+              <Text
+                className={s.addressLandmark}
+                style={{ color: palette.textSecondary }}
+              >
+                {"📍 "}
+                {addr.landmark}
               </Text>
             )}
           </Pressable>
@@ -169,38 +209,84 @@ export default function DeliveryAddressScreen() {
       {/* Add Address Form Sheet */}
       {showForm && (
         <View className={s.formOverlay}>
-          <Pressable
-            style={{ flex: 1 }}
-            onPress={() => setShowForm(false)}
-          />
-          <View className={s.formSheet}>
-            <View className={s.formHandle} />
-            <Text className={s.formLabel}>NEW ADDRESS</Text>
-            <Text className={s.formTitle}>Where to?</Text>
+          <Pressable style={{ flex: 1 }} onPress={() => setShowForm(false)} />
+          <View
+            className={s.formSheet}
+            style={{
+              backgroundColor: palette.background,
+              borderTopColor: palette.border,
+            }}
+          >
+            <View
+              className={s.formHandle}
+              style={{ backgroundColor: palette.border }}
+            />
+            <Text
+              className={s.formLabel}
+              style={{ color: palette.textSecondary }}
+            >
+              NEW ADDRESS
+            </Text>
+            <Text
+              className={s.formTitle}
+              style={{ color: palette.textPrimary }}
+            >
+              Where to?
+            </Text>
 
-            <Text className={s.formFieldLabel}>LABEL (e.g. Home, Office)</Text>
+            <Text
+              className={s.formFieldLabel}
+              style={{ color: palette.textSecondary }}
+            >
+              LABEL (e.g. Home, Office)
+            </Text>
             <TextInput
               className={s.formInput}
               placeholder="Home"
-              placeholderTextColor="#3a5a7a"
+              placeholderTextColor={palette.textSecondary}
+              style={{
+                backgroundColor: palette.card,
+                borderColor: palette.border,
+                color: palette.textPrimary,
+              }}
               value={newLabel}
               onChangeText={setNewLabel}
             />
 
-            <Text className={s.formFieldLabel}>FULL ADDRESS</Text>
+            <Text
+              className={s.formFieldLabel}
+              style={{ color: palette.textSecondary }}
+            >
+              FULL ADDRESS
+            </Text>
             <TextInput
               className={s.formInput}
               placeholder="14 Akin Adesola Street, VI"
-              placeholderTextColor="#3a5a7a"
+              placeholderTextColor={palette.textSecondary}
+              style={{
+                backgroundColor: palette.card,
+                borderColor: palette.border,
+                color: palette.textPrimary,
+              }}
               value={newAddr}
               onChangeText={setNewAddr}
             />
 
-            <Text className={s.formFieldLabel}>LANDMARK (optional)</Text>
+            <Text
+              className={s.formFieldLabel}
+              style={{ color: palette.textSecondary }}
+            >
+              LANDMARK (optional)
+            </Text>
             <TextInput
               className={s.formInput}
               placeholder="Near Access Bank"
-              placeholderTextColor="#3a5a7a"
+              placeholderTextColor={palette.textSecondary}
+              style={{
+                backgroundColor: palette.card,
+                borderColor: palette.border,
+                color: palette.textPrimary,
+              }}
               value={newLandmark}
               onChangeText={setNewLandmark}
             />
@@ -216,7 +302,10 @@ export default function DeliveryAddressScreen() {
             </Pressable>
 
             <Pressable onPress={() => setShowForm(false)}>
-              <Text className={s.formCancelBtn} style={{ textAlign: "center" }}>
+              <Text
+                className={s.formCancelBtn}
+                style={{ textAlign: "center", color: palette.textSecondary }}
+              >
                 CANCEL
               </Text>
             </Pressable>

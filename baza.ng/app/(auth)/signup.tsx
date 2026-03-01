@@ -9,7 +9,9 @@ import {
     TextInput,
     View,
 } from "react-native";
+import { getThemePalette } from "../../constants/appTheme";
 import { useAuth } from "../../hooks/useAuth";
+import { useThemeStore } from "../../stores/themeStore";
 import { authScreen as s } from "../../styles";
 
 export default function SignUpScreen() {
@@ -18,6 +20,8 @@ export default function SignUpScreen() {
   const [refCode, setRefCode] = useState("");
   const [refApplied, setRefApplied] = useState(false);
   const { requestOtp, isLoading, error, clearError } = useAuth();
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
 
   const isValid =
     name.trim().length >= 1 && phone.replace(/\s/g, "").length >= 8;
@@ -64,7 +68,7 @@ export default function SignUpScreen() {
           value={name}
           onChangeText={setName}
           placeholder="Thrive"
-          placeholderTextColor="#2a4a2a"
+          placeholderTextColor={palette.textSecondary}
           autoFocus
           className={s.signupInput}
         />
@@ -74,7 +78,7 @@ export default function SignUpScreen() {
           value={phone}
           onChangeText={setPhone}
           placeholder="+234 800 000 0000"
-          placeholderTextColor="#2a4a2a"
+          placeholderTextColor={palette.textSecondary}
           keyboardType="phone-pad"
           className={s.signupInput}
         />
@@ -90,7 +94,7 @@ export default function SignUpScreen() {
               setRefApplied(false);
             }}
             placeholder="e.g. THRIVE200"
-            placeholderTextColor="#2a4a2a"
+            placeholderTextColor={palette.textSecondary}
             maxLength={12}
             autoCapitalize="characters"
             className={`${s.signupRefInput} ${refApplied ? s.signupRefInputApplied : ""}`}
@@ -100,7 +104,8 @@ export default function SignUpScreen() {
             className={`${s.signupApplyBtn} ${refApplied ? s.signupApplyActive : s.signupApplyInactive}`}
           >
             <Text
-              className={`text-3xs tracking-wide-md font-mono ${refApplied ? "text-baza-green" : "text-[#3a5c3a]"}`}
+              className={`text-3xs tracking-wide-md font-mono ${refApplied ? "text-baza-green" : ""}`}
+              style={!refApplied ? { color: palette.textSecondary } : undefined}
             >
               {refApplied ? "✓ APPLIED" : "APPLY"}
             </Text>
@@ -114,7 +119,7 @@ export default function SignUpScreen() {
         ) : null}
 
         <Text className={`${s.signupHint} mt-5`}>
-          We'll send a verification code to your number.{"\n"}
+          We’ll send a verification code to your number.{"\n"}
           <Text className={s.signupHintDim}>Standard SMS rates may apply.</Text>
         </Text>
 
@@ -130,7 +135,8 @@ export default function SignUpScreen() {
           disabled={!isValid || isLoading}
         >
           <Text
-            className={`text-[11px] tracking-wide-2xl font-mono font-bold text-center ${isValid ? "text-black" : "text-[#2a3a2a]"}`}
+            className={`text-[11px] tracking-wide-2xl font-mono font-bold text-center ${isValid ? "text-black" : ""}`}
+            style={!isValid ? { color: palette.textSecondary } : undefined}
           >
             {isLoading ? "SENDING..." : "SEND VERIFICATION CODE"}
           </Text>

@@ -1,21 +1,23 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    Image,
-    Modal,
-    Pressable,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Image,
+  Modal,
+  Pressable,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import AddMoreItemsSheet from "../../../../components/ui/AddMoreItemsSheet";
 import ProductImage from "../../../../components/ui/ProductImage";
 import QtyControl from "../../../../components/ui/QtyControl";
+import { getThemePalette } from "../../../../constants/appTheme";
 import { useCart } from "../../../../hooks/useCart";
 import { useProducts } from "../../../../hooks/useProducts";
+import { useThemeStore } from "../../../../stores/themeStore";
 import { addMoreButton, mealPackDetail as s } from "../../../../styles";
 import type { RestockItem } from "../../../../types";
 import { formatPrice } from "../../../../utils/format";
@@ -25,6 +27,8 @@ export default function MealPackDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { mealPacks, fetchMealPacks } = useProducts();
   const { addItem } = useCart();
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
 
   const pack = mealPacks.find((p) => p.id === id);
 
@@ -139,7 +143,10 @@ export default function MealPackDetailScreen() {
 
   if (!pack) {
     return (
-      <View className={s.container} style={{ backgroundColor: "#080a04" }}>
+      <View
+        className={s.container}
+        style={{ backgroundColor: palette.background }}
+      >
         <View
           style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
         >
@@ -154,7 +161,10 @@ export default function MealPackDetailScreen() {
       className={s.container}
       style={{ backgroundColor: pack.color + "06" }}
     >
-      <StatusBar backgroundColor="#050505" barStyle="light-content" />
+      <StatusBar
+        backgroundColor={mode === "light" ? "#ffffff" : "#050505"}
+        barStyle={mode === "light" ? "dark-content" : "light-content"}
+      />
 
       <Modal
         visible={Boolean(previewTarget)}
@@ -205,7 +215,7 @@ export default function MealPackDetailScreen() {
         <Pressable className={s.heroBackBtn} onPress={() => router.back()}>
           <Text
             style={{
-              color: "#aaa",
+              color: palette.textSecondary,
               fontSize: 10,
               letterSpacing: 1,
               fontFamily: "NotoSerif_400Regular",
@@ -279,7 +289,7 @@ export default function MealPackDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Text className={s.ingredientHint}>
-          WHAT'S INSIDE FOR {plates} PLATE{plates > 1 ? "S" : ""}
+          WHAT’S INSIDE FOR {plates} PLATE{plates > 1 ? "S" : ""}
         </Text>
 
         {(pack.ingredients ?? []).map((item) => {
@@ -316,7 +326,9 @@ export default function MealPackDetailScreen() {
                 <Text
                   className={s.ingredientName}
                   style={{
-                    color: isRemoved ? "#555" : "#d0e0d0",
+                    color: isRemoved
+                      ? palette.textSecondary
+                      : palette.textPrimary,
                     textDecorationLine: isRemoved ? "line-through" : "none",
                   }}
                 >
@@ -389,7 +401,7 @@ export default function MealPackDetailScreen() {
                 <View style={{ flex: 1 }}>
                   <Text
                     className={s.ingredientName}
-                    style={{ color: "#d0e0d0" }}
+                    style={{ color: palette.textPrimary }}
                   >
                     {item.name}
                   </Text>

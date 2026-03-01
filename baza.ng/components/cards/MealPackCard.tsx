@@ -1,4 +1,6 @@
 import { Pressable, Text, View } from "react-native";
+import { getThemePalette } from "../../constants/appTheme";
+import { useThemeStore } from "../../stores/themeStore";
 import { tonightMode as s } from "../../styles";
 import type { MealPack } from "../../types";
 import { formatPrice } from "../../utils/format";
@@ -15,6 +17,9 @@ export default function MealPackCard({
   onPress,
   isInCart,
 }: MealPackCardProps) {
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
+
   return (
     <Pressable
       className={s.packButton}
@@ -33,16 +38,22 @@ export default function MealPackCard({
       />
 
       <View style={{ flex: 1 }}>
-        <Text className={s.packTitle}>{pack.name}</Text>
+        <Text className={s.packTitle} style={{ color: palette.textPrimary }}>
+          {pack.name}
+        </Text>
         <Text className={s.packMeta} style={{ color: pack.color + "aa" }}>
           {pack.baseTime} min · {pack.basePlates} plates
         </Text>
-        <Text className={s.packDesc}>{pack.description}</Text>
+        <Text className={s.packDesc} style={{ color: palette.textSecondary }}>
+          {pack.description}
+        </Text>
         {isInCart && <Text className={s.packAdded}>✓ ADDED</Text>}
       </View>
 
       <View style={{ alignItems: "flex-end", minWidth: 70 }}>
-        <Text className={s.packPrice}>{formatPrice(pack.basePrice)}</Text>
+        <Text className={s.packPrice} style={{ color: palette.textPrimary }}>
+          {formatPrice(pack.basePrice)}
+        </Text>
       </View>
     </Pressable>
   );
