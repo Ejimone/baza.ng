@@ -28,13 +28,28 @@ export default function StockUpScreen() {
   }, []);
 
   return (
-    <View className={s.container}>
-      <View className={s.header}>
+    <View
+      className={s.container}
+      style={{ backgroundColor: palette.background }}
+    >
+      <View
+        className={s.header}
+        style={{ borderBottomWidth: 1, borderBottomColor: palette.border }}
+      >
         <Pressable onPress={() => router.back()}>
-          <Text className={s.backButton}>← BACK</Text>
+          <Text
+            className={s.backButton}
+            style={{ color: palette.textSecondary }}
+          >
+            ← BACK
+          </Text>
         </Pressable>
-        <Text className={s.title}>Stock Up</Text>
-        <Text className={s.subtitle}>TAP A BUNDLE TO CUSTOMISE IT</Text>
+        <Text className={s.title} style={{ color: palette.textPrimary }}>
+          Stock Up
+        </Text>
+        <Text className={s.subtitle} style={{ color: palette.textSecondary }}>
+          TAP A BUNDLE TO CUSTOMISE IT
+        </Text>
       </View>
 
       {isLoading && bundles.length === 0 ? (

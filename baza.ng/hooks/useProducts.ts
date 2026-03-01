@@ -1,88 +1,159 @@
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 import * as productsService from "../services/products";
 import type {
-  Bundle,
-  MealPack,
-  ReadyEatItem,
-  SnackItem,
-  RestockItem,
+    Bundle,
+    MealPack,
+    ReadyEatItem,
+    RestockItem,
+    SnackItem,
 } from "../types";
 
+interface FetchOptions {
+  background?: boolean;
+  force?: boolean;
+}
+
 export function useProducts() {
-  const [bundles, setBundles] = useState<Bundle[]>([]);
-  const [mealPacks, setMealPacks] = useState<MealPack[]>([]);
-  const [readyEat, setReadyEat] = useState<ReadyEatItem[]>([]);
-  const [snacks, setSnacks] = useState<SnackItem[]>([]);
-  const [restockItems, setRestockItems] = useState<RestockItem[]>([]);
-  const [restockCategories, setRestockCategories] = useState<string[]>([]);
+  const [bundles, setBundles] = useState<Bundle[]>(
+    () => productsService.getCachedBundles() ?? [],
+  );
+  const [mealPacks, setMealPacks] = useState<MealPack[]>(
+    () => productsService.getCachedMealPacks() ?? [],
+  );
+  const [readyEat, setReadyEat] = useState<ReadyEatItem[]>(
+    () => productsService.getCachedReadyEat() ?? [],
+  );
+  const [snacks, setSnacks] = useState<SnackItem[]>(
+    () => productsService.getCachedSnacks() ?? [],
+  );
+  const [restockItems, setRestockItems] = useState<RestockItem[]>(
+    () => productsService.getCachedRestock()?.items ?? [],
+  );
+  const [restockCategories, setRestockCategories] = useState<string[]>(
+    () => productsService.getCachedRestock()?.categories ?? [],
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchBundles = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  const fetchBundles = useCallback(async (options?: FetchOptions) => {
+    if (!options?.background) {
+      setIsLoading(true);
+      setError(null);
+    }
     try {
-      const data = await productsService.getBundles();
+      const data = await productsService.getBundles({ force: options?.force });
       setBundles(data);
     } catch (err: any) {
-      setError(err.response?.data?.error ?? "Failed to load bundles");
+      if (!options?.background) {
+        setError(err.response?.data?.error ?? "Failed to load bundles");
+      }
     } finally {
-      setIsLoading(false);
+      if (!options?.background) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
-  const fetchMealPacks = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  const fetchMealPacks = useCallback(async (options?: FetchOptions) => {
+    if (!options?.background) {
+      setIsLoading(true);
+      setError(null);
+    }
     try {
-      const data = await productsService.getMealPacks();
+      const data = await productsService.getMealPacks({
+        force: options?.force,
+      });
       setMealPacks(data);
     } catch (err: any) {
-      setError(err.response?.data?.error ?? "Failed to load meal packs");
+      if (!options?.background) {
+        setError(err.response?.data?.error ?? "Failed to load meal packs");
+      }
     } finally {
-      setIsLoading(false);
+      if (!options?.background) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
-  const fetchReadyEat = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  const fetchReadyEat = useCallback(async (options?: FetchOptions) => {
+    if (!options?.background) {
+      setIsLoading(true);
+      setError(null);
+    }
     try {
-      const data = await productsService.getReadyEat();
+      const data = await productsService.getReadyEat({ force: options?.force });
       setReadyEat(data);
     } catch (err: any) {
-      setError(err.response?.data?.error ?? "Failed to load ready-to-eat items");
+      if (!options?.background) {
+        setError(
+          err.response?.data?.error ?? "Failed to load ready-to-eat items",
+        );
+      }
     } finally {
-      setIsLoading(false);
+      if (!options?.background) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
-  const fetchSnacks = useCallback(async (category?: string) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await productsService.getSnacks(category);
-      setSnacks(data);
-    } catch (err: any) {
-      setError(err.response?.data?.error ?? "Failed to load snacks");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const fetchSnacks = useCallback(
+    async (category?: string, options?: FetchOptions) => {
+      if (!options?.background) {
+        setIsLoading(true);
+        setError(null);
+      }
+      try {
+        const data = await productsService.getSnacks(category, {
+          force: options?.force,
+        });
+        setSnacks(data);
+      } catch (err: any) {
+        if (!options?.background) {
+          setError(err.response?.data?.error ?? "Failed to load snacks");
+        }
+      } finally {
+        if (!options?.background) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [],
+  );
 
-  const fetchRestock = useCallback(async (category?: string, q?: string) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await productsService.getRestock(category, q);
-      setRestockItems(data.items);
-      setRestockCategories(data.categories);
-    } catch (err: any) {
-      setError(err.response?.data?.error ?? "Failed to load products");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const fetchRestock = useCallback(
+    async (category?: string, q?: string, options?: FetchOptions) => {
+      if (!options?.background) {
+        setIsLoading(true);
+        setError(null);
+      }
+      try {
+        const data = await productsService.getRestock(category, q, {
+          force: options?.force,
+        });
+        setRestockItems(data.items);
+        setRestockCategories(data.categories);
+      } catch (err: any) {
+        if (!options?.background) {
+          setError(err.response?.data?.error ?? "Failed to load products");
+        }
+      } finally {
+        if (!options?.background) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [],
+  );
+
+  const prefetchAll = useCallback(async () => {
+    await Promise.allSettled([
+      fetchBundles({ background: true }),
+      fetchMealPacks({ background: true }),
+      fetchReadyEat({ background: true }),
+      fetchSnacks(undefined, { background: true }),
+      fetchRestock(undefined, undefined, { background: true }),
+    ]);
+  }, [fetchBundles, fetchMealPacks, fetchReadyEat, fetchSnacks, fetchRestock]);
 
   return {
     bundles,
@@ -98,6 +169,7 @@ export function useProducts() {
     fetchReadyEat,
     fetchSnacks,
     fetchRestock,
+    prefetchAll,
     clearError: () => setError(null),
   };
 }

@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -29,16 +29,27 @@ import { formatPrice } from "../../../utils/format";
 
 export default function ReadyEatScreen() {
   const router = useRouter();
+  const { itemId } = useLocalSearchParams<{ itemId?: string }>();
   const { readyEat, isLoading, error, fetchReadyEat } = useProducts();
   const { addItem, isInCart, getItemQty, updateQty, removeItem } = useCart();
   const mode = useThemeStore((state) => state.mode);
   const palette = getThemePalette(mode);
   const [selected, setSelected] = useState<ReadyEatItem | null>(null);
   const [showAddMore, setShowAddMore] = useState(false);
+  const [hasHandledItemParam, setHasHandledItemParam] = useState(false);
 
   useEffect(() => {
     fetchReadyEat();
   }, []);
+
+  useEffect(() => {
+    if (!itemId || hasHandledItemParam || readyEat.length === 0) return;
+    const matchedItem = readyEat.find((item) => item.id === itemId);
+    if (matchedItem) {
+      setSelected(matchedItem);
+      setHasHandledItemParam(true);
+    }
+  }, [itemId, hasHandledItemParam, readyEat]);
 
   const handleAdd = (item: ReadyEatItem) => {
     addItem({

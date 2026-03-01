@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
     ActivityIndicator,
@@ -26,6 +26,7 @@ import { formatPrice } from "../../../utils/format";
 
 export default function ShopListScreen() {
   const router = useRouter();
+  const { itemId } = useLocalSearchParams<{ itemId?: string }>();
   const { restockItems, restockCategories, isLoading, error, fetchRestock } =
     useProducts();
   const { addItem, getItemQty, updateQty, removeItem } = useCart();
@@ -35,11 +36,22 @@ export default function ShopListScreen() {
   const [query, setQuery] = useState("");
   const [activeCat, setActiveCat] = useState("All");
   const [selectedItem, setSelectedItem] = useState<RestockItem | null>(null);
+  const [hasHandledItemParam, setHasHandledItemParam] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     fetchRestock();
   }, []);
+
+  useEffect(() => {
+    if (!itemId || hasHandledItemParam || restockItems.length === 0) return;
+    const matchedItem = restockItems.find((item) => item.id === itemId);
+    if (matchedItem) {
+      setSelectedItem(matchedItem);
+      setActiveCat(matchedItem.category || "All");
+      setHasHandledItemParam(true);
+    }
+  }, [itemId, hasHandledItemParam, restockItems]);
 
   const doFetch = useCallback(
     (cat: string, q: string) => {

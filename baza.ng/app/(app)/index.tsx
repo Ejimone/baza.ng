@@ -65,11 +65,11 @@ export default function IntentGateScreen() {
   useEffect(() => {
     refreshBalance();
     fetchOrders(1, 5);
-    fetchBundles();
-    fetchMealPacks();
-    fetchReadyEat();
-    fetchSnacks();
-    fetchRestock();
+    fetchBundles({ background: true });
+    fetchMealPacks({ background: true });
+    fetchReadyEat({ background: true });
+    fetchSnacks(undefined, { background: true });
+    fetchRestock(undefined, undefined, { background: true });
   }, []);
 
   const onRefresh = useCallback(async () => {
@@ -249,12 +249,18 @@ export default function IntentGateScreen() {
       result.targetId
     ) {
       router.push(`/(app)/modes/cookmeal/${result.targetId}` as any);
-    } else if (result.type === "readyeat") {
-      router.push("/(app)/modes/readyeat" as any);
+    } else if (result.type === "readyeat" && result.targetId) {
+      router.push({
+        pathname: "/(app)/modes/readyeat",
+        params: { itemId: result.targetId },
+      } as any);
     } else if (result.type === "snack") {
       router.push("/(app)/modes/snacks" as any);
-    } else if (result.type === "restock") {
-      router.push("/(app)/modes/shoplist" as any);
+    } else if (result.type === "restock" && result.targetId) {
+      router.push({
+        pathname: "/(app)/modes/shoplist",
+        params: { itemId: result.targetId },
+      } as any);
     }
     setGlobalQuery("");
   };

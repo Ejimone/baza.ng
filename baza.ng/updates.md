@@ -2,6 +2,11 @@
 
 ## Completed
 
+- Improved app startup and perceived speed with background prefetch + caching: added shared in-memory TTL caching and in-flight request de-duplication for product, order, and wallet service fetches (`services/products.ts`, `services/orders.ts`, `services/wallet.ts`), seeded product hook state from cache (`hooks/useProducts.ts`), and added authenticated app warmup prefetch on app stack mount (`app/(app)/_layout.tsx`) so data is loaded in the background before users navigate.
+- Fixed Stock Up theme responsiveness in light mode by applying token-based background/header/text/border styling on the mode list screen (`app/(app)/modes/stockup.tsx`) and aligned detail status/loading colors with theme palette (`app/(app)/modes/stockup/[id].tsx`).
+
+- Updated home universal search selection behavior for item-level results: selecting a `Product` result now opens Shop List with that exact item popup pre-opened, and selecting a `Ready to Eat` result opens the item popup directly, so users can order the specific item immediately instead of landing on the generic list page.
+
 - Fixed remaining light-mode parity regressions reported after the previous sweep: themed Order Detail/Order History list surfaces in `app/(app)/orders/[id].tsx` and updated `components/ui/SearchBar.tsx` so the Shop List search bar (non-universal variant) uses theme palette tokens for background, border, input, and clear icon states.
 
 - Final light/dark parity sweep across remaining reusable and mode surfaces: themed `FloatingCart` and `EmptyState`; applied token-based light-mode styling to `Shop your list` (`app/(app)/modes/shoplist.tsx`), `Snacks & Drinks` (`app/(app)/modes/snacks.tsx`), `Ready to Eat` (`app/(app)/modes/readyeat.tsx`), `Cook a Meal` (`app/(app)/modes/cookmeal.tsx`), and `Orders` (`app/(app)/orders.tsx`), including popups/sheets and header/error states so light mode renders consistently.

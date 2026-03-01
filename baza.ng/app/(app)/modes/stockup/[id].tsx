@@ -15,6 +15,7 @@ import AddMoreItemsSheet from "../../../../components/ui/AddMoreItemsSheet";
 import ProductImage from "../../../../components/ui/ProductImage";
 import QtyControl from "../../../../components/ui/QtyControl";
 import { getThemePalette } from "../../../../constants/appTheme";
+import { colors } from "../../../../constants/theme";
 import { useCart } from "../../../../hooks/useCart";
 import { useProducts } from "../../../../hooks/useProducts";
 import { useThemeStore } from "../../../../stores/themeStore";
@@ -133,7 +134,7 @@ export default function BundleDetailScreen() {
         <View
           style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
         >
-          <ActivityIndicator color="#f5a623" size="small" />
+          <ActivityIndicator color={colors.accent.amber} size="small" />
         </View>
       </View>
     );
@@ -145,7 +146,7 @@ export default function BundleDetailScreen() {
       style={{ backgroundColor: bundle.color + "08" }}
     >
       <StatusBar
-        backgroundColor={mode === "light" ? "#ffffff" : "#050505"}
+        backgroundColor={mode === "light" ? "#ffffff" : palette.background}
         barStyle={mode === "light" ? "dark-content" : "light-content"}
       />
 
