@@ -212,11 +212,14 @@ export default function BundleDetailScreen() {
           </Text>
         ) : null}
 
-        {items.map((item) => (
+        {items.map((item, index) => (
           <View
             key={item.id}
             className={s.itemRow}
-            style={{ opacity: item.qty === 0 ? 0.35 : 1 }}
+            style={{
+              opacity: item.qty === 0 ? 0.35 : 1,
+              marginBottom: index === items.length - 1 ? 0 : 10,
+            }}
           >
             <Pressable
               style={previewStyles.itemThumb}

@@ -230,8 +230,12 @@ export default function MealPackDetailScreen() {
         <Text className={s.cookTime} style={{ color: pack.color }}>
           🕐 {pack.baseTime} MIN COOK TIME
         </Text>
-        <Text className={s.packTitle}>{pack.name}</Text>
-        <Text className={s.packDesc}>{pack.description}</Text>
+        <Text className={s.packTitle} style={{ color: palette.textPrimary }}>
+          {pack.name}
+        </Text>
+        <Text className={s.packDesc} style={{ color: palette.textSecondary }}>
+          {pack.description}
+        </Text>
 
         <View
           className={s.platesBox}
@@ -292,7 +296,7 @@ export default function MealPackDetailScreen() {
           WHAT’S INSIDE FOR {plates} PLATE{plates > 1 ? "S" : ""}
         </Text>
 
-        {(pack.ingredients ?? []).map((item) => {
+        {(pack.ingredients ?? []).map((item, index, list) => {
           const isRemoved = removedItems.includes(item.name);
           const scaledQty = item.perPlate * plates;
 
@@ -304,6 +308,7 @@ export default function MealPackDetailScreen() {
                 opacity: isRemoved ? 0.3 : 1,
                 borderBottomWidth: 1,
                 borderBottomColor: pack.color + "0a",
+                marginBottom: index === list.length - 1 ? 0 : 10,
               }}
             >
               <Pressable
@@ -373,13 +378,14 @@ export default function MealPackDetailScreen() {
             <Text className={s.ingredientHint} style={{ marginTop: 16 }}>
               EXTRA ITEMS ADDED
             </Text>
-            {extraItems.map((item) => (
+            {extraItems.map((item, index) => (
               <View
                 key={item.id}
                 className={s.ingredientRow}
                 style={{
                   borderBottomWidth: 1,
                   borderBottomColor: pack.color + "0a",
+                  marginBottom: index === extraItems.length - 1 ? 0 : 10,
                 }}
               >
                 <Pressable
