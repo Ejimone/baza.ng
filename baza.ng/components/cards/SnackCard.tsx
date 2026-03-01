@@ -31,73 +31,87 @@ export default function SnackCard({
       style={{
         backgroundColor: palette.card,
         borderColor: inCart ? item.color + "44" : palette.border,
+        borderRadius: 4,
+        paddingLeft: 0,
+        paddingRight: 0,
+        paddingTop: 0,
+        paddingBottom: 0,
+        overflow: "hidden",
       }}
     >
-      <ProductImage
-        imageUrl={item.imageUrl}
-        emoji={item.emoji}
-        size={40}
-        borderRadius={6}
-      />
-      <Text className={s.cardName} style={{ color: palette.textPrimary }}>
-        {item.name}
-      </Text>
-      <Text className={s.cardTag} style={{ color: item.color + "99" }}>
-        {item.tag}
-      </Text>
+      <View style={{ marginBottom: 10 }}>
+        <ProductImage
+          imageUrl={item.imageUrl}
+          emoji={item.emoji}
+          size={112}
+          borderRadius={0}
+        />
+      </View>
 
-      <View className={s.cardFooter}>
-        <Text className={s.cardPrice} style={{ color: palette.textPrimary }}>
-          {formatPrice(item.price)}
+      <View style={{ paddingHorizontal: 12, paddingBottom: 12 }}>
+        <Text className={s.cardName} style={{ color: palette.textPrimary }}>
+          {item.name}
+        </Text>
+        <Text className={s.cardTag} style={{ color: item.color + "99" }}>
+          {item.tag}
         </Text>
 
-        {qty === 0 ? (
-          <Pressable
-            className={s.addBtn}
-            style={{ borderWidth: 1, borderColor: "#c77dff55" }}
-            onPress={onAdd}
-          >
-            <Text
-              style={{
-                color: "#c77dff",
-                fontSize: 7,
-                letterSpacing: 1,
-                fontFamily: "NotoSerif_400Regular",
-              }}
-            >
-              ADD
-            </Text>
-          </Pressable>
-        ) : (
-          <View className={s.stepperRow}>
+        <View className={s.cardFooter}>
+          <Text className={s.cardPrice} style={{ color: palette.textPrimary }}>
+            {formatPrice(item.price)}
+          </Text>
+
+          {qty === 0 ? (
             <Pressable
-              className={`${s.stepperDec} ${qty === 1 ? s.stepperDecRemove : s.stepperDecNormal}`}
-              onPress={onDecrement}
+              className={s.addBtn}
+              style={{ borderWidth: 1, borderColor: "#c77dff55" }}
+              onPress={onAdd}
             >
               <Text
                 style={{
-                  color: qty === 1 ? "#e85c3a" : "#c77dff",
+                  color: "#c77dff",
+                  fontSize: 7,
+                  letterSpacing: 1,
                   fontFamily: "NotoSerif_400Regular",
                 }}
               >
-                {qty === 1 ? "×" : "−"}
+                ADD
               </Text>
             </Pressable>
-            <Text
-              className={s.stepperValue}
-              style={{ color: palette.textPrimary }}
-            >
-              {qty}
-            </Text>
-            <Pressable className={s.stepperInc} onPress={onIncrement}>
-              <Text
-                style={{ color: "#c77dff", fontFamily: "NotoSerif_400Regular" }}
+          ) : (
+            <View className={s.stepperRow}>
+              <Pressable
+                className={`${s.stepperDec} ${qty === 1 ? s.stepperDecRemove : s.stepperDecNormal}`}
+                onPress={onDecrement}
               >
-                +
+                <Text
+                  style={{
+                    color: qty === 1 ? "#e85c3a" : "#c77dff",
+                    fontFamily: "NotoSerif_400Regular",
+                  }}
+                >
+                  {qty === 1 ? "×" : "−"}
+                </Text>
+              </Pressable>
+              <Text
+                className={s.stepperValue}
+                style={{ color: palette.textPrimary }}
+              >
+                {qty}
               </Text>
-            </Pressable>
-          </View>
-        )}
+              <Pressable className={s.stepperInc} onPress={onIncrement}>
+                <Text
+                  style={{
+                    color: "#c77dff",
+                    fontFamily: "NotoSerif_400Regular",
+                  }}
+                >
+                  +
+                </Text>
+              </Pressable>
+            </View>
+          )}
+        </View>
       </View>
     </View>
   );

@@ -17,24 +17,32 @@ export default function ModeCard({ mode }: ModeCardProps) {
 
   return (
     <Pressable
-      className={s.modeButton}
+      className="flex-row items-center gap-4"
       style={{
         backgroundColor: themeMode === "light" ? palette.card : mode.bg,
         borderColor: themeMode === "light" ? palette.border : `${mode.color}22`,
+        borderRadius: 4,
+        paddingLeft: 0,
+        paddingRight: 16,
+        paddingTop: 0,
+        paddingBottom: 0,
+        overflow: "hidden",
       }}
       onPress={() => router.push(mode.route as any)}
     >
       <View
-        className={s.modeIcon}
         style={{
-          backgroundColor: `${mode.color}15`,
-          borderRadius: 0,
+          backgroundColor: "transparent",
+          width: 84,
+          height: 84,
+          borderTopLeftRadius: 4,
+          borderBottomLeftRadius: 4,
           overflow: "hidden",
         }}
       >
         {mode.imageUrl ? (
           <Image
-            source={{ uri: optimizedUrl(mode.imageUrl, 88) }}
+            source={{ uri: optimizedUrl(mode.imageUrl, 168) }}
             style={{ width: "100%", height: "100%" }}
             resizeMode="cover"
           />

@@ -1,6 +1,5 @@
 import { useCartStore } from "../stores/cartStore";
 import { formatPrice } from "../utils/format";
-import type { CartItem } from "../types";
 
 export function useCart() {
   const items = useCartStore((s) => s.items);
@@ -8,11 +7,9 @@ export function useCart() {
   const removeItem = useCartStore((s) => s.removeItem);
   const updateQty = useCartStore((s) => s.updateQty);
   const clear = useCartStore((s) => s.clear);
-  const totalKobo = useCartStore((s) => s.total);
-  const itemCount = useCartStore((s) => s.count);
 
-  const total = totalKobo();
-  const count = itemCount();
+  const total = items.reduce((sum, item) => sum + item.totalPrice, 0);
+  const count = items.reduce((sum, item) => sum + item.qty, 0);
   const formattedTotal = formatPrice(total);
   const isEmpty = items.length === 0;
 
@@ -21,8 +18,7 @@ export function useCart() {
     return item?.qty ?? 0;
   };
 
-  const isInCart = (id: string): boolean =>
-    items.some((i) => i.id === id);
+  const isInCart = (id: string): boolean => items.some((i) => i.id === id);
 
   return {
     items,

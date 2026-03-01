@@ -27,15 +27,30 @@ export default function BundleCard({
         backgroundColor: bundle.color + "08",
         borderWidth: 1,
         borderColor: bundle.color + "22",
+        borderRadius: 4,
+        paddingLeft: 0,
+        paddingRight: 16,
+        paddingVertical: 0,
+        overflow: "hidden",
       }}
       onPress={onPress}
     >
-      <ProductImage
-        imageUrl={bundle.imageUrl}
-        emoji={bundle.emoji}
-        size={44}
-        borderRadius={6}
-      />
+      <View
+        style={{
+          width: 84,
+          height: 84,
+          borderTopLeftRadius: 4,
+          borderBottomLeftRadius: 4,
+          overflow: "hidden",
+        }}
+      >
+        <ProductImage
+          imageUrl={bundle.imageUrl}
+          emoji={bundle.emoji}
+          size={84}
+          borderRadius={0}
+        />
+      </View>
 
       <View style={{ flex: 1 }}>
         <Text className={s.bundleTitle} style={{ color: palette.textPrimary }}>

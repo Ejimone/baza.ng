@@ -31,17 +31,33 @@ export default function ProductCard({
     <Pressable
       className={s.itemRow}
       onPress={onPress}
-      style={{ backgroundColor: palette.card, borderColor: palette.border }}
+      style={{
+        backgroundColor: palette.card,
+        borderColor: palette.border,
+        borderRadius: 4,
+        paddingLeft: 0,
+        paddingRight: 14,
+        paddingVertical: 0,
+        overflow: "hidden",
+      }}
     >
       <Pressable
         className={`${s.itemThumb} ${inCart ? s.itemThumbActive : s.itemThumbInactive}`}
         onPress={onPress}
+        style={{
+          width: 84,
+          height: 84,
+          borderRadius: 0,
+          borderWidth: 0,
+          backgroundColor: "transparent",
+          overflow: "hidden",
+        }}
       >
         <ProductImage
           imageUrl={item.imageUrl}
           emoji={item.emoji}
-          size={40}
-          borderRadius={4}
+          size={84}
+          borderRadius={0}
         />
       </Pressable>
 

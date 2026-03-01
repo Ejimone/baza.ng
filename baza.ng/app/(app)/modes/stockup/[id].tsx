@@ -282,7 +282,12 @@ export default function BundleDetailScreen() {
           >
             MEMBER PRICE
           </Text>
-          <Text className={s.memberPrice}>{formatPrice(memberTotal)}</Text>
+          <Text
+            className={s.memberPrice}
+            style={{ color: palette.textPrimary }}
+          >
+            {formatPrice(memberTotal)}
+          </Text>
         </View>
         <Pressable
           className={addMoreButton.wrapper}

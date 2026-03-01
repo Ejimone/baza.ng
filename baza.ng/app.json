@@ -2,7 +2,7 @@
   "expo": {
     "name": "Baza.ng",
     "slug": "baza.ng",
-    "version": "2.4.0",
+    "version": "2.5.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "bazang",

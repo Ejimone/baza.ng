@@ -17,7 +17,7 @@ export default function ProductImage({
   imageUrl,
   emoji,
   size = 48,
-  borderRadius = 8,
+  borderRadius = 4,
 }: ProductImageProps) {
   if (imageUrl) {
     return (
@@ -42,7 +42,7 @@ export default function ProductImage({
 
 const styles = StyleSheet.create({
   image: {
-    backgroundColor: "#0d1a0f",
+    backgroundColor: "transparent",
   },
   emojiContainer: {
     alignItems: "center",

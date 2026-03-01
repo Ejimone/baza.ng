@@ -445,7 +445,12 @@ export default function MealPackDetailScreen() {
             <Text className={s.footerFree}>FREE DELIVERY · MEMBERS</Text>
           </View>
           <View style={{ alignItems: "flex-end" }}>
-            <Text className={s.footerPrice}>{formatPrice(price)}</Text>
+            <Text
+              className={s.footerPrice}
+              style={{ color: palette.textPrimary }}
+            >
+              {formatPrice(price)}
+            </Text>
           </View>
         </View>
 

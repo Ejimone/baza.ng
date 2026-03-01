@@ -159,18 +159,30 @@ export default function ReadyEatScreen() {
                     backgroundColor: item.color + "08",
                     borderWidth: 1,
                     borderColor: inCart ? item.color + "44" : item.color + "15",
+                    paddingLeft: 0,
+                    paddingRight: 14,
+                    paddingVertical: 0,
+                    overflow: "hidden",
                   }}
                   onPress={() => setSelected(item)}
                 >
                   <View
                     className={s.itemEmoji}
-                    style={{ backgroundColor: item.color + "12" }}
+                    style={{
+                      width: 84,
+                      height: 84,
+                      borderRadius: 0,
+                      borderTopLeftRadius: 4,
+                      borderBottomLeftRadius: 4,
+                      overflow: "hidden",
+                      backgroundColor: item.color + "12",
+                    }}
                   >
                     <ProductImage
                       imageUrl={item.imageUrl}
                       emoji={item.emoji}
-                      size={48}
-                      borderRadius={6}
+                      size={84}
+                      borderRadius={0}
                     />
                   </View>
 

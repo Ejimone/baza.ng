@@ -2,6 +2,16 @@
 
 ## Completed
 
+- Fixed two UI state/visibility issues: (1) floating cart now updates count and total immediately on add/remove by deriving values directly from current cart items in `useCart`, and (2) Stock Up bundle detail member price is now visible in light mode by binding the amount text color to theme palette (`hooks/useCart.ts`, `app/(app)/modes/stockup/[id].tsx`).
+
+- Adjusted home and mode product-list card media layout so thumbnails are larger and start flush at the left edge (no inner left padding), matching the requested card style. Applied to home mode cards and key product rows in Stock Up, Cook a Meal, Ready to Eat, and Shop List (`components/cards/ModeCard.tsx`, `components/cards/BundleCard.tsx`, `components/cards/MealPackCard.tsx`, `components/cards/ProductCard.tsx`, `app/(app)/modes/readyeat.tsx`).
+
+- Refined the same card-media update by removing top/bottom inner spacing on those rows, increasing media blocks so the image sits exactly on card edges, removing remaining media inset/border feel, and applying the exact flush-media treatment to Snacks cards for cross-mode consistency (`components/cards/SnackCard.tsx` plus the files above).
+
+- Removed the remaining vertical inner padding source on Home mode selection cards so those cards now match the product-card flush-media pattern more exactly (`components/cards/ModeCard.tsx`).
+
+- Polished product-card visuals across Home and mode lists: increased product thumbnail sizes, removed inner thumbnail padding so images sit flush inside their containers, and standardized corner radius to `4px` across shared product card components (`components/cards/ModeCard.tsx`, `components/cards/BundleCard.tsx`, `components/cards/MealPackCard.tsx`, `components/cards/SnackCard.tsx`, `components/cards/ProductCard.tsx`, `components/ui/ProductImage.tsx`). Also fixed Cook a Meal detail total price visibility in light mode by binding the footer price text to the active theme palette (`app/(app)/modes/cookmeal/[id].tsx`).
+
 - Moved the Light/Dark mode switcher from Account Settings to the Profile screen for better discoverability; users can now toggle theme directly from Profile without navigating into settings (`app/(app)/profile.tsx`), and the toggle section was removed from Account Settings (`app/(app)/settings/account.tsx`).
 
 - Improved app startup and perceived speed with background prefetch + caching: added shared in-memory TTL caching and in-flight request de-duplication for product, order, and wallet service fetches (`services/products.ts`, `services/orders.ts`, `services/wallet.ts`), seeded product hook state from cache (`hooks/useProducts.ts`), and added authenticated app warmup prefetch on app stack mount (`app/(app)/_layout.tsx`) so data is loaded in the background before users navigate.
