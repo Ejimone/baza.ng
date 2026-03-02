@@ -1,4 +1,6 @@
 import { Pressable, Text, View } from "react-native";
+import { getThemePalette } from "../../constants/appTheme";
+import { useThemeStore } from "../../stores/themeStore";
 import { insufficientSheet as s } from "../../styles";
 import { formatPrice } from "../../utils/format";
 
@@ -17,17 +19,37 @@ export default function InsufficientFundsSheet({
   onFundWallet,
   onDismiss,
 }: InsufficientFundsSheetProps) {
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
+
   if (!visible) return null;
 
   return (
-    <View className={s.overlay}>
+    <View
+      className={s.overlay}
+      style={{
+        backgroundColor:
+          mode === "light" ? "rgba(0,0,0,0.35)" : "rgba(0,0,0,0.85)",
+      }}
+    >
       <Pressable style={{ flex: 1 }} onPress={onDismiss} />
-      <View className={s.sheet}>
-        <View className={s.handle} />
+      <View
+        className={s.sheet}
+        style={{
+          backgroundColor: palette.background,
+          borderColor: palette.border,
+        }}
+      >
+        <View
+          className={s.handle}
+          style={{ backgroundColor: palette.border }}
+        />
 
         <Text className={s.label}>INSUFFICIENT BALANCE</Text>
-        <Text className={s.title}>Choose how to pay</Text>
-        <Text className={s.desc}>
+        <Text className={s.title} style={{ color: palette.textPrimary }}>
+          Choose how to pay
+        </Text>
+        <Text className={s.desc} style={{ color: palette.textSecondary }}>
           You need{" "}
           <Text className={s.shortfallAmount}>{formatPrice(shortfall)}</Text>{" "}
           more to pay from wallet. You can pay directly with card instead, or
@@ -43,7 +65,10 @@ export default function InsufficientFundsSheet({
         </Pressable>
 
         <Pressable className={s.cancelBtn} onPress={onDismiss}>
-          <Text className="text-[#2a3a2a] text-xxs tracking-wide-lg font-mono text-center">
+          <Text
+            className="text-xxs tracking-wide-lg font-mono text-center"
+            style={{ color: palette.textSecondary }}
+          >
             CANCEL
           </Text>
         </Pressable>

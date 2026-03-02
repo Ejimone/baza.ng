@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import ModeCard from "../../components/cards/ModeCard";
 import Header from "../../components/layout/Header";
-import FloatingCart from "../../components/ui/FloatingCart";
+import ProductImage from "../../components/ui/ProductImage";
 import SearchBar from "../../components/ui/SearchBar";
 import { getThemePalette } from "../../constants/appTheme";
 import { colors } from "../../constants/theme";
@@ -89,6 +89,7 @@ export default function IntentGateScreen() {
       title: string;
       subtitle: string;
       emoji: string;
+      imageUrl?: string;
       type:
         | "bundle"
         | "mealpack"
@@ -105,6 +106,7 @@ export default function IntentGateScreen() {
       title: string;
       subtitle: string;
       emoji: string;
+      imageUrl?: string;
       type:
         | "bundle"
         | "mealpack"
@@ -129,6 +131,7 @@ export default function IntentGateScreen() {
           title: bundle.name,
           subtitle: "Bundle",
           emoji: bundle.emoji,
+          imageUrl: bundle.imageUrl,
           type: "bundle",
           targetId: bundle.id,
         });
@@ -142,6 +145,7 @@ export default function IntentGateScreen() {
             title: item.name,
             subtitle: `In bundle · ${bundle.name}`,
             emoji: item.emoji,
+            imageUrl: item.imageUrl,
             type: "bundle",
             targetId: bundle.id,
           });
@@ -157,6 +161,7 @@ export default function IntentGateScreen() {
           title: pack.name,
           subtitle: "Meal pack",
           emoji: pack.emoji,
+          imageUrl: pack.imageUrl,
           type: "mealpack",
           targetId: pack.id,
         });
@@ -169,6 +174,7 @@ export default function IntentGateScreen() {
             title: ingredient.name,
             subtitle: `Ingredient · ${pack.name}`,
             emoji: ingredient.emoji,
+            imageUrl: ingredient.imageUrl,
             type: "ingredient",
             targetId: pack.id,
           });
@@ -191,6 +197,7 @@ export default function IntentGateScreen() {
           title: item.name,
           subtitle: `Ready to Eat · ${item.kitchen}`,
           emoji: item.emoji,
+          imageUrl: item.imageUrl,
           type: "readyeat",
           targetId: item.id,
         });
@@ -207,6 +214,7 @@ export default function IntentGateScreen() {
           title: item.name,
           subtitle: `Snacks & Drinks · ${item.category}`,
           emoji: item.emoji,
+          imageUrl: item.imageUrl,
           type: "snack",
           targetId: item.id,
         });
@@ -223,6 +231,7 @@ export default function IntentGateScreen() {
           title: item.name,
           subtitle: `Product · ${item.brand}`,
           emoji: item.emoji,
+          imageUrl: item.imageUrl,
           type: "restock",
           targetId: item.id,
         });
@@ -353,13 +362,19 @@ export default function IntentGateScreen() {
                         flexDirection: "row",
                         alignItems: "center",
                         gap: 10,
-                        paddingVertical: 10,
+                        minHeight: 56,
+                        paddingVertical: 8,
                         paddingHorizontal: 12,
                         borderBottomWidth: 1,
                         borderBottomColor: palette.border,
                       }}
                     >
-                      <Text style={{ fontSize: 16 }}>{result.emoji}</Text>
+                      <ProductImage
+                        imageUrl={result.imageUrl}
+                        emoji={result.emoji}
+                        size={40}
+                        borderRadius={4}
+                      />
                       <View style={{ flex: 1 }}>
                         <Text
                           style={{
@@ -394,7 +409,7 @@ export default function IntentGateScreen() {
       <ScrollView
         className={s.scrollBody}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -473,8 +488,6 @@ export default function IntentGateScreen() {
           ))}
         </View>
       </ScrollView>
-
-      <FloatingCart />
 
       {showTopUp && <TopUpSheet onClose={() => setShowTopUp(false)} />}
     </View>

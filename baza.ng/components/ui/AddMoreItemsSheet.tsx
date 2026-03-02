@@ -16,6 +16,7 @@ import { addMoreSheet as s } from "../../styles";
 import type { RestockItem } from "../../types";
 import ProductCard from "../cards/ProductCard";
 import BottomSheet from "./BottomSheet";
+import ProductImage from "./ProductImage";
 import SearchBar from "./SearchBar";
 
 const SHEET_HEIGHT = Dimensions.get("window").height * 0.75;
@@ -273,21 +274,18 @@ export default function AddMoreItemsSheet({
                         style={{
                           width: 44,
                           height: 44,
-                          backgroundColor: palette.background,
                           borderWidth: 1,
                           borderColor: wasAdded ? "#4caf7d33" : palette.border,
-                          alignItems: "center",
-                          justifyContent: "center",
+                          borderRadius: 4,
+                          overflow: "hidden",
                         }}
                       >
-                        <Text
-                          style={{
-                            fontSize: 20,
-                            fontFamily: "NotoSerif_400Regular",
-                          }}
-                        >
-                          {item.emoji}
-                        </Text>
+                        <ProductImage
+                          imageUrl={item.imageUrl}
+                          emoji={item.emoji}
+                          size={44}
+                          borderRadius={4}
+                        />
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text

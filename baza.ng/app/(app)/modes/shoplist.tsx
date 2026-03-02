@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, usePathname, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
     ActivityIndicator,
@@ -12,7 +12,6 @@ import {
     View,
 } from "react-native";
 import ProductCard from "../../../components/cards/ProductCard";
-import FloatingCart from "../../../components/ui/FloatingCart";
 import ProductImage from "../../../components/ui/ProductImage";
 import SearchBar from "../../../components/ui/SearchBar";
 import { getThemePalette } from "../../../constants/appTheme";
@@ -26,6 +25,7 @@ import { formatPrice } from "../../../utils/format";
 
 export default function ShopListScreen() {
   const router = useRouter();
+  const pathname = usePathname();
   const { itemId } = useLocalSearchParams<{ itemId?: string }>();
   const { restockItems, restockCategories, isLoading, error, fetchRestock } =
     useProducts();
@@ -38,6 +38,7 @@ export default function ShopListScreen() {
   const [selectedItem, setSelectedItem] = useState<RestockItem | null>(null);
   const [hasHandledItemParam, setHasHandledItemParam] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isWholesale = pathname.includes("/modes/wholesale");
 
   useEffect(() => {
     fetchRestock();
@@ -119,7 +120,7 @@ export default function ShopListScreen() {
           </Text>
         </Pressable>
         <Text className={s.title} style={{ color: palette.textPrimary }}>
-          Quick Restock
+          {isWholesale ? "Buy Wholesale" : "Quick Restock"}
         </Text>
 
         <SearchBar
@@ -128,7 +129,9 @@ export default function ShopListScreen() {
           placeholder="What do you need?"
         />
         <Text className={s.searchHint} style={{ color: palette.textSecondary }}>
-          SEARCH OR BROWSE BY CATEGORY
+          {isWholesale
+            ? "SEARCH OR BROWSE BULK PRODUCTS"
+            : "SEARCH OR BROWSE BY CATEGORY"}
         </Text>
       </View>
 
@@ -214,7 +217,7 @@ export default function ShopListScreen() {
         <ScrollView
           className={s.list}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 100 }}
+          contentContainerStyle={{ paddingBottom: 120 }}
         >
           {restockItems.map((item) => {
             const qty = getItemQty(item.id);
@@ -232,8 +235,6 @@ export default function ShopListScreen() {
           })}
         </ScrollView>
       )}
-
-      <FloatingCart />
 
       {selectedItem ? (
         <RestockItemPopup

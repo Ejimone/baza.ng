@@ -1,25 +1,72 @@
 import { useRouter } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { useEffect, useRef } from "react";
+import {
+    Animated,
+    Easing,
+    Keyboard,
+    Platform,
+    Pressable,
+    Text,
+    View,
+} from "react-native";
 import { getThemePalette } from "../../constants/appTheme";
 import { useCart } from "../../hooks/useCart";
 import { useThemeStore } from "../../stores/themeStore";
 import { floatingCart as s } from "../../styles";
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function FloatingCart() {
   const router = useRouter();
   const { count, formattedTotal, isEmpty } = useCart();
   const mode = useThemeStore((state) => state.mode);
   const palette = getThemePalette(mode);
+  const translateY = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const animateTo = (toValue: number, duration = 220) => {
+      Animated.timing(translateY, {
+        toValue,
+        duration,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+    };
+
+    const showEvent =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent =
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const showSub = Keyboard.addListener(showEvent, (event) => {
+      const keyboardHeight = event.endCoordinates?.height ?? 0;
+      const duration =
+        typeof event.duration === "number" ? event.duration : 220;
+      animateTo(-(keyboardHeight + 12), duration);
+    });
+
+    const hideSub = Keyboard.addListener(hideEvent, (event) => {
+      const duration =
+        typeof event.duration === "number" ? event.duration : 220;
+      animateTo(0, duration);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [translateY]);
 
   if (isEmpty) return null;
 
   return (
-    <Pressable
+    <AnimatedPressable
       className={s.button}
       style={{
         backgroundColor: palette.card,
         borderColor: palette.border,
         borderWidth: 1,
+        transform: [{ translateY }],
       }}
       onPress={() => router.push("/(app)/cart")}
     >
@@ -42,6 +89,6 @@ export default function FloatingCart() {
       <Text className={s.chevron} style={{ color: palette.textPrimary }}>
         ›
       </Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 }

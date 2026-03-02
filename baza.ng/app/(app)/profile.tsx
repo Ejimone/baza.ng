@@ -3,16 +3,16 @@ import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Animated,
-  Keyboard,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
+    ActivityIndicator,
+    Alert,
+    Animated,
+    Keyboard,
+    Platform,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 import ScreenWrapper from "../../components/layout/ScreenWrapper";
 import WalletCard from "../../components/wallet/WalletCard";
@@ -583,6 +583,7 @@ export default function ProfileScreen() {
           </Animated.View>
         </View>
       )}
+
     </ScreenWrapper>
   );
 }

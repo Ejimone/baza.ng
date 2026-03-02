@@ -25,6 +25,7 @@ export const RESTOCK_CATEGORIES = [
 ] as const;
 
 export type ShoppingMode =
+  | "wholesale"
   | "stockup"
   | "cookmeal"
   | "readyeat"
@@ -44,6 +45,17 @@ export interface ModeConfig {
 }
 
 export const SHOPPING_MODES: ModeConfig[] = [
+  {
+    key: "wholesale",
+    title: "Buy Wholesale",
+    subtitle: "BETTER UNIT PRICE. RIGHT QUANTITY.",
+    emoji: "",
+    imageUrl:
+      "https://res.cloudinary.com/dunnk4pbw/image/upload/v1772414639/wholesale_djejvm.jpg",
+    color: "#4caf7d",
+    bg: "#111315",
+    route: "/(app)/modes/wholesale",
+  },
   {
     key: "stockup",
     title: "Stock up the house",

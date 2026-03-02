@@ -1,5 +1,7 @@
-import { Redirect, Stack } from "expo-router";
+import { Redirect, Stack, usePathname } from "expo-router";
 import { useEffect } from "react";
+import { View } from "react-native";
+import BottomNav from "../../components/layout/BottomNav";
 import { getThemePalette } from "../../constants/appTheme";
 import * as ordersService from "../../services/orders";
 import * as productsService from "../../services/products";
@@ -11,6 +13,17 @@ export default function AppLayout() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const mode = useThemeStore((s) => s.mode);
   const palette = getThemePalette(mode);
+  const pathname = usePathname();
+
+  const normalizedPath = pathname.replace("/(app)", "");
+  const isOrderDetail =
+    normalizedPath.startsWith("/orders/") && normalizedPath !== "/orders";
+  const isStockupDetail = normalizedPath.startsWith("/modes/stockup/");
+  const isCookmealDetail = normalizedPath.startsWith("/modes/cookmeal/");
+  const isPopupHeavyRoute =
+    normalizedPath === "/modes/readyeat" || normalizedPath === "/modes/chat";
+  const showBottomNav =
+    !(isOrderDetail || isStockupDetail || isCookmealDetail || isPopupHeavyRoute);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -27,11 +40,20 @@ export default function AppLayout() {
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: palette.background },
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: palette.background,
+        paddingBottom: showBottomNav ? 82 : 0,
       }}
-    />
+    >
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: palette.background },
+        }}
+      />
+      {showBottomNav ? <BottomNav /> : null}
+    </View>
   );
 }

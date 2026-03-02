@@ -890,7 +890,7 @@ export const accountSettingsScreen = {
 
 export const floatingCart = {
   button:
-    "absolute top-[52px] right-4 z-[200] bg-txt-primary py-3 px-5 flex-row items-center justify-between",
+    "absolute bottom-5 left-5 right-5 z-[200] bg-txt-primary py-3 px-5 flex-row items-center justify-between",
   iconWrap: "flex-row items-center gap-4",
   cartIcon: "text-lg relative",
   badge:

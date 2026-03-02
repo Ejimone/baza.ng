@@ -17,11 +17,13 @@ import FundPrompt from "../../components/ui/FundPrompt";
 import InsufficientFundsSheet from "../../components/ui/InsufficientFundsSheet";
 import PaymentMethodSelector from "../../components/ui/PaymentMethodSelector";
 import PaystackInline from "../../components/ui/PaystackInline";
+import { getThemePalette } from "../../constants/appTheme";
 import { useAuth } from "../../hooks/useAuth";
 import { useCart } from "../../hooks/useCart";
 import { useOrders } from "../../hooks/useOrders";
 import { useWallet } from "../../hooks/useWallet";
 import { cartItemsToOrderItems } from "../../services/orders";
+import { useThemeStore } from "../../stores/themeStore";
 import { useWalletStore } from "../../stores/walletStore";
 import { addMoreButton, cartScreen as s } from "../../styles";
 import type { PaymentMethod } from "../../types";
@@ -29,6 +31,8 @@ import { formatPrice } from "../../utils/format";
 
 export default function CartScreen() {
   const router = useRouter();
+  const mode = useThemeStore((state) => state.mode);
+  const palette = getThemePalette(mode);
   const { items, total, formattedTotal, isEmpty, removeItem, clear } =
     useCart();
   const { balance, formattedBalance, fetchPaystackConfig } = useWallet();
@@ -175,18 +179,30 @@ export default function CartScreen() {
 
   if (done) {
     return (
-      <View className={s.container}>
-        <View className={s.header}>
-          <Text className={s.title}>Cart</Text>
+      <View
+        className={s.container}
+        style={{ backgroundColor: palette.background }}
+      >
+        <View
+          className={s.header}
+          style={{ borderBottomWidth: 1, borderBottomColor: palette.border }}
+        >
+          <Text className={s.title} style={{ color: palette.textPrimary }}>
+            Cart
+          </Text>
         </View>
         <View className={s.confirmDone}>
           <Text className={s.confirmIcon}>✓</Text>
           <Text className={s.confirmLabel}>ORDER CONFIRMED</Text>
-          <Text className={s.confirmEta}>
+          <Text
+            className={s.confirmEta}
+            style={{ color: palette.textSecondary }}
+          >
             {eta ? eta.toUpperCase() : "ARRIVING TOMORROW BY 10AM"}
           </Text>
           <Pressable
             className={s.confirmBackBtn}
+            style={{ borderColor: palette.border }}
             onPress={() => router.replace("/(app)" as any)}
           >
             <Text className="text-baza-green text-xxs tracking-wide-lg font-mono">
@@ -203,29 +219,54 @@ export default function CartScreen() {
       className={s.container}
       behavior="padding"
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 24}
-      style={{ flex: 1 }}
+      style={{ flex: 1, backgroundColor: palette.background }}
     >
-      <View className={s.header}>
+      <View
+        className={s.header}
+        style={{ borderBottomWidth: 1, borderBottomColor: palette.border }}
+      >
         <Pressable onPress={() => router.back()}>
-          <Text className={s.backButton}>← BACK</Text>
+          <Text
+            className={s.backButton}
+            style={{ color: palette.textSecondary }}
+          >
+            ← BACK
+          </Text>
         </Pressable>
-        <Text className={s.title}>Cart</Text>
+        <Text className={s.title} style={{ color: palette.textPrimary }}>
+          Cart
+        </Text>
       </View>
 
       {!isEmpty && (
         <View
           className={`${s.balanceBar} ${hasFunds ? s.balanceBarOk : s.balanceBarLow}`}
+          style={{
+            backgroundColor: hasFunds ? "#4caf7d12" : "#e85c3a12",
+            borderColor: hasFunds ? "#4caf7d44" : "#e85c3a44",
+            borderWidth: 1,
+          }}
         >
           <View>
-            <Text className={hasFunds ? s.balanceLabelOk : s.balanceLabelLow}>
+            <Text
+              className={hasFunds ? s.balanceLabelOk : s.balanceLabelLow}
+              style={{ color: hasFunds ? "#4caf7d" : "#e85c3a" }}
+            >
               WALLET BALANCE
             </Text>
-            <Text className={hasFunds ? s.balanceAmountOk : s.balanceAmountLow}>
+            <Text
+              className={hasFunds ? s.balanceAmountOk : s.balanceAmountLow}
+              style={{ color: hasFunds ? "#4caf7d" : "#e85c3a" }}
+            >
               {formattedBalance}
             </Text>
           </View>
           {!hasFunds && (
-            <Pressable className={s.topUpBtn} onPress={() => setShowFund(true)}>
+            <Pressable
+              className={s.topUpBtn}
+              style={{ borderColor: "#e85c3a66" }}
+              onPress={() => setShowFund(true)}
+            >
               <Text className="text-baza-red text-3xs tracking-wide-lg font-mono">
                 TOP UP
               </Text>
@@ -237,30 +278,55 @@ export default function CartScreen() {
       <ScrollView
         className={s.list}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
         keyboardShouldPersistTaps="handled"
         onScrollBeginDrag={Keyboard.dismiss}
       >
         {isEmpty ? (
-          <Text className={s.emptyText}>CART IS EMPTY</Text>
+          <Text
+            className={s.emptyText}
+            style={{ color: palette.textSecondary }}
+          >
+            CART IS EMPTY
+          </Text>
         ) : (
           <>
             {items.map((item) => (
-              <View key={item.id} className={s.itemRow}>
+              <View
+                key={item.id}
+                className={s.itemRow}
+                style={{ borderBottomColor: palette.border }}
+              >
                 <Text className={s.itemEmoji}>{item.emoji}</Text>
                 <View style={{ flex: 1 }}>
-                  <Text className={s.itemName}>{item.name}</Text>
-                  <Text className={s.itemType}>
+                  <Text
+                    className={s.itemName}
+                    style={{ color: palette.textPrimary }}
+                  >
+                    {item.name}
+                  </Text>
+                  <Text
+                    className={s.itemType}
+                    style={{ color: palette.textSecondary }}
+                  >
                     {item.itemType}
                     {item.qty > 1 ? ` × ${item.qty}` : ""}
                   </Text>
                 </View>
                 <View className={s.itemRight}>
-                  <Text className={s.itemPrice}>
+                  <Text
+                    className={s.itemPrice}
+                    style={{ color: palette.textPrimary }}
+                  >
                     {formatPrice(item.totalPrice)}
                   </Text>
                   <Pressable onPress={() => removeItem(item.id)}>
-                    <Text className={s.itemRemoveBtn}>×</Text>
+                    <Text
+                      className={s.itemRemoveBtn}
+                      style={{ color: palette.textSecondary }}
+                    >
+                      ×
+                    </Text>
                   </Pressable>
                 </View>
               </View>
@@ -281,29 +347,54 @@ export default function CartScreen() {
         {!isEmpty && (
           <View className={s.footer}>
             <View className={s.subtotalRow}>
-              <Text className="text-3xs text-[#2a3a2a] tracking-wide-lg font-mono">
+              <Text
+                className="text-3xs tracking-wide-lg font-mono"
+                style={{ color: palette.textSecondary }}
+              >
                 SUBTOTAL
               </Text>
-              <Text className={s.subtotalValue}>{formattedTotal}</Text>
+              <Text
+                className={s.subtotalValue}
+                style={{ color: palette.textPrimary }}
+              >
+                {formattedTotal}
+              </Text>
             </View>
             <View className={s.deliveryRow}>
-              <Text className="text-3xs text-[#2a3a2a] tracking-wide-lg font-mono">
+              <Text
+                className="text-3xs tracking-wide-lg font-mono"
+                style={{ color: palette.textSecondary }}
+              >
                 DELIVERY
               </Text>
               <Text className={s.deliveryValue}>FREE</Text>
             </View>
 
             <View className={s.noteSection}>
-              <Text className={s.noteLabel}>
+              <Text
+                className={s.noteLabel}
+                style={{ color: palette.textSecondary }}
+              >
                 NOTE FOR RIDER / KITCHEN{" "}
-                <Text className={s.noteOptional}>(OPTIONAL)</Text>
+                <Text
+                  className={s.noteOptional}
+                  style={{ color: palette.textSecondary }}
+                >
+                  (OPTIONAL)
+                </Text>
               </Text>
               <TextInput
                 className={s.noteInput}
+                style={{
+                  backgroundColor: palette.card,
+                  borderColor: palette.border,
+                  borderWidth: 1,
+                  color: palette.textPrimary,
+                }}
                 value={orderNote}
                 onChangeText={setOrderNote}
                 placeholder="e.g. Leave at gate, call on arrival, no pepper..."
-                placeholderTextColor="#2a3a2a"
+                placeholderTextColor={palette.textSecondary}
                 multiline
                 numberOfLines={2}
                 textAlignVertical="top"
@@ -375,6 +466,7 @@ export default function CartScreen() {
         onSuccess={handlePaystackSuccess}
         onCancel={handlePaystackCancel}
       />
+
     </KeyboardAvoidingView>
   );
 }

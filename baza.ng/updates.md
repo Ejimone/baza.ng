@@ -2,6 +2,30 @@
 
 ## Completed
 
+- Rolled out bottom nav globally at the `(app)` layout level so it persists across app screens (including Orders and Settings), with route-based auto-hide for detail/pop-up-heavy routes (`orders/[id]`, `modes/stockup/[id]`, `modes/cookmeal/[id]`, `modes/readyeat`, `modes/chat`). Removed page-level duplicate nav mounts and centralized behavior in layout (`app/(app)/_layout.tsx`, `app/(app)/index.tsx`, `app/(app)/cart.tsx`, `app/(app)/profile.tsx`, `app/(app)/modes/shoplist.tsx`).
+
+- Added live cart indicator on the bottom-nav cart tab: badge now shows current total cart item count and updates immediately on add/increment/decrement/remove actions (`components/layout/BottomNav.tsx`).
+
+- Made bottom nav persistent on key tab pages (`Home`, `Browse`, `Cart`, `Account`) by mounting it on cart, profile, and browse screens as well; nav remains keyboard-responsive (moves up/down on keyboard show/hide), and pressing the currently active tab now does nothing (no reload/no redirect to same page) (`components/layout/BottomNav.tsx`, `app/(app)/cart.tsx`, `app/(app)/profile.tsx`, `app/(app)/modes/shoplist.tsx`).
+
+- Improved Cart light/dark parity: cart surfaces, headers, balance bar, item rows, subtotal/delivery labels, notes input, and insufficient-funds sheet now use theme palette-aware styling for consistent readability in both modes (`app/(app)/cart.tsx`, `components/ui/InsufficientFundsSheet.tsx`).
+
+- Replaced emoji-based icons with Phosphor icons in newly added nav/payment surfaces: bottom nav now uses `House`, `MagnifyingGlass`, `ShoppingCart`, `UserCircle`, and payment method options now use `Wallet` and `CreditCard` (`components/layout/BottomNav.tsx`, `components/ui/PaymentMethodSelector.tsx`).
+
+- Updated the Wholesale mode card media to use the provided Cloudinary image instead of emoji fallback (`utils/constants.ts`).
+
+- Added a new keyboard-aware bottom navigation on Home with `Home`, `Browse`, `Cart`, and `Account` actions; the nav now animates up/down with keyboard visibility while typing in search (`components/layout/BottomNav.tsx`, `app/(app)/index.tsx`).
+
+- Added a new `Buy Wholesale` mode and route, built by reusing the Quick Restock flow (same product browsing/adding behavior), and made the shared screen title/hint adapt when accessed via wholesale (`utils/constants.ts`, `app/(app)/modes/wholesale.tsx`, `app/(app)/modes/shoplist.tsx`).
+
+- Fixed search-result thumbnail alignment/padding so result rows match other product cards: updated Home universal search and Add More Items search results to render via shared `ProductImage` with consistent sizing/radius and flush thumbnail containers (`app/(app)/index.tsx`, `components/ui/AddMoreItemsSheet.tsx`).
+
+- Added smooth move-up/move-down animation for keyboard handling in the floating cart using `Animated.timing`, so the cart now glides above the keyboard and back down instead of jumping (`components/ui/FloatingCart.tsx`).
+
+- Made `FloatingCart` keyboard-aware: when the keyboard opens, the cart auto-repositions above it; when keyboard closes, it returns to its normal bottom position (`components/ui/FloatingCart.tsx`).
+
+- Fixed floating cart placement so it no longer overlaps the Home profile control: moved shared `FloatingCart` position from top-right to bottom-docked (`styles/index.ts`).
+
 - Fixed two UI state/visibility issues: (1) floating cart now updates count and total immediately on add/remove by deriving values directly from current cart items in `useCart`, and (2) Stock Up bundle detail member price is now visible in light mode by binding the amount text color to theme palette (`hooks/useCart.ts`, `app/(app)/modes/stockup/[id].tsx`).
 
 - Adjusted home and mode product-list card media layout so thumbnails are larger and start flush at the left edge (no inner left padding), matching the requested card style. Applied to home mode cards and key product rows in Stock Up, Cook a Meal, Ready to Eat, and Shop List (`components/cards/ModeCard.tsx`, `components/cards/BundleCard.tsx`, `components/cards/MealPackCard.tsx`, `components/cards/ProductCard.tsx`, `app/(app)/modes/readyeat.tsx`).
