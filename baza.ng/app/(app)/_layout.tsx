@@ -36,6 +36,10 @@ export default function AppLayout() {
       productsService.prefetchAllCatalog(),
       ordersService.prefetchOrdersWarmup(),
       walletService.prefetchWalletWarmup(),
+      (async () => {
+        const { useCartStore } = await import("../../stores/cartStore");
+        return useCartStore.getState().fetchCart();
+      })(),
     ]);
   }, [isAuthenticated]);
 

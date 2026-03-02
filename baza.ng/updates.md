@@ -2,6 +2,24 @@
 
 ## Completed
 
+- Improved Help Me Decide response quality and tool usability: assistant text now strips markdown/link raw artifacts and product-list replies are normalized to concise copy while cards render details below; added in-chat tool shortcut chips for full tool flow coverage (including `checkout_cart`) and persisted tool-call metadata on messages (`app/(app)/modes/chat.tsx`).
+
+- Fixed AI chat product-list cards so each item reliably shows image + details in-card by enriching AI item payloads with live catalog data (lookup by id/name across bundles, meal packs, ready-to-eat, snacks, and restock) and adding a visible image fallback when an item image URL is missing (`app/(app)/modes/chat.tsx`).
+
+- Redesigned AI quick-suggestion section in Help Me Decide to responsive square sliding cards (instead of tall rectangles), reusing Home mode images/titles/subtitles and preserving tap-to-send behavior (`app/(app)/modes/chat.tsx`).
+
+- Added `Clear Chat` functionality in Help Me Decide: resets UI state and starts a fresh backend AI session for real-time continuation from a clean thread. Also updated AI product listings to a horizontal sliding card carousel (snacks-style card presentation), and sanitized chat display text to remove special characters from AI-generated content/options (`app/(app)/modes/chat.tsx`).
+
+- Polished Help Me Decide product cards to be fully tappable and navigate to related destination screens/details using AI tool context (bundles, meal packs, ready-to-eat, snacks, and shop-list fallback) in `app/(app)/modes/chat.tsx`.
+
+- Upgraded `Help me decide` chat UX: AI `product_list` messages now render as product cards (not plain lists), MCQ responses now render as poll/vote-style selectable options, confirmation actions now use plain text labels, and chat visuals were restyled toward a WhatsApp-like layout/color treatment while keeping theme compatibility (`app/(app)/modes/chat.tsx`).
+
+- Fixed duplicate React key warnings in Help Me Decide option chips by switching MCQ/quick-reply list keys to index-scoped unique keys in `app/(app)/modes/chat.tsx`.
+
+- Updated Home mode card copy for `Help me decide` to reflect live availability (removed "COMING SOON" wording) in `utils/constants.ts`.
+
+- Implemented live AI integration for `Help me decide` mode: added AI client service (`services/ai.ts`), introduced typed AI models in `types/index.ts`, and rewired chat UI to `/v1/ai/*` endpoints (suggestions, sessions, history, chat) with structured rendering support for `mcq` options and `confirmation` actions in `app/(app)/modes/chat.tsx`. Also ran `AI-part.py` smoke test successfully (`5 passed, 0 failed`) before wiring frontend. Added implementation doc: `docs/help-me-decide-ai.md`.
+
 - Rolled out bottom nav globally at the `(app)` layout level so it persists across app screens (including Orders and Settings), with route-based auto-hide for detail/pop-up-heavy routes (`orders/[id]`, `modes/stockup/[id]`, `modes/cookmeal/[id]`, `modes/readyeat`, `modes/chat`). Removed page-level duplicate nav mounts and centralized behavior in layout (`app/(app)/_layout.tsx`, `app/(app)/index.tsx`, `app/(app)/cart.tsx`, `app/(app)/profile.tsx`, `app/(app)/modes/shoplist.tsx`).
 
 - Added live cart indicator on the bottom-nav cart tab: badge now shows current total cart item count and updates immediately on add/increment/decrement/remove actions (`components/layout/BottomNav.tsx`).

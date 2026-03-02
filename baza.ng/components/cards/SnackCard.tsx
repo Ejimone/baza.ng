@@ -1,3 +1,4 @@
+import { Minus, Plus } from "phosphor-react-native";
 import { Pressable, Text, View } from "react-native";
 import { getThemePalette } from "../../constants/appTheme";
 import { useThemeStore } from "../../stores/themeStore";
@@ -80,18 +81,8 @@ export default function SnackCard({
             </Pressable>
           ) : (
             <View className={s.stepperRow}>
-              <Pressable
-                className={`${s.stepperDec} ${qty === 1 ? s.stepperDecRemove : s.stepperDecNormal}`}
-                onPress={onDecrement}
-              >
-                <Text
-                  style={{
-                    color: qty === 1 ? "#e85c3a" : "#c77dff",
-                    fontFamily: "NotoSerif_400Regular",
-                  }}
-                >
-                  {qty === 1 ? "×" : "−"}
-                </Text>
+              <Pressable className={s.stepperDec} onPress={onDecrement}>
+                <Minus size={14} color="#c77dff" weight="bold" />
               </Pressable>
               <Text
                 className={s.stepperValue}
@@ -100,14 +91,7 @@ export default function SnackCard({
                 {qty}
               </Text>
               <Pressable className={s.stepperInc} onPress={onIncrement}>
-                <Text
-                  style={{
-                    color: "#c77dff",
-                    fontFamily: "NotoSerif_400Regular",
-                  }}
-                >
-                  +
-                </Text>
+                <Plus size={14} color="#c77dff" weight="bold" />
               </Pressable>
             </View>
           )}

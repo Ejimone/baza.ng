@@ -1,3 +1,4 @@
+import { Minus, Plus } from "phosphor-react-native";
 import { Pressable, Text, View } from "react-native";
 import { getThemePalette } from "../../constants/appTheme";
 import { useThemeStore } from "../../stores/themeStore";
@@ -99,20 +100,13 @@ export default function ProductCard({
         ) : (
           <View className={s.stepperRow}>
             <Pressable
-              className={`${s.stepperDec} ${qty === 1 ? s.stepperDecRemove : s.stepperDecNormal}`}
+              className={s.stepperDec}
               onPress={(e) => {
                 e.stopPropagation?.();
                 onDecrement();
               }}
             >
-              <Text
-                style={{
-                  color: qty === 1 ? "#e85c3a" : "#6ec6ff",
-                  fontFamily: "NotoSerif_400Regular",
-                }}
-              >
-                {qty === 1 ? "×" : "−"}
-              </Text>
+              <Minus size={16} color="#6ec6ff" weight="bold" />
             </Pressable>
             <Text
               className={s.stepperValue}
@@ -127,11 +121,7 @@ export default function ProductCard({
                 onIncrement();
               }}
             >
-              <Text
-                style={{ color: "#6ec6ff", fontFamily: "NotoSerif_400Regular" }}
-              >
-                +
-              </Text>
+              <Plus size={16} color="#6ec6ff" weight="bold" />
             </Pressable>
           </View>
         )}

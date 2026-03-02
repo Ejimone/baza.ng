@@ -305,14 +305,13 @@ export const snacksDrinksMode = {
   cardFooter: "flex-row items-center justify-between",
   cardPrice: "text-[13px] text-txt-primary font-bold font-mono",
   addBtn: "py-1.5 px-3.5 bg-transparent text-[7px] tracking-wide-md font-mono",
-  stepperRow: "flex-row items-center overflow-hidden",
-  stepperDec: "w-[26px] h-[26px] items-center justify-center text-sm",
-  stepperDecRemove: "bg-[#2a0a0a]",
-  stepperDecNormal: "bg-[#1a0a2a]",
+  stepperRow:
+    "flex-row items-center border border-[#c77dff44] rounded overflow-hidden bg-transparent",
+  stepperDec: "w-[26px] h-[26px] items-center justify-center bg-transparent",
   stepperValue:
-    "min-w-[22px] text-center text-xs text-txt-primary bg-[#0c0714] leading-[26px] font-mono",
+    "min-w-[22px] text-center text-xs text-txt-primary font-mono bg-transparent leading-[26px]",
   stepperInc:
-    "w-[26px] h-[26px] bg-[#1a0a2a] items-center justify-center text-sm",
+    "w-[26px] h-[26px] items-center justify-center bg-transparent",
 };
 
 // ─── RESTOCK (SHOP YOUR LIST) MODE ───────────────────────────────────────────
@@ -351,45 +350,44 @@ export const restockMode = {
   itemPrice: "text-xs text-txt-primary font-mono",
   addBtn:
     "py-[7px] px-[18px] bg-transparent border border-[#6ec6ff55] text-baza-blue text-[8px] tracking-wide-lg font-mono",
-  stepperRow: "flex-row items-center border border-[#6ec6ff44] overflow-hidden",
-  stepperDec: "w-8 h-[30px] items-center justify-center text-base",
-  stepperDecRemove: "bg-[#1a0a0a] text-baza-red",
-  stepperDecNormal: "bg-[#0d1a2a] text-baza-blue",
+  stepperRow:
+    "flex-row items-center border border-[#6ec6ff44] rounded overflow-hidden bg-transparent",
+  stepperDec: "w-8 h-[30px] items-center justify-center bg-transparent",
   stepperValue:
-    "min-w-7 text-center text-[13px] text-txt-primary font-mono bg-[#0d1220] px-1 leading-[30px]",
+    "min-w-7 text-center text-[13px] text-txt-primary font-mono bg-transparent px-1 leading-[30px]",
   stepperInc:
-    "w-8 h-[30px] bg-[#0d1a2a] items-center justify-center text-base text-baza-blue",
+    "w-8 h-[30px] items-center justify-center bg-transparent",
 };
 
-// ─── CHAT (HELP ME DECIDE) MODE ──────────────────────────────────────────────
+// ─── CHAT (HELP ME DECIDE) MODE - WhatsApp Business style ───────────────────
 
 export const chatMode = {
-  container: "flex-1 bg-[#080a0f] flex-col font-mono",
+  container: "flex-1 bg-[#e5ddd5] flex-col font-mono",
   header:
-    "pt-status px-5 pb-3.5 border-b border-[#0f1220] flex-row items-center gap-3",
-  backButton: "bg-transparent text-[11px] text-baza-orange p-0",
+    "pt-status px-5 pb-3.5 bg-[#075e54] flex-row items-center gap-3",
+  backButton: "bg-transparent text-[11px] text-white p-0",
   avatar:
-    "w-[34px] h-[34px] bg-[#ff704322] border border-[#ff704333] rounded-full items-center justify-center text-base",
-  headerName: "text-[13px] text-txt-primary font-mono",
-  headerStatus: "text-3xs text-baza-orange tracking-wide-lg font-mono",
+    "w-[34px] h-[34px] bg-[#128c7e] rounded-full items-center justify-center text-base",
+  headerName: "text-[13px] text-white font-mono",
+  headerStatus: "text-3xs text-[#a8d5ce] tracking-wide-lg font-mono",
   messageList: "flex-1 px-5 pt-4 flex-col gap-2.5",
   messageRow: "flex-row",
   messageRowUser: "justify-end",
   messageRowBot: "justify-start",
   messageBubbleUser:
-    "max-w-[78%] p-2.5 px-3.5 bg-[#ff704322] border border-[#ff704333] text-xs text-[#d0d8e0] leading-relaxed font-mono",
+    "max-w-[78%] p-2.5 px-3.5 bg-[#dcf8c6] text-xs text-[#111b21] leading-relaxed font-mono",
   messageBubbleBot:
-    "max-w-[78%] p-2.5 px-3.5 bg-[#0d1220] border border-[#1a2540] text-xs text-[#d0d8e0] leading-relaxed font-mono",
+    "max-w-[78%] p-2.5 px-3.5 bg-white text-xs text-[#111b21] leading-relaxed font-mono",
   typingIndicator:
-    "flex-row gap-1 p-2.5 px-3.5 bg-[#0d1220] border border-[#1a2540] w-14",
-  typingDot: "w-[5px] h-[5px] bg-[#3a5a8a] rounded-full",
+    "flex-row gap-1 p-2.5 px-3.5 bg-white w-14",
+  typingDot: "w-[5px] h-[5px] bg-[#667781] rounded-full",
   quickReplies: "py-2 px-4 flex-row gap-2",
   quickReplyBtn:
-    "py-[7px] px-3.5 bg-transparent border border-[#1a2a40] text-baza-blue text-xxs tracking-wide-sm font-mono",
-  inputBar: "py-2.5 px-4 pb-9 flex-row gap-2.5 border-t border-[#0f1220]",
+    "py-[7px] px-3.5 bg-transparent border border-[#e9edef] text-[#667781] text-xxs tracking-wide-sm font-mono",
+  inputBar: "py-2.5 px-4 pb-9 flex-row gap-2.5 border-t border-[#e9edef] bg-[#f0f2f5]",
   input:
-    "flex-1 bg-[#0d1220] border border-[#1a2540] py-[11px] px-3.5 text-[#c8d8f0] text-xs font-mono",
-  sendBtn: "py-[11px] px-4 bg-baza-orange text-black text-sm font-mono",
+    "flex-1 bg-white border border-[#e9edef] py-[11px] px-3.5 text-[#111b21] text-xs font-mono",
+  sendBtn: "py-[11px] px-4 bg-[#25d366] text-white text-sm font-mono",
 };
 
 // ─── FUND PROMPT ─────────────────────────────────────────────────────────────
@@ -465,7 +463,7 @@ export const cartScreen = {
   itemPrice: "text-[13px] text-txt-primary font-mono",
   itemRemoveBtn:
     "bg-transparent text-[#2a3a2a] text-lg p-0 leading-none font-mono",
-  footer: "px-6 pt-4 pb-11",
+  footer: "pt-4 pb-11",
   subtotalRow:
     "flex-row justify-between mb-[5px] text-3xs text-[#2a3a2a] tracking-wide-lg font-mono",
   subtotalValue: "text-txt-primary font-mono",

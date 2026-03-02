@@ -6,26 +6,27 @@ Runs a live conversation against /v1/ai/chat and tracks which backend tools
 were actually invoked via message.metadata.toolCalls.
 
 Also verifies:
-
-- GET /v1/ai/suggestions
-- GET /v1/ai/sessions
+- GET  /v1/ai/suggestions
+- GET  /v1/ai/sessions
 - POST /v1/ai/sessions
-- GET /v1/ai/history
+- GET  /v1/ai/history
 
 Usage:
-export BASE_URL=https://baza-chi.vercel.app
-export TEST_PHONE=+917204218098
-export TEST_OTP=111111
+  export BASE_URL=https://baza-chi.vercel.app
+  export TEST_PHONE=+917204218098
+  export TEST_OTP=111111
+  python test_ai_chat.py
 
 Optional:
-export AUTH_TOKEN=<jwt>
-export REQUIRE_ALL_TOOLS=true # fail if any tool was not called
+  export AUTH_TOKEN=<jwt>
+  export REQUIRE_ALL_TOOLS=true   # fail if any tool was not called
 """
 
 import os
 import sys
 
 import requests
+
 
 BASE = os.getenv("BASE_URL", "https://baza-chi.vercel.app").rstrip("/")
 TEST_PHONE = os.getenv("TEST_PHONE", "+917204218098")
@@ -34,24 +35,24 @@ TEST_OTP = os.getenv("TEST_OTP", "").strip()
 REQUIRE_ALL_TOOLS = os.getenv("REQUIRE_ALL_TOOLS", "false").strip().lower() == "true"
 
 EXPECTED_TOOLS = {
-"search_products",
-"list_bundles",
-"list_mealpacks",
-"list_readyeat",
-"list_snacks",
-"get_product_details",
-"get_product_categories",
-"get_user_profile",
-"get_wallet_balance",
-"list_orders",
-"get_order_status",
-"list_addresses",
-"create_order",
-"add_to_cart",
-"view_cart",
-"remove_from_cart",
-"clear_cart",
-"checkout_cart",
+    "search_products",
+    "list_bundles",
+    "list_mealpacks",
+    "list_readyeat",
+    "list_snacks",
+    "get_product_details",
+    "get_product_categories",
+    "get_user_profile",
+    "get_wallet_balance",
+    "list_orders",
+    "get_order_status",
+    "list_addresses",
+    "create_order",
+    "add_to_cart",
+    "view_cart",
+    "remove_from_cart",
+    "clear_cart",
+    "checkout_cart",
 }
 
 passed = 0
@@ -63,32 +64,35 @@ last_orders = []
 cart_candidate_id = None
 cart_candidate_name = None
 
-def step(name, fn):
-global passed, failed
-try:
-fn()
-print(f" ✓ {name}")
-passed += 1
-except AssertionError as err:
-print(f" ✗ {name} — {err}")
-failed += 1
-except Exception as err:
-print(f" ✗ {name} — {type(err).**name**}: {err}")
-failed += 1
 
-def \_req(method: str, path: str, token: str, **kwargs):
-headers = kwargs.pop("headers", {})
-headers.update(
-{
-"Authorization": f"Bearer {token}",
-"Content-Type": "application/json",
-}
-)
-return requests.request(method, f"{BASE}{path}", headers=headers, timeout=45, **kwargs)
+def step(name, fn):
+    global passed, failed
+    try:
+        fn()
+        print(f"  ✓ {name}")
+        passed += 1
+    except AssertionError as err:
+        print(f"  ✗ {name} — {err}")
+        failed += 1
+    except Exception as err:
+        print(f"  ✗ {name} — {type(err).__name__}: {err}")
+        failed += 1
+
+
+def _req(method: str, path: str, token: str, **kwargs):
+    headers = kwargs.pop("headers", {})
+    headers.update(
+        {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+        }
+    )
+    return requests.request(method, f"{BASE}{path}", headers=headers, timeout=45, **kwargs)
+
 
 def get_token() -> str:
-if AUTH_TOKEN:
-return AUTH_TOKEN
+    if AUTH_TOKEN:
+        return AUTH_TOKEN
 
     r = requests.post(
         f"{BASE}/v1/auth/otp-request",
@@ -122,32 +126,36 @@ return AUTH_TOKEN
         f"{last_response.text if last_response else 'n/a'}"
     )
 
+
 def test_suggestions(token: str):
-r = \_req("GET", "/v1/ai/suggestions", token)
-assert r.status_code == 200, f"expected 200 got {r.status_code}: {r.text}"
-body = r.json()
-assert isinstance(body.get("suggestions"), list), f"invalid suggestions response: {body}"
-print(f" suggestions count: {len(body['suggestions'])}")
+    r = _req("GET", "/v1/ai/suggestions", token)
+    assert r.status_code == 200, f"expected 200 got {r.status_code}: {r.text}"
+    body = r.json()
+    assert isinstance(body.get("suggestions"), list), f"invalid suggestions response: {body}"
+    print(f"    suggestions count: {len(body['suggestions'])}")
+
 
 def test_sessions_list(token: str):
-r = \_req("GET", "/v1/ai/sessions", token)
-assert r.status_code == 200, f"expected 200 got {r.status_code}: {r.text}"
-body = r.json()
-assert isinstance(body.get("sessions"), list), f"invalid sessions response: {body}"
-print(f" existing sessions: {len(body['sessions'])}")
+    r = _req("GET", "/v1/ai/sessions", token)
+    assert r.status_code == 200, f"expected 200 got {r.status_code}: {r.text}"
+    body = r.json()
+    assert isinstance(body.get("sessions"), list), f"invalid sessions response: {body}"
+    print(f"    existing sessions: {len(body['sessions'])}")
+
 
 def test_session_create(token: str):
-global session_id
-r = \_req("POST", "/v1/ai/sessions", token, json={"title": "Full Tool Coverage Chat"})
-assert r.status_code == 201, f"expected 201 got {r.status_code}: {r.text}"
-body = r.json()
-session_id = body.get("session", {}).get("id")
-assert session_id, f"missing session id: {body}"
-print(f" created session: {session_id}")
+    global session_id
+    r = _req("POST", "/v1/ai/sessions", token, json={"title": "Full Tool Coverage Chat"})
+    assert r.status_code == 201, f"expected 201 got {r.status_code}: {r.text}"
+    body = r.json()
+    session_id = body.get("session", {}).get("id")
+    assert session_id, f"missing session id: {body}"
+    print(f"    created session: {session_id}")
+
 
 def send_chat(token: str, prompt: str):
-global last_items, last_orders, cart_candidate_id, cart_candidate_name
-assert session_id, "session_id missing"
+    global last_items, last_orders, cart_candidate_id, cart_candidate_name
+    assert session_id, "session_id missing"
 
     r = _req(
         "POST",
@@ -185,19 +193,46 @@ assert session_id, "session_id missing"
     print(f"    ai: {reply!r}")
     if tool_calls:
         print(f"    tools: {[c.get('name') for c in tool_calls]}")
+        for i, tc in enumerate(tool_calls):
+            name = tc.get("name", "?")
+            args = tc.get("arguments") or tc.get("args") or {}
+            result = tc.get("result")
+            err = tc.get("error")
+            print(f"      [{i+1}] {name} args={args}")
+            if err:
+                print(f"          ERROR: {err}")
+            if result is not None:
+                print(f"          result: {result}")
+
+    tool_results = metadata.get("toolResults") or metadata.get("tool_results") or []
+    if tool_results:
+        for i, tr in enumerate(tool_results):
+            name = tr.get("name", "?")
+            err = tr.get("error")
+            result = tr.get("result")
+            if err:
+                print(f"    tool_result[{i+1}] {name} ERROR: {err}")
+            if result is not None:
+                print(f"    tool_result[{i+1}] {name} result: {result}")
+
+    if "error" in (reply or "").lower() or "sorry" in (reply or "").lower():
+        print(f"    [WARN] AI response suggests error: {reply!r}")
+        print(f"    [WARN] full metadata: {metadata}")
 
     return body
 
-def test_full_conversation(token: str): # Intentionally crafted prompts to trigger each tool at least once.
-send_chat(token, "Hi, please check my profile details and show my wallet balance.")
-send_chat(token, "What product categories do you have?")
-send_chat(token, "Search products for rice and show options.")
-send_chat(token, "Show me available bundles.")
-send_chat(token, "Show me meal packs available now.")
-send_chat(token, "Show ready to eat meals.")
-send_chat(token, "Show snacks in stock.")
-send_chat(token, "List my saved addresses.")
-send_chat(token, "Show my recent orders.")
+
+def test_full_conversation(token: str):
+    # Intentionally crafted prompts to trigger each tool at least once.
+    send_chat(token, "Hi, please check my profile details and show my wallet balance.")
+    send_chat(token, "What product categories do you have?")
+    send_chat(token, "Search products for rice and show options.")
+    send_chat(token, "Show me available bundles.")
+    send_chat(token, "Show me meal packs available now.")
+    send_chat(token, "Show ready to eat meals.")
+    send_chat(token, "Show snacks in stock.")
+    send_chat(token, "List my saved addresses.")
+    send_chat(token, "Show my recent orders.")
 
     # Attempt get_order_status using latest known order id if available.
     if last_orders:
@@ -282,19 +317,21 @@ send_chat(token, "Show my recent orders.")
 
     print(f"    total unique tools called: {len(called_tools)}")
 
+
 def test_history(token: str):
-assert session_id, "session_id missing"
-r = \_req("GET", f"/v1/ai/history?sessionId={session_id}", token)
-assert r.status_code == 200, f"expected 200 got {r.status_code}: {r.text}"
-body = r.json()
-messages = body.get("messages")
-assert isinstance(messages, list), f"invalid history response: {body}"
-assert len(messages) >= 2, "history should contain multiple messages"
-print(f" history message count: {len(messages)}")
+    assert session_id, "session_id missing"
+    r = _req("GET", f"/v1/ai/history?sessionId={session_id}", token)
+    assert r.status_code == 200, f"expected 200 got {r.status_code}: {r.text}"
+    body = r.json()
+    messages = body.get("messages")
+    assert isinstance(messages, list), f"invalid history response: {body}"
+    assert len(messages) >= 2, "history should contain multiple messages"
+    print(f"    history message count: {len(messages)}")
+
 
 def test_tool_coverage_report():
-missing = sorted(EXPECTED_TOOLS - called_tools)
-hit = sorted(called_tools)
+    missing = sorted(EXPECTED_TOOLS - called_tools)
+    hit = sorted(called_tools)
 
     print("\n    Tool coverage report")
     print(f"    called ({len(hit)}): {', '.join(hit) if hit else '(none)'}")
@@ -303,8 +340,9 @@ hit = sorted(called_tools)
     if REQUIRE_ALL_TOOLS:
         assert not missing, "Missing required tools: " + ", ".join(missing)
 
+
 def main():
-print(f"\n🤖 AI Chat Full Conversation Test\n Base: {BASE}\n")
+    print(f"\n🤖 AI Chat Full Conversation Test\n   Base: {BASE}\n")
 
     token = get_token()
     print(f"    token acquired: {token[:20]}…")
@@ -327,5 +365,6 @@ print(f"\n🤖 AI Chat Full Conversation Test\n Base: {BASE}\n")
 
     sys.exit(1 if failed else 0)
 
-if **name** == "**main**":
-main()
+
+if __name__ == "__main__":
+    main()

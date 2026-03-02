@@ -51,16 +51,11 @@ export default function ReadyEatScreen() {
     }
   }, [itemId, hasHandledItemParam, readyEat]);
 
-  const handleAdd = (item: ReadyEatItem) => {
-    addItem({
-      id: item.id,
+  const handleAdd = async (item: ReadyEatItem) => {
+    await addItem({
+      productId: item.id,
       itemType: "readyeat",
-      name: item.name,
-      emoji: item.emoji,
-      imageUrl: item.imageUrl,
       qty: 1,
-      unitPrice: item.price,
-      totalPrice: item.price,
     });
   };
 
@@ -145,7 +140,7 @@ export default function ReadyEatScreen() {
           contentContainerStyle={{ paddingBottom: 100 }}
         >
           {readyEat.map((item, index) => {
-            const qty = getItemQty(item.id);
+            const qty = getItemQty(item.id, "readyeat");
             const inCart = qty > 0;
 
             return (
@@ -263,8 +258,8 @@ export default function ReadyEatScreen() {
                           }}
                           onPress={(e) => {
                             e.stopPropagation?.();
-                            if (qty === 1) removeItem(item.id);
-                            else updateQty(item.id, qty - 1);
+                            if (qty === 1) removeItem(item.id, "readyeat");
+                            else updateQty(item.id, qty - 1, "readyeat");
                           }}
                         >
                           <Text
@@ -282,7 +277,7 @@ export default function ReadyEatScreen() {
                           style={{ backgroundColor: item.color + "12" }}
                           onPress={(e) => {
                             e.stopPropagation?.();
-                            updateQty(item.id, qty + 1);
+                            updateQty(item.id, qty + 1, "readyeat");
                           }}
                         >
                           <Text
@@ -339,7 +334,7 @@ export default function ReadyEatScreen() {
           item={selected}
           onClose={() => setSelected(null)}
           onAdd={handleAdd}
-          isAdded={isInCart(selected.id)}
+          isAdded={isInCart(selected.id, "readyeat")}
           isLight={mode === "light"}
           palette={palette}
         />
@@ -366,7 +361,7 @@ function ReadyEatPopup({
   const [imagePreview, setImagePreview] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const { getItemQty, updateQty, removeItem } = useCart();
-  const qty = getItemQty(item.id);
+  const qty = getItemQty(item.id, "readyeat");
   const [pendingQty, setPendingQty] = useState(1);
 
   useEffect(() => {
@@ -379,9 +374,9 @@ function ReadyEatPopup({
   const handleDecrease = () => {
     if (qty > 0) {
       if (qty === 1) {
-        removeItem(item.id);
+        removeItem(item.id, "readyeat");
       } else {
-        updateQty(item.id, qty - 1);
+        updateQty(item.id, qty - 1, "readyeat");
       }
       return;
     }
@@ -391,23 +386,23 @@ function ReadyEatPopup({
 
   const handleIncrease = () => {
     if (qty > 0) {
-      updateQty(item.id, qty + 1);
+      updateQty(item.id, qty + 1, "readyeat");
       return;
     }
 
     setPendingQty((prev) => prev + 1);
   };
 
-  const handleAddFromPopup = () => {
+  const handleAddFromPopup = async () => {
     if (qty === 0) {
-      onAdd(item);
+      await onAdd(item);
       if (selectedQty > 1) {
-        updateQty(item.id, selectedQty);
+        updateQty(item.id, selectedQty, "readyeat");
       }
       return;
     }
 
-    updateQty(item.id, selectedQty);
+    updateQty(item.id, selectedQty, "readyeat");
   };
 
   const handleDismiss = () => {

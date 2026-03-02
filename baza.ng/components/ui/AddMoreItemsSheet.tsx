@@ -77,25 +77,20 @@ export default function AddMoreItemsSheet({
   };
 
   const handleSetQty = useCallback(
-    (item: RestockItem, newQty: number) => {
+    async (item: RestockItem, newQty: number) => {
       const clamped = Math.max(0, Math.min(20, newQty));
-      const currentQty = getItemQty(item.id);
+      const currentQty = getItemQty(item.id, "product");
 
       if (clamped === 0) {
-        removeItem(item.id);
+        await removeItem(item.id, "product");
       } else if (currentQty === 0) {
-        addItem({
-          id: item.id,
-          itemType: "product",
+        await addItem({
           productId: item.id,
-          name: item.name,
-          emoji: item.emoji,
+          itemType: "product",
           qty: clamped,
-          unitPrice: item.price,
-          totalPrice: item.price * clamped,
         });
       } else {
-        updateQty(item.id, clamped);
+        await updateQty(item.id, clamped, "product");
       }
     },
     [addItem, updateQty, removeItem, getItemQty],
@@ -407,7 +402,7 @@ export default function AddMoreItemsSheet({
                 }
 
                 // Default cart mode
-                const qty = getItemQty(item.id);
+                const qty = getItemQty(item.id, "product");
                 return (
                   <ProductCard
                     key={item.id}

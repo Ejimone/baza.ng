@@ -13,7 +13,7 @@ export function useAuth() {
     logout: storeLogout,
     updateUser,
   } = useAuthStore();
-  const clearCart = useCartStore((s) => s.clear);
+  const clearCartLocal = useCartStore((s) => s.clearLocal);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +42,7 @@ export function useAuth() {
         const { accessToken, user: userData } =
           await authService.verifyOtp(payload);
         login(userData, accessToken);
+        void useCartStore.getState().fetchCart();
         router.replace("/(app)");
         return userData;
       } catch (err: any) {
@@ -62,10 +63,10 @@ export function useAuth() {
     } catch {
       // Logout API call may fail if token expired — proceed anyway
     }
-    clearCart();
+    clearCartLocal();
     storeLogout();
     router.replace("/(auth)");
-  }, [storeLogout, clearCart]);
+  }, [storeLogout, clearCartLocal]);
 
   return {
     user,

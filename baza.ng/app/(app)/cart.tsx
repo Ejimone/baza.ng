@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -36,7 +36,7 @@ export default function CartScreen() {
   const router = useRouter();
   const mode = useThemeStore((state) => state.mode);
   const palette = getThemePalette(mode);
-  const { items, total, formattedTotal, isEmpty, removeItem, clear } =
+  const { items, total, formattedTotal, isEmpty, error: cartError, removeItem, clear, fetchCart } =
     useCart();
   const { balance, formattedBalance } = useWallet();
   const { createOrder, verifyPayment, isLoading } = useOrders();
@@ -59,6 +59,10 @@ export default function CartScreen() {
   const hasFunds = balance >= total;
   const shortfall = total - balance;
 
+  useEffect(() => {
+    fetchCart();
+  }, [fetchCart]);
+
   const handleWalletCheckout = async () => {
     try {
       const payload = {
@@ -71,7 +75,7 @@ export default function CartScreen() {
       const result = await createOrder(payload);
       useWalletStore.getState().setBalance(result.walletBalance);
       setEta(result.order.eta ?? "Tomorrow by 10am");
-      clear();
+      await clear();
       setDone(true);
     } catch (err: any) {
       const code = err.response?.data?.code;
@@ -120,7 +124,7 @@ export default function CartScreen() {
       const verifyResult = await verifyPayment(data.reference);
       if (verifyResult.status === "success") {
         setEta(verifyResult.order.eta ?? "Tomorrow by 10am");
-        clear();
+        await clear();
         setDone(true);
       } else {
         Alert.alert(
@@ -278,6 +282,32 @@ export default function CartScreen() {
         </View>
       )}
 
+      {cartError ? (
+        <View
+          style={{
+            marginHorizontal: 16,
+            marginTop: 12,
+            padding: 12,
+            backgroundColor: "#e85c3a18",
+            borderWidth: 1,
+            borderColor: "#e85c3a66",
+            borderRadius: 8,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Text style={{ flex: 1, fontSize: 11, color: "#e85c3a" }}>
+            {cartError}
+          </Text>
+          <Pressable onPress={() => void fetchCart()} style={{ padding: 8 }}>
+            <Text style={{ fontSize: 10, color: "#e85c3a", fontWeight: "600" }}>
+              Retry
+            </Text>
+          </Pressable>
+        </View>
+      ) : null}
+
       <ScrollView
         className={s.list}
         showsVerticalScrollIndicator={false}
@@ -294,9 +324,9 @@ export default function CartScreen() {
           </Text>
         ) : (
           <>
-            {items.map((item) => (
+            {items.map((item, index) => (
               <View
-                key={item.id}
+                key={item.id ?? `cart-item-${index}`}
                 className={s.itemRow}
                 style={{ borderBottomColor: palette.border }}
               >
@@ -323,7 +353,7 @@ export default function CartScreen() {
                   >
                     {formatPrice(item.totalPrice)}
                   </Text>
-                  <Pressable onPress={() => removeItem(item.id)}>
+                  <Pressable onPress={() => void removeItem(item.id)}>
                     <Text
                       className={s.itemRemoveBtn}
                       style={{ color: palette.textSecondary }}

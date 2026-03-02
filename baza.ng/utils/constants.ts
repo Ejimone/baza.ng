@@ -111,17 +111,17 @@ export const SHOPPING_MODES: ModeConfig[] = [
     bg: "#0d1a0f",
     route: "/(app)/modes/shoplist",
   },
-  // {
-  //   key: "chat",
-  //   title: "Help me decide",
-  //   subtitle: "AI(COMING SOON)",
-  //   emoji: "💬",
-  //   imageUrl:
-  //     "https://res.cloudinary.com/dunnk4pbw/image/upload/v1772258333/suraajm20-ai-generated-9688500_1920_qpqfr3.png",
-  //   color: "#4caf7d",
-  //   bg: "#0d1a0f",
-  //   route: "/(app)/modes/chat",
-  // },
+  {
+    key: "chat",
+    title: "Help me decide",
+    subtitle: "AI ASSISTANT, READY TO HELP",
+    emoji: "💬",
+    imageUrl:
+      "https://res.cloudinary.com/dunnk4pbw/image/upload/v1772258333/suraajm20-ai-generated-9688500_1920_qpqfr3.png",
+    color: "#4caf7d",
+    bg: "#0d1a0f",
+    route: "/(app)/modes/chat",
+  },
 ];
 
 export const ORDER_STATUS_LABELS: Record<string, string> = {

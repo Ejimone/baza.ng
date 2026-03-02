@@ -119,23 +119,13 @@ export default function MealPackDetailScreen() {
     }
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!pack) return;
 
-    addItem({
-      id: pack.id,
+    await addItem({
+      productId: pack.id,
       itemType: "mealpack",
-      name: pack.name,
-      emoji: pack.emoji,
-      imageUrl: pack.imageUrl,
       qty: 1,
-      unitPrice: price,
-      totalPrice: price,
-      meta: {
-        plates,
-        removedItems,
-        extraItems: extraItems.length > 0 ? extraItems : undefined,
-      },
     });
 
     router.back();

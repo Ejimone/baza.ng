@@ -323,6 +323,69 @@ export interface SendMessageResponse {
   flagged: boolean;
 }
 
+// AI Chat
+
+export type AIMessageRole = "user" | "assistant" | "system" | "tool";
+
+export type AIMessageType =
+  | "text"
+  | "product_list"
+  | "mcq"
+  | "confirmation"
+  | "order_summary"
+  | "error"
+  | "tool_call"
+  | "tool_result";
+
+export interface AISession {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface AISuggestion {
+  text: string;
+  action: string;
+}
+
+export interface AIChatMessage {
+  id: string;
+  role: AIMessageRole;
+  content: string;
+  messageType: AIMessageType;
+  metadata?: {
+    options?: string[];
+    items?: Array<{
+      id: string;
+      name: string;
+      price?: number;
+      priceFormatted?: string;
+      category?: string;
+      imageUrl?: string;
+      inStock?: boolean;
+    }>;
+    order?: {
+      orderId?: string;
+      status?: string;
+      totalFormatted?: string;
+      eta?: string;
+      walletFormatted?: string;
+    };
+    toolName?: string;
+    toolCalls?: Array<{ name: string; arguments?: Record<string, unknown> }>;
+    toolResults?: Array<{ name: string; result?: unknown; error?: string }>;
+  } | null;
+  createdAt: string;
+}
+
+export interface AIChatResponse {
+  message: AIChatMessage;
+  session: AISession;
+  model: string | null;
+  provider: string | null;
+}
+
 // Pagination
 
 export interface Pagination {

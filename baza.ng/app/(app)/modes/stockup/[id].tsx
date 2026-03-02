@@ -100,26 +100,13 @@ export default function BundleDetailScreen() {
     });
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!bundle || activeItems.length === 0) return;
 
-    addItem({
-      id: bundle.id,
+    await addItem({
+      productId: bundle.id,
       itemType: "bundle",
-      name: bundle.name,
-      emoji: bundle.emoji,
-      imageUrl: bundle.imageUrl,
       qty: 1,
-      unitPrice: memberTotal,
-      totalPrice: memberTotal,
-      meta: {
-        items: activeItems.map((i) => ({
-          id: i.id,
-          name: i.name,
-          qty: i.qty,
-          unitPrice: i.unitPrice,
-        })),
-      },
     });
 
     router.back();

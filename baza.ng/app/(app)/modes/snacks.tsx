@@ -41,20 +41,15 @@ export default function SnacksScreen() {
       const currentQty = getItemQty(item.id);
 
       if (clamped === 0) {
-        removeItem(item.id);
+        removeItem(item.id, "snack");
       } else if (currentQty === 0) {
         addItem({
-          id: item.id,
+          productId: item.id,
           itemType: "snack",
-          name: item.name,
-          emoji: item.emoji,
-          imageUrl: item.imageUrl,
           qty: clamped,
-          unitPrice: item.price,
-          totalPrice: item.price * clamped,
         });
       } else {
-        updateQty(item.id, clamped);
+        updateQty(item.id, clamped, "snack");
       }
     },
     [addItem, updateQty, removeItem, getItemQty],
@@ -180,7 +175,7 @@ export default function SnacksScreen() {
         >
           <View className={s.gridInner}>
             {filtered.map((item) => {
-              const qty = getItemQty(item.id);
+              const qty = getItemQty(item.id, "snack");
               return (
                 <SnackCard
                   key={item.id}

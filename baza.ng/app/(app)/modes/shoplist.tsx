@@ -1,4 +1,5 @@
 import { useLocalSearchParams, usePathname, useRouter } from "expo-router";
+import { Minus, Plus } from "phosphor-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
     ActivityIndicator,
@@ -75,26 +76,20 @@ export default function ShopListScreen() {
   };
 
   const handleSetQty = useCallback(
-    (item: RestockItem, newQty: number) => {
+    async (item: RestockItem, newQty: number) => {
       const clamped = Math.max(0, Math.min(20, newQty));
-      const currentQty = getItemQty(item.id);
+      const currentQty = getItemQty(item.id, "product");
 
       if (clamped === 0) {
-        removeItem(item.id);
+        await removeItem(item.id, "product");
       } else if (currentQty === 0) {
-        addItem({
-          id: item.id,
-          itemType: "product",
+        await addItem({
           productId: item.id,
-          name: item.name,
-          emoji: item.emoji,
-          imageUrl: item.imageUrl,
+          itemType: "product",
           qty: clamped,
-          unitPrice: item.price,
-          totalPrice: item.price * clamped,
         });
       } else {
-        updateQty(item.id, clamped);
+        await updateQty(item.id, clamped, "product");
       }
     },
     [addItem, updateQty, removeItem, getItemQty],
@@ -220,7 +215,7 @@ export default function ShopListScreen() {
           contentContainerStyle={{ paddingBottom: 120 }}
         >
           {restockItems.map((item) => {
-            const qty = getItemQty(item.id);
+            const qty = getItemQty(item.id, "product");
             return (
               <ProductCard
                 key={item.id}
@@ -239,14 +234,14 @@ export default function ShopListScreen() {
       {selectedItem ? (
         <RestockItemPopup
           item={selectedItem}
-          qty={getItemQty(selectedItem.id)}
+          qty={getItemQty(selectedItem.id, "product")}
           onClose={() => setSelectedItem(null)}
           onAdd={() => handleSetQty(selectedItem, 1)}
           onIncrement={() =>
-            handleSetQty(selectedItem, getItemQty(selectedItem.id) + 1)
+            handleSetQty(selectedItem, getItemQty(selectedItem.id, "product") + 1)
           }
           onDecrement={() =>
-            handleSetQty(selectedItem, getItemQty(selectedItem.id) - 1)
+            handleSetQty(selectedItem, getItemQty(selectedItem.id, "product") - 1)
           }
           palette={palette}
           isLight={mode === "light"}
@@ -435,34 +430,10 @@ function RestockItemPopup({
           ) : (
             <View style={popupStyles.stepperRow}>
               <Pressable
-                style={[
-                  popupStyles.stepperBtn,
-                  qty === 1
-                    ? popupStyles.stepperDanger
-                    : popupStyles.stepperNormal,
-                  {
-                    backgroundColor:
-                      qty === 1
-                        ? isLight
-                          ? "#ffeaea"
-                          : "#1a0a0a"
-                        : isLight
-                          ? "#e8f4ff"
-                          : "#0d1a2a",
-                  },
-                ]}
+                style={popupStyles.stepperBtn}
                 onPress={onDecrement}
               >
-                <Text
-                  style={[
-                    popupStyles.stepperText,
-                    qty === 1
-                      ? popupStyles.stepperDangerText
-                      : popupStyles.stepperNormalText,
-                  ]}
-                >
-                  {qty === 1 ? "×" : "−"}
-                </Text>
+                <Minus size={18} color={colors.accent.blue} weight="bold" />
               </Pressable>
               <Text
                 style={[
@@ -473,21 +444,10 @@ function RestockItemPopup({
                 {qty}
               </Text>
               <Pressable
-                style={[
-                  popupStyles.stepperBtn,
-                  popupStyles.stepperNormal,
-                  { backgroundColor: isLight ? "#e8f4ff" : "#0d1a2a" },
-                ]}
+                style={popupStyles.stepperBtn}
                 onPress={onIncrement}
               >
-                <Text
-                  style={[
-                    popupStyles.stepperText,
-                    popupStyles.stepperNormalText,
-                  ]}
-                >
-                  +
-                </Text>
+                <Plus size={18} color={colors.accent.blue} weight="bold" />
               </Pressable>
             </View>
           )}
@@ -627,30 +587,17 @@ const popupStyles = StyleSheet.create({
     flexDirection: "row",
     borderWidth: 1,
     borderColor: "#6ec6ff44",
+    borderRadius: 4,
     alignItems: "center",
     overflow: "hidden",
+    backgroundColor: "transparent",
   },
   stepperBtn: {
     width: 54,
     height: 44,
     alignItems: "center",
     justifyContent: "center",
-  },
-  stepperNormal: {
-    backgroundColor: "#0d1a2a",
-  },
-  stepperDanger: {
-    backgroundColor: "#1a0a0a",
-  },
-  stepperText: {
-    fontSize: 22,
-    fontFamily: "NotoSerif_400Regular",
-  },
-  stepperNormalText: {
-    color: "#6ec6ff",
-  },
-  stepperDangerText: {
-    color: "#e85c3a",
+    backgroundColor: "transparent",
   },
   stepperValue: {
     flex: 1,
