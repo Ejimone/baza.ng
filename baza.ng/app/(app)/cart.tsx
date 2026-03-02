@@ -466,7 +466,6 @@ export default function CartScreen() {
         onSuccess={handlePaystackSuccess}
         onCancel={handlePaystackCancel}
       />
-
     </KeyboardAvoidingView>
   );
 }

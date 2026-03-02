@@ -22,8 +22,12 @@ export default function AppLayout() {
   const isCookmealDetail = normalizedPath.startsWith("/modes/cookmeal/");
   const isPopupHeavyRoute =
     normalizedPath === "/modes/readyeat" || normalizedPath === "/modes/chat";
-  const showBottomNav =
-    !(isOrderDetail || isStockupDetail || isCookmealDetail || isPopupHeavyRoute);
+  const showBottomNav = !(
+    isOrderDetail ||
+    isStockupDetail ||
+    isCookmealDetail ||
+    isPopupHeavyRoute
+  );
 
   useEffect(() => {
     if (!isAuthenticated) return;

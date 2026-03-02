@@ -583,7 +583,6 @@ export default function ProfileScreen() {
           </Animated.View>
         </View>
       )}
-
     </ScreenWrapper>
   );
 }
