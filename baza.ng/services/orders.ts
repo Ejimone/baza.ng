@@ -91,11 +91,25 @@ export interface CreateOrderResponse {
   reference?: string;
 }
 
+export interface DirectCheckoutResponse {
+  authorizationUrl: string;
+  accessCode?: string;
+  reference: string;
+  publicKey: string;
+}
+
 export async function createOrder(
   payload: CreateOrderPayload,
 ): Promise<CreateOrderResponse> {
   const { data } = await api.post("/orders/create", payload);
   invalidateOrdersCache();
+  return data;
+}
+
+export async function initDirectCheckout(
+  payload: CreateOrderPayload,
+): Promise<DirectCheckoutResponse> {
+  const { data } = await api.post("/orders/direct-checkout", payload);
   return data;
 }
 
@@ -123,10 +137,13 @@ export async function getOrder(id: string): Promise<OrderDetail> {
 
 export async function verifyOrderPayment(
   reference: string,
-  orderId: string,
+  orderId?: string,
 ): Promise<OrderPaymentVerifyResponse> {
+  const params: Record<string, string> = { reference };
+  if (orderId) params.orderId = orderId;
+
   const { data } = await api.get("/orders/verify-payment", {
-    params: { reference, orderId },
+    params,
   });
   invalidateOrdersCache();
   return data;

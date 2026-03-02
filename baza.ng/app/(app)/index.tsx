@@ -56,7 +56,6 @@ export default function IntentGateScreen() {
 
   const activeOrder = orders.find(
     (o) =>
-      o.status === "PENDING" ||
       o.status === "CONFIRMED" ||
       o.status === "PREPARING" ||
       o.status === "DISPATCHED",

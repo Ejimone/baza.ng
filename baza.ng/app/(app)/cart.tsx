@@ -22,7 +22,10 @@ import { useAuth } from "../../hooks/useAuth";
 import { useCart } from "../../hooks/useCart";
 import { useOrders } from "../../hooks/useOrders";
 import { useWallet } from "../../hooks/useWallet";
-import { cartItemsToOrderItems } from "../../services/orders";
+import {
+    cartItemsToOrderItems,
+    initDirectCheckout,
+} from "../../services/orders";
 import { useThemeStore } from "../../stores/themeStore";
 import { useWalletStore } from "../../stores/walletStore";
 import { addMoreButton, cartScreen as s } from "../../styles";
@@ -35,7 +38,7 @@ export default function CartScreen() {
   const palette = getThemePalette(mode);
   const { items, total, formattedTotal, isEmpty, removeItem, clear } =
     useCart();
-  const { balance, formattedBalance, fetchPaystackConfig } = useWallet();
+  const { balance, formattedBalance } = useWallet();
   const { createOrder, verifyPayment, isLoading } = useOrders();
   const { user } = useAuth();
 
@@ -51,7 +54,6 @@ export default function CartScreen() {
   const [showPaystack, setShowPaystack] = useState(false);
   const [paystackKey, setPaystackKey] = useState("");
   const [paystackRef, setPaystackRef] = useState("");
-  const [paystackOrderId, setPaystackOrderId] = useState("");
   const [paystackEmail, setPaystackEmail] = useState("");
 
   const hasFunds = balance >= total;
@@ -85,30 +87,26 @@ export default function CartScreen() {
 
   const handleCardCheckout = async () => {
     try {
-      // 1. Get Paystack public key
-      const config = await fetchPaystackConfig();
-
-      // 2. Create order with paystack_inline method
+      // 1. Initialise direct checkout (no order is created yet)
       const payload = {
         items: cartItemsToOrderItems(items),
         total,
         note: orderNote.trim() || undefined,
-        paymentMethod: "paystack_inline" as const,
+        paymentMethod: "paystack_direct" as const,
       };
 
-      const result = await createOrder(payload);
-      const orderId = result.order.id;
+      const result = await initDirectCheckout(payload);
       const email = user?.email || `${user?.phone ?? "customer"}@baza.ng`;
-      const ref = result.reference ?? `order_${orderId}_${Date.now()}`;
+      const ref = result.reference;
 
-      // 3. Show Paystack Inline modal
-      setPaystackKey(config.publicKey);
+      // 2. Show Paystack Inline modal
+      setPaystackKey(result.publicKey);
       setPaystackRef(ref);
-      setPaystackOrderId(orderId);
       setPaystackEmail(email);
       setShowPaystack(true);
     } catch (err: any) {
-      const message = err.response?.data?.error ?? "Failed to place order";
+      const message =
+        err.response?.data?.error ?? "Failed to initialise payment";
       Alert.alert("Order Failed", message);
     }
   };
@@ -119,7 +117,7 @@ export default function CartScreen() {
   }) => {
     setShowPaystack(false);
     try {
-      const verifyResult = await verifyPayment(data.reference, paystackOrderId);
+      const verifyResult = await verifyPayment(data.reference);
       if (verifyResult.status === "success") {
         setEta(verifyResult.order.eta ?? "Tomorrow by 10am");
         clear();
@@ -142,8 +140,13 @@ export default function CartScreen() {
     setShowPaystack(false);
     Alert.alert(
       "Payment Cancelled",
-      "Your order has been created but not yet paid. You can retry payment from your orders page.",
+      "No order was created. You can retry checkout whenever you're ready.",
     );
+  };
+
+  const handlePaystackError = (message: string) => {
+    setShowPaystack(false);
+    Alert.alert("Payment Error", message || "Unable to complete payment");
   };
 
   const handleCheckout = async () => {
@@ -462,9 +465,10 @@ export default function CartScreen() {
         email={paystackEmail}
         amount={total}
         reference={paystackRef}
-        metadata={{ orderId: paystackOrderId, purpose: "order_payment" }}
+        metadata={{ purpose: "order_payment_direct" }}
         onSuccess={handlePaystackSuccess}
         onCancel={handlePaystackCancel}
+        onError={handlePaystackError}
       />
     </KeyboardAvoidingView>
   );

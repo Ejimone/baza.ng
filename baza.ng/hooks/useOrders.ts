@@ -70,7 +70,7 @@ export function useOrders() {
   const verifyPayment = useCallback(
     async (
       reference: string,
-      orderId: string,
+      orderId?: string,
     ): Promise<OrderPaymentVerifyResponse> => {
       setIsLoading(true);
       setError(null);
