@@ -360,20 +360,29 @@ export default function IntentGateScreen() {
                       style={{
                         flexDirection: "row",
                         alignItems: "center",
-                        gap: 10,
-                        minHeight: 56,
-                        paddingVertical: 8,
-                        paddingHorizontal: 12,
+                        gap: 14,
+                        paddingLeft: 0,
+                        paddingRight: 14,
+                        paddingVertical: 0,
                         borderBottomWidth: 1,
                         borderBottomColor: palette.border,
+                        overflow: "hidden",
                       }}
                     >
-                      <ProductImage
-                        imageUrl={result.imageUrl}
-                        emoji={result.emoji}
-                        size={40}
-                        borderRadius={4}
-                      />
+                      <View
+                        style={{
+                          width: 84,
+                          height: 84,
+                          overflow: "hidden",
+                        }}
+                      >
+                        <ProductImage
+                          imageUrl={result.imageUrl}
+                          emoji={result.emoji}
+                          size={84}
+                          borderRadius={0}
+                        />
+                      </View>
                       <View style={{ flex: 1 }}>
                         <Text
                           style={{

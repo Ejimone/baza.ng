@@ -260,26 +260,26 @@ export default function AddMoreItemsSheet({
                         flexDirection: "row",
                         alignItems: "center",
                         gap: 14,
-                        paddingVertical: 15,
+                        paddingLeft: 0,
+                        paddingRight: 14,
+                        paddingVertical: 0,
                         borderBottomWidth: 1,
                         borderBottomColor: palette.border,
+                        overflow: "hidden",
                       }}
                     >
                       <View
                         style={{
-                          width: 44,
-                          height: 44,
-                          borderWidth: 1,
-                          borderColor: wasAdded ? "#4caf7d33" : palette.border,
-                          borderRadius: 4,
+                          width: 84,
+                          height: 84,
                           overflow: "hidden",
                         }}
                       >
                         <ProductImage
                           imageUrl={item.imageUrl}
                           emoji={item.emoji}
-                          size={44}
-                          borderRadius={4}
+                          size={84}
+                          borderRadius={0}
                         />
                       </View>
                       <View style={{ flex: 1 }}>

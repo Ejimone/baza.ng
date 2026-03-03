@@ -16,11 +16,11 @@ import { useProducts } from "../../../hooks/useProducts";
 import { useThemeStore } from "../../../stores/themeStore";
 import { snacksDrinksMode as s } from "../../../styles";
 import type { SnackItem } from "../../../types";
-import { SNACK_CATEGORIES } from "../../../utils/constants";
 
 export default function SnacksScreen() {
   const router = useRouter();
-  const { snacks, isLoading, error, fetchSnacks } = useProducts();
+  const { snacks, snackCategories, isLoading, error, fetchSnacks } =
+    useProducts();
   const { addItem, getItemQty, updateQty, removeItem } = useCart();
   const mode = useThemeStore((state) => state.mode);
   const palette = getThemePalette(mode);
@@ -84,7 +84,8 @@ export default function SnacksScreen() {
         style={{ flexGrow: 0 }}
       >
         <View className={s.catFilter}>
-          {SNACK_CATEGORIES.map((cat) => (
+          {(snackCategories.length > 0 ? snackCategories : ["All"]).map(
+            (cat) => (
             <Pressable
               key={cat}
               className={`${s.catButton} ${activeCat === cat ? s.catButtonActive : s.catButtonInactive}`}
@@ -112,7 +113,8 @@ export default function SnacksScreen() {
                 {cat}
               </Text>
             </Pressable>
-          ))}
+            ),
+          )}
         </View>
       </ScrollView>
 

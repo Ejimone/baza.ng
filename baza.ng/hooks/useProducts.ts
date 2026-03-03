@@ -32,6 +32,9 @@ export function useProducts() {
   const [restockCategories, setRestockCategories] = useState<string[]>(
     () => productsService.getCachedRestock()?.categories ?? [],
   );
+  const [snackCategories, setSnackCategories] = useState<string[]>(
+    () => productsService.getCachedSnackCategories() ?? [],
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -107,6 +110,10 @@ export function useProducts() {
           force: options?.force,
         });
         setSnacks(data);
+        const cats = productsService.getCachedSnackCategories();
+        if (cats && cats.length > 0) {
+          setSnackCategories(cats);
+        }
       } catch (err: any) {
         if (!options?.background) {
           setError(err.response?.data?.error ?? "Failed to load snacks");
@@ -131,7 +138,9 @@ export function useProducts() {
           force: options?.force,
         });
         setRestockItems(data.items);
-        setRestockCategories(data.categories);
+        if (data.categories && data.categories.length > 0) {
+          setRestockCategories(data.categories);
+        }
       } catch (err: any) {
         if (!options?.background) {
           setError(err.response?.data?.error ?? "Failed to load products");
@@ -162,6 +171,7 @@ export function useProducts() {
     snacks,
     restockItems,
     restockCategories,
+    snackCategories,
     isLoading,
     error,
     fetchBundles,

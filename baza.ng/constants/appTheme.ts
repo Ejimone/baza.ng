@@ -5,7 +5,7 @@ export const appTheme = {
     background: "#060d07",
     card: "#0d1a0f",
     textPrimary: "#f5f5f0",
-    textSecondary: "#2a4a2a",
+    textSecondary: "#8a9a8a",
     border: "#1a2a1c",
     statusBar: "light" as const,
   },
