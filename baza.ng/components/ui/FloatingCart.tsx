@@ -66,6 +66,7 @@ export default function FloatingCart() {
         backgroundColor: palette.card,
         borderColor: palette.border,
         borderWidth: 1,
+        borderRadius: 4,
         transform: [{ translateY }],
       }}
       onPress={() => router.push("/(app)/cart")}

@@ -432,6 +432,7 @@ export default function IntentGateScreen() {
             style={{
               backgroundColor: palette.card,
               borderColor: palette.border,
+              borderRadius: 4,
             }}
             onPress={() =>
               router.push(`/(app)/orders/${activeOrder.id}` as any)

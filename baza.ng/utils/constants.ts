@@ -51,7 +51,7 @@ export const SHOPPING_MODES: ModeConfig[] = [
     subtitle: "BETTER UNIT PRICE. RIGHT QUANTITY.",
     emoji: "",
     imageUrl:
-      "https://res.cloudinary.com/dunnk4pbw/image/upload/v1772414639/wholesale_djejvm.jpg",
+      "https://res.cloudinary.com/dunnk4pbw/image/upload/v1772497110/Buy_Wholesale_onadh7.png",
     color: "#4caf7d",
     bg: "#111315",
     route: "/(app)/modes/wholesale",
@@ -62,7 +62,7 @@ export const SHOPPING_MODES: ModeConfig[] = [
     subtitle: "BUNDLES FOR THE WEEK OR MONTH",
     emoji: "🏠",
     imageUrl:
-      "https://res.cloudinary.com/dunnk4pbw/image/upload/v1772258098/stock-up_mgqkal.jpg",
+      "https://res.cloudinary.com/dunnk4pbw/image/upload/v1772497112/Stock_Up_the_House_hmfwwo.png",
     color: "#4caf7d",
     bg: "#0d1a0f",
     route: "/(app)/modes/stockup",
@@ -73,7 +73,7 @@ export const SHOPPING_MODES: ModeConfig[] = [
     subtitle: "MEAL PACKS FOR ANY TIME OF DAY",
     emoji: "🍳",
     imageUrl:
-      "https://res.cloudinary.com/dunnk4pbw/image/upload/v1772258098/mealpack_ut1e1k.jpg",
+      "https://res.cloudinary.com/dunnk4pbw/image/upload/v1772497111/Cook_a_Meal_qbxxhv.png",
     color: "#4caf7d",
     bg: "#0d1a0f",
     route: "/(app)/modes/cookmeal",
@@ -84,7 +84,7 @@ export const SHOPPING_MODES: ModeConfig[] = [
     subtitle: "HOT FOOD, DELIVERED NOW",
     emoji: "🥡",
     imageUrl:
-      "https://res.cloudinary.com/dunnk4pbw/image/upload/v1772258098/ready_to_eat_ts7lfd.jpg",
+      "https://res.cloudinary.com/dunnk4pbw/image/upload/v1772497111/Ready_to_Eat_pp2f9u.png",
     color: "#4caf7d",
     bg: "#0d1a0f",
     route: "/(app)/modes/readyeat",
@@ -95,7 +95,7 @@ export const SHOPPING_MODES: ModeConfig[] = [
     subtitle: "DRINKS, SNACKS & BAKED GOODS",
     emoji: "⚡",
     imageUrl:
-      "https://res.cloudinary.com/dunnk4pbw/image/upload/v1772258098/snacks_xxmult.jpg",
+      "https://res.cloudinary.com/dunnk4pbw/image/upload/v1772497111/Snacks_Drinks_ksobtm.png",
     color: "#4caf7d",
     bg: "#0d1a0f",
     route: "/(app)/modes/snacks",
@@ -106,22 +106,22 @@ export const SHOPPING_MODES: ModeConfig[] = [
     subtitle: "PICK EXACTLY WHAT YOU NEED",
     emoji: "🔍",
     imageUrl:
-      "https://res.cloudinary.com/dunnk4pbw/image/upload/v1772258098/your_list_h3kj62.jpg",
+      "https://res.cloudinary.com/dunnk4pbw/image/upload/v1772497111/Shop_with_AI_thuej0.png",
     color: "#4caf7d",
     bg: "#0d1a0f",
     route: "/(app)/modes/shoplist",
   },
-  {
-    key: "chat",
-    title: "Help me decide",
-    subtitle: "AI ASSISTANT, READY TO HELP",
-    emoji: "💬",
-    imageUrl:
-      "https://res.cloudinary.com/dunnk4pbw/image/upload/v1772258333/suraajm20-ai-generated-9688500_1920_qpqfr3.png",
-    color: "#4caf7d",
-    bg: "#0d1a0f",
-    route: "/(app)/modes/chat",
-  },
+  // {
+  //   key: "chat",
+  //   title: "Help me decide",
+  //   subtitle: "AI ASSISTANT, READY TO HELP",
+  //   emoji: "💬",
+  //   imageUrl:
+  //     "https://res.cloudinary.com/dunnk4pbw/image/upload/v1772258333/suraajm20-ai-generated-9688500_1920_qpqfr3.png",
+  //   color: "#4caf7d",
+  //   bg: "#0d1a0f",
+  //   route: "/(app)/modes/chat",
+  // },
 ];
 
 export const ORDER_STATUS_LABELS: Record<string, string> = {
