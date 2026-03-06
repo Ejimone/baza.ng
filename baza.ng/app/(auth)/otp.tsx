@@ -1,12 +1,12 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    Text,
-    TextInput,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { getThemePalette } from "../../constants/appTheme";
 import { useAuth } from "../../hooks/useAuth";
@@ -41,6 +41,37 @@ export default function OTPScreen() {
     return () => clearTimeout(timer);
   }, [cooldown]);
 
+  const handleVerify = useCallback(
+    async (code?: string) => {
+      const otpCode = code ?? otp.join("");
+      if (otpCode.length !== OTP_LENGTH || isLoading) return;
+      clearError();
+      try {
+        await verifyOtp({
+          phone: phone!,
+          otp: otpCode,
+          intent: authIntent,
+          channel: authChannel,
+          name: name || undefined,
+          referralCode: referralCode || undefined,
+        });
+      } catch {
+        // error state managed by hook
+      }
+    },
+    [
+      authChannel,
+      authIntent,
+      clearError,
+      isLoading,
+      name,
+      otp,
+      phone,
+      referralCode,
+      verifyOtp,
+    ],
+  );
+
   const handleChange = useCallback(
     (value: string, index: number) => {
       if (!/^[0-9]?$/.test(value)) return;
@@ -56,10 +87,10 @@ export default function OTPScreen() {
       // Auto-submit when all digits filled
       if (next.every((d) => d !== "")) {
         const code = next.join("");
-        handleVerify(code);
+        void handleVerify(code);
       }
     },
-    [otp],
+    [handleVerify, otp],
   );
 
   const handleKeyPress = useCallback(
@@ -73,24 +104,6 @@ export default function OTPScreen() {
     },
     [otp],
   );
-
-  const handleVerify = async (code?: string) => {
-    const otpCode = code ?? otp.join("");
-    if (otpCode.length !== OTP_LENGTH || isLoading) return;
-    clearError();
-    try {
-      await verifyOtp({
-        phone: phone!,
-        otp: otpCode,
-        intent: authIntent,
-        channel: authChannel,
-        name: name || undefined,
-        referralCode: referralCode || undefined,
-      });
-    } catch {
-      // error state managed by hook
-    }
-  };
 
   const handleResend = async () => {
     if (cooldown > 0 || isLoading) return;

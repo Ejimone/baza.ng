@@ -56,7 +56,15 @@ export default function AccountScreen() {
   return (
     <ScreenWrapper className="bg-[#060d07]">
       <View className={s.header} style={{ borderBottomColor: palette.border }}>
-        <Pressable onPress={() => router.back()}>
+        <Pressable
+          onPress={() => {
+            if ((router as any).canGoBack?.()) {
+              router.back();
+            } else {
+              router.replace("/(app)/profile" as any);
+            }
+          }}
+        >
           <Text
             className={s.backButton}
             style={{ color: palette.textSecondary }}

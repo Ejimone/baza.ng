@@ -3,16 +3,17 @@ import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Animated,
-    Keyboard,
-    Platform,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Alert,
+  Animated,
+  InteractionManager,
+  Keyboard,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import ScreenWrapper from "../../components/layout/ScreenWrapper";
 import WalletCard from "../../components/wallet/WalletCard";
@@ -49,6 +50,7 @@ export default function ProfileScreen() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [customAmount, setCustomAmount] = useState("");
   const [isCustom, setIsCustom] = useState(false);
+  const [ordersHydrating, setOrdersHydrating] = useState(true);
   const keyboardTranslateY = useRef(new Animated.Value(0)).current;
 
   const customAmountKobo = Math.round(parseFloat(customAmount || "0") * 100);
@@ -61,9 +63,23 @@ export default function ProfileScreen() {
   const canConfirm = effectiveAmount !== null && effectiveAmount > 0;
 
   useEffect(() => {
-    refreshBalance();
-    fetchOrders(1, 100);
-  }, []);
+    void refreshBalance();
+
+    let cancelled = false;
+    const task = InteractionManager.runAfterInteractions(() => {
+      if (cancelled) return;
+      void fetchOrders(1, 20).finally(() => {
+        if (!cancelled) {
+          setOrdersHydrating(false);
+        }
+      });
+    });
+
+    return () => {
+      cancelled = true;
+      task.cancel();
+    };
+  }, [fetchOrders, refreshBalance]);
 
   useEffect(() => {
     const showEvent =
@@ -157,8 +173,9 @@ export default function ProfileScreen() {
     {
       icon: "📦",
       label: "My Orders",
-      sub:
-        orders.length === 0
+      sub: ordersHydrating
+        ? "LOADING ORDERS..."
+        : orders.length === 0
           ? "NO ORDERS YET"
           : `${orders.length} ORDER${orders.length !== 1 ? "S" : ""}`,
       route: "/(app)/orders",
@@ -192,7 +209,15 @@ export default function ProfileScreen() {
   return (
     <ScreenWrapper className="bg-[#060c07]">
       <View className={s.header} style={{ borderBottomColor: palette.border }}>
-        <Pressable onPress={() => router.back()}>
+        <Pressable
+          onPress={() => {
+            if ((router as any).canGoBack?.()) {
+              router.back();
+            } else {
+              router.replace("/" as any);
+            }
+          }}
+        >
           <Text
             className={s.backButton}
             style={{ color: palette.textSecondary }}

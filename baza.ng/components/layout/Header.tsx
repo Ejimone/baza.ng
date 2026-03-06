@@ -1,4 +1,5 @@
 import { useRouter } from "expo-router";
+import { memo } from "react";
 import { Pressable, Text, View } from "react-native";
 import { getThemePalette } from "../../constants/appTheme";
 import { useWallet } from "../../hooks/useWallet";
@@ -10,7 +11,7 @@ interface HeaderProps {
   onTopUpPress?: () => void;
 }
 
-export default function Header({ onTopUpPress }: HeaderProps) {
+function Header({ onTopUpPress }: HeaderProps) {
   const router = useRouter();
   const { formattedBalance } = useWallet();
   const userName = useAuthStore((state) => state.user?.name ?? "");
@@ -71,3 +72,5 @@ export default function Header({ onTopUpPress }: HeaderProps) {
     </View>
   );
 }
+
+export default memo(Header);

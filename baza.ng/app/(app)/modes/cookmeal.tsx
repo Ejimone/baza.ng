@@ -24,8 +24,8 @@ export default function CookMealScreen() {
   const palette = getThemePalette(mode);
 
   useEffect(() => {
-    fetchMealPacks();
-  }, []);
+    void fetchMealPacks();
+  }, [fetchMealPacks]);
 
   return (
     <View
@@ -36,7 +36,15 @@ export default function CookMealScreen() {
         className={s.header}
         style={{ borderBottomWidth: 1, borderBottomColor: palette.border }}
       >
-        <Pressable onPress={() => router.back()}>
+        <Pressable
+          onPress={() => {
+            if ((router as any).canGoBack?.()) {
+              router.back();
+            } else {
+              router.replace("/(app)/modes/shoplist" as any);
+            }
+          }}
+        >
           <Text
             className={s.backButton}
             style={{ color: palette.textSecondary }}

@@ -1,13 +1,13 @@
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import ScreenWrapper from "../../../components/layout/ScreenWrapper";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
@@ -145,7 +145,15 @@ export default function SupportScreen() {
           className={s.header}
           style={{ borderBottomColor: palette.border }}
         >
-          <Pressable onPress={() => router.back()}>
+          <Pressable
+            onPress={() => {
+              if ((router as any).canGoBack?.()) {
+                router.back();
+              } else {
+                router.replace("/(app)/profile" as any);
+              }
+            }}
+          >
             <Text
               className={s.backButton}
               style={{ color: palette.textSecondary }}

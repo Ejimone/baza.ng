@@ -2,17 +2,18 @@ import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Animated,
-    Keyboard,
-    Platform,
-    Pressable,
-    RefreshControl,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Alert,
+  Animated,
+  InteractionManager,
+  Keyboard,
+  Platform,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import ModeCard from "../../components/cards/ModeCard";
 import Header from "../../components/layout/Header";
@@ -23,15 +24,14 @@ import { colors } from "../../constants/theme";
 import { useOrders } from "../../hooks/useOrders";
 import { useProducts } from "../../hooks/useProducts";
 import { useWallet } from "../../hooks/useWallet";
-import { useAuthStore } from "../../stores/authStore";
 import { useThemeStore } from "../../stores/themeStore";
 import { intentGateBalance as s } from "../../styles";
 import { SHOPPING_MODES } from "../../utils/constants";
 import { formatPrice, getGreeting } from "../../utils/format";
+import { perfMeasure } from "../../utils/perfLogger";
 
 export default function IntentGateScreen() {
   const router = useRouter();
-  const user = useAuthStore((state) => state.user);
   const mode = useThemeStore((state) => state.mode);
   const palette = getThemePalette(mode);
   const { refreshBalance } = useWallet();
@@ -50,9 +50,9 @@ export default function IntentGateScreen() {
   } = useProducts();
   const [refreshing, setRefreshing] = useState(false);
   const [globalQuery, setGlobalQuery] = useState("");
+  const [isCatalogPending, setIsCatalogPending] = useState(false);
 
   const greeting = getGreeting();
-  const firstName = user?.name?.split(" ")[0] ?? "";
 
   const activeOrder = orders.find(
     (o) =>
@@ -62,14 +62,40 @@ export default function IntentGateScreen() {
   );
 
   useEffect(() => {
+    perfMeasure("nav tap -> first shell paint", "nav:tap");
     refreshBalance();
     fetchOrders(1, 5);
-    fetchBundles({ background: true });
-    fetchMealPacks({ background: true });
-    fetchReadyEat({ background: true });
-    fetchSnacks(undefined, { background: true });
-    fetchRestock(undefined, undefined, { background: true });
-  }, []);
+
+    let cancelled = false;
+    const task = InteractionManager.runAfterInteractions(() => {
+      if (cancelled) return;
+      setIsCatalogPending(true);
+      void Promise.allSettled([
+        fetchBundles({ background: true }),
+        fetchMealPacks({ background: true }),
+        fetchReadyEat({ background: true }),
+        fetchSnacks(undefined, { background: true }),
+        fetchRestock(undefined, undefined, { background: true }),
+      ]).finally(() => {
+        if (!cancelled) {
+          setIsCatalogPending(false);
+        }
+      });
+    });
+
+    return () => {
+      cancelled = true;
+      task.cancel();
+    };
+  }, [
+    fetchBundles,
+    fetchMealPacks,
+    fetchOrders,
+    fetchReadyEat,
+    fetchRestock,
+    fetchSnacks,
+    refreshBalance,
+  ]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -83,7 +109,7 @@ export default function IntentGateScreen() {
     const q = globalQuery.trim().toLowerCase();
     if (q.length < 2) return [];
 
-    const results: Array<{
+    const results: {
       key: string;
       title: string;
       subtitle: string;
@@ -97,7 +123,7 @@ export default function IntentGateScreen() {
         | "snack"
         | "restock";
       targetId?: string;
-    }> = [];
+    }[] = [];
     const seen = new Set<string>();
 
     const addResult = (item: {
@@ -274,6 +300,13 @@ export default function IntentGateScreen() {
   };
 
   const isSearchOpen = globalQuery.trim().length >= 2;
+  const hasCatalogData =
+    bundles.length > 0 ||
+    mealPacks.length > 0 ||
+    readyEat.length > 0 ||
+    snacks.length > 0 ||
+    restockItems.length > 0;
+  const showCatalogSkeleton = isCatalogPending && !hasCatalogData;
 
   return (
     <View
@@ -340,18 +373,50 @@ export default function IntentGateScreen() {
                 keyboardShouldPersistTaps="handled"
               >
                 {universalResults.length === 0 ? (
-                  <Text
-                    style={{
-                      color: palette.textSecondary,
-                      fontSize: 10,
-                      letterSpacing: 1,
-                      paddingVertical: 12,
-                      paddingHorizontal: 12,
-                      fontFamily: "NotoSerif_400Regular",
-                    }}
-                  >
-                    NO RESULTS FOUND
-                  </Text>
+                  isCatalogPending ? (
+                    <View
+                      style={{
+                        paddingVertical: 12,
+                        paddingHorizontal: 12,
+                        gap: 8,
+                      }}
+                    >
+                      <View
+                        style={{
+                          height: 12,
+                          width: "60%",
+                          backgroundColor: palette.border,
+                        }}
+                      />
+                      <View
+                        style={{
+                          height: 12,
+                          width: "76%",
+                          backgroundColor: palette.border,
+                        }}
+                      />
+                      <View
+                        style={{
+                          height: 12,
+                          width: "52%",
+                          backgroundColor: palette.border,
+                        }}
+                      />
+                    </View>
+                  ) : (
+                    <Text
+                      style={{
+                        color: palette.textSecondary,
+                        fontSize: 10,
+                        letterSpacing: 1,
+                        paddingVertical: 12,
+                        paddingHorizontal: 12,
+                        fontFamily: "NotoSerif_400Regular",
+                      }}
+                    >
+                      NO RESULTS FOUND
+                    </Text>
+                  )
                 ) : (
                   universalResults.map((result) => (
                     <Pressable
@@ -426,6 +491,40 @@ export default function IntentGateScreen() {
           />
         }
       >
+        {!activeOrder && isLoadingOrders ? (
+          <View
+            className={s.orderCard}
+            style={{
+              backgroundColor: palette.card,
+              borderColor: palette.border,
+              borderRadius: 4,
+              gap: 8,
+            }}
+          >
+            <View
+              style={{
+                height: 10,
+                width: "30%",
+                backgroundColor: palette.border,
+              }}
+            />
+            <View
+              style={{
+                height: 12,
+                width: "70%",
+                backgroundColor: palette.border,
+              }}
+            />
+            <View
+              style={{
+                height: 10,
+                width: "44%",
+                backgroundColor: palette.border,
+              }}
+            />
+          </View>
+        ) : null}
+
         {activeOrder && (
           <Pressable
             className={s.orderCard}
@@ -496,6 +595,45 @@ export default function IntentGateScreen() {
             <ModeCard key={mode.key} mode={mode} />
           ))}
         </View>
+
+        {showCatalogSkeleton ? (
+          <View
+            style={{
+              marginTop: 12,
+              marginHorizontal: 20,
+              padding: 12,
+              borderWidth: 1,
+              borderColor: palette.border,
+              backgroundColor: palette.card,
+              gap: 8,
+            }}
+          >
+            <Text
+              style={{
+                color: palette.textSecondary,
+                fontSize: 10,
+                letterSpacing: 1,
+                fontFamily: "NotoSerif_400Regular",
+              }}
+            >
+              LOADING CATALOG IN BACKGROUND
+            </Text>
+            <View
+              style={{
+                height: 9,
+                width: "86%",
+                backgroundColor: palette.border,
+              }}
+            />
+            <View
+              style={{
+                height: 9,
+                width: "64%",
+                backgroundColor: palette.border,
+              }}
+            />
+          </View>
+        ) : null}
       </ScrollView>
 
       {showTopUp && <TopUpSheet onClose={() => setShowTopUp(false)} />}

@@ -1,13 +1,15 @@
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-    Alert,
-    Pressable,
-    RefreshControl,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import ScreenWrapper from "../../../components/layout/ScreenWrapper";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
@@ -116,7 +118,15 @@ export default function DeliveryAddressScreen() {
   return (
     <ScreenWrapper className="bg-[#070a0c]">
       <View className={s.header} style={{ borderBottomColor: palette.border }}>
-        <Pressable onPress={() => router.back()}>
+        <Pressable
+          onPress={() => {
+            if ((router as any).canGoBack?.()) {
+              router.back();
+            } else {
+              router.replace("/(app)/profile" as any);
+            }
+          }}
+        >
           <Text
             className={s.backButton}
             style={{ color: palette.textSecondary }}
@@ -210,106 +220,123 @@ export default function DeliveryAddressScreen() {
       {showForm && (
         <View className={s.formOverlay}>
           <Pressable style={{ flex: 1 }} onPress={() => setShowForm(false)} />
-          <View
-            className={s.formSheet}
-            style={{
-              backgroundColor: palette.background,
-              borderTopColor: palette.border,
-            }}
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 24 : 0}
           >
-            <View
-              className={s.formHandle}
-              style={{ backgroundColor: palette.border }}
-            />
-            <Text
-              className={s.formLabel}
-              style={{ color: palette.textSecondary }}
-            >
-              NEW ADDRESS
-            </Text>
-            <Text
-              className={s.formTitle}
-              style={{ color: palette.textPrimary }}
-            >
-              Where to?
-            </Text>
-
-            <Text
-              className={s.formFieldLabel}
-              style={{ color: palette.textSecondary }}
-            >
-              LABEL (e.g. Home, Office)
-            </Text>
-            <TextInput
-              className={s.formInput}
-              placeholder="Home"
-              placeholderTextColor={palette.textSecondary}
-              style={{
-                backgroundColor: palette.card,
-                borderColor: palette.border,
-                color: palette.textPrimary,
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              bounces={false}
+              contentContainerStyle={{
+                flexGrow: 1,
+                justifyContent: "flex-end",
               }}
-              value={newLabel}
-              onChangeText={setNewLabel}
-            />
-
-            <Text
-              className={s.formFieldLabel}
-              style={{ color: palette.textSecondary }}
             >
-              FULL ADDRESS
-            </Text>
-            <TextInput
-              className={s.formInput}
-              placeholder="14 Akin Adesola Street, VI"
-              placeholderTextColor={palette.textSecondary}
-              style={{
-                backgroundColor: palette.card,
-                borderColor: palette.border,
-                color: palette.textPrimary,
-              }}
-              value={newAddr}
-              onChangeText={setNewAddr}
-            />
-
-            <Text
-              className={s.formFieldLabel}
-              style={{ color: palette.textSecondary }}
-            >
-              LANDMARK (optional)
-            </Text>
-            <TextInput
-              className={s.formInput}
-              placeholder="Near Access Bank"
-              placeholderTextColor={palette.textSecondary}
-              style={{
-                backgroundColor: palette.card,
-                borderColor: palette.border,
-                color: palette.textPrimary,
-              }}
-              value={newLandmark}
-              onChangeText={setNewLandmark}
-            />
-
-            <Pressable
-              onPress={handleSave}
-              disabled={isSaving || !newAddr.trim()}
-              style={{ alignItems: "center" }}
-            >
-              <Text className={s.formSaveBtn}>
-                {isSaving ? "SAVING..." : "SAVE ADDRESS"}
-              </Text>
-            </Pressable>
-
-            <Pressable onPress={() => setShowForm(false)}>
-              <Text
-                className={s.formCancelBtn}
-                style={{ textAlign: "center", color: palette.textSecondary }}
+              <View
+                className={s.formSheet}
+                style={{
+                  backgroundColor: palette.background,
+                  borderTopColor: palette.border,
+                }}
               >
-                CANCEL
-              </Text>
-            </Pressable>
-          </View>
+                <View
+                  className={s.formHandle}
+                  style={{ backgroundColor: palette.border }}
+                />
+                <Text
+                  className={s.formLabel}
+                  style={{ color: palette.textSecondary }}
+                >
+                  NEW ADDRESS
+                </Text>
+                <Text
+                  className={s.formTitle}
+                  style={{ color: palette.textPrimary }}
+                >
+                  Where to?
+                </Text>
+
+                <Text
+                  className={s.formFieldLabel}
+                  style={{ color: palette.textSecondary }}
+                >
+                  LABEL (e.g. Home, Office)
+                </Text>
+                <TextInput
+                  className={s.formInput}
+                  placeholder="Home"
+                  placeholderTextColor={palette.textSecondary}
+                  style={{
+                    backgroundColor: palette.card,
+                    borderColor: palette.border,
+                    color: palette.textPrimary,
+                  }}
+                  value={newLabel}
+                  onChangeText={setNewLabel}
+                />
+
+                <Text
+                  className={s.formFieldLabel}
+                  style={{ color: palette.textSecondary }}
+                >
+                  FULL ADDRESS
+                </Text>
+                <TextInput
+                  className={s.formInput}
+                  placeholder="14 Akin Adesola Street, VI"
+                  placeholderTextColor={palette.textSecondary}
+                  style={{
+                    backgroundColor: palette.card,
+                    borderColor: palette.border,
+                    color: palette.textPrimary,
+                  }}
+                  value={newAddr}
+                  onChangeText={setNewAddr}
+                />
+
+                <Text
+                  className={s.formFieldLabel}
+                  style={{ color: palette.textSecondary }}
+                >
+                  LANDMARK (optional)
+                </Text>
+                <TextInput
+                  className={s.formInput}
+                  placeholder="Near Access Bank"
+                  placeholderTextColor={palette.textSecondary}
+                  style={{
+                    backgroundColor: palette.card,
+                    borderColor: palette.border,
+                    color: palette.textPrimary,
+                  }}
+                  value={newLandmark}
+                  onChangeText={setNewLandmark}
+                />
+
+                <Pressable
+                  onPress={handleSave}
+                  disabled={isSaving || !newAddr.trim()}
+                  style={{ alignItems: "center" }}
+                >
+                  <Text className={s.formSaveBtn}>
+                    {isSaving ? "SAVING..." : "SAVE ADDRESS"}
+                  </Text>
+                </Pressable>
+
+                <Pressable onPress={() => setShowForm(false)}>
+                  <Text
+                    className={s.formCancelBtn}
+                    style={{
+                      textAlign: "center",
+                      color: palette.textSecondary,
+                    }}
+                  >
+                    CANCEL
+                  </Text>
+                </Pressable>
+              </View>
+            </ScrollView>
+          </KeyboardAvoidingView>
         </View>
       )}
     </ScreenWrapper>

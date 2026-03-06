@@ -1,20 +1,21 @@
 import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Animated,
-    FlatList,
-    Keyboard,
-    Platform,
-    Pressable,
-    RefreshControl,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Alert,
+  Animated,
+  FlatList,
+  InteractionManager,
+  Keyboard,
+  Platform,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import ScreenWrapper from "../../components/layout/ScreenWrapper";
 import TransactionItem from "../../components/wallet/TransactionItem";
@@ -47,16 +48,13 @@ function matchesFilter(type: WalletTxnType, filter: TxFilter): boolean {
 export default function WalletScreen() {
   const router = useRouter();
   const {
-    balance,
     formattedBalance,
     accountNumber,
     bankName,
     accountName,
-    isRefreshing,
     transactions,
     txPagination,
     isLoadingTx,
-    error,
     refreshBalance,
     fetchTransactions,
     fetchAccount,
@@ -87,17 +85,36 @@ export default function WalletScreen() {
     : selectedAmt;
   const canConfirm = effectiveAmount !== null && effectiveAmount > 0;
 
-  const filteredTransactions = transactions.filter((tx) =>
-    matchesFilter(tx.type as WalletTxnType, activeFilter),
+  const filteredTransactions = useMemo(
+    () =>
+      transactions.filter((tx) =>
+        matchesFilter(tx.type as WalletTxnType, activeFilter),
+      ),
+    [activeFilter, transactions],
   );
 
   useEffect(() => {
-    refreshBalance();
-    fetchAccount();
-    fetchTransactions(1, 50);
-    startPolling();
-    return () => stopPolling();
-  }, []);
+    void refreshBalance();
+
+    let cancelled = false;
+    const task = InteractionManager.runAfterInteractions(() => {
+      if (cancelled) return;
+      void Promise.all([fetchAccount(), fetchTransactions(1, 50)]);
+      startPolling();
+    });
+
+    return () => {
+      cancelled = true;
+      task.cancel();
+      stopPolling();
+    };
+  }, [
+    fetchAccount,
+    fetchTransactions,
+    refreshBalance,
+    startPolling,
+    stopPolling,
+  ]);
 
   useEffect(() => {
     const showEvent =
@@ -341,7 +358,15 @@ export default function WalletScreen() {
   return (
     <ScreenWrapper className="bg-[#060c07]">
       <View className={s.header}>
-        <Pressable onPress={() => router.back()}>
+        <Pressable
+          onPress={() => {
+            if ((router as any).canGoBack?.()) {
+              router.back();
+            } else {
+              router.replace("/" as any);
+            }
+          }}
+        >
           <Text
             className={s.backButton}
             style={{ color: palette.textSecondary }}

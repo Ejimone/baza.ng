@@ -97,7 +97,7 @@ export default function SignInEmailScreen() {
         </Pressable>
 
         <Text className={s.signinSwitch}>
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Text
             onPress={() => router.replace("/(auth)/signup-email" as any)}
             className={s.signinSwitchLink}

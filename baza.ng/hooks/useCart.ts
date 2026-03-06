@@ -1,7 +1,7 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useCartStore } from "../stores/cartStore";
-import { formatPrice } from "../utils/format";
 import type { CartItem, CartItemType } from "../types";
+import { formatPrice } from "../utils/format";
 
 type AddItemPayload =
   | { productId: string; itemType: CartItemType; qty?: number }
@@ -17,8 +17,26 @@ export function useCart() {
   const updateQtyStore = useCartStore((s) => s.updateQty);
   const clearStore = useCartStore((s) => s.clear);
 
-  const total = items.reduce((sum, item) => sum + item.totalPrice, 0);
-  const count = items.reduce((sum, item) => sum + item.qty, 0);
+  const { total, count, itemLookup } = useMemo(() => {
+    const lookup = new Map<string, CartItem>();
+    let totalAccumulator = 0;
+    let countAccumulator = 0;
+
+    for (const item of items) {
+      const id = String(item.productId ?? item.id);
+      lookup.set(`${item.itemType}:${id}`, item);
+      lookup.set(`any:${id}`, item);
+      totalAccumulator += item.totalPrice;
+      countAccumulator += item.qty;
+    }
+
+    return {
+      total: totalAccumulator,
+      count: countAccumulator,
+      itemLookup: lookup,
+    };
+  }, [items]);
+
   const formattedTotal = formatPrice(total);
   const isEmpty = items.length === 0;
 
@@ -27,7 +45,9 @@ export function useCart() {
       const productId =
         "productId" in payload
           ? String(payload.productId ?? "").trim()
-          : String((payload as CartItem).id ?? (payload as CartItem).productId ?? "").trim();
+          : String(
+              (payload as CartItem).id ?? (payload as CartItem).productId ?? "",
+            ).trim();
       const itemType =
         "itemType" in payload
           ? (payload.itemType as CartItemType)
@@ -50,55 +70,47 @@ export function useCart() {
   const removeItem = useCallback(
     async (idOrProductId: string, itemType?: CartItemType) => {
       if (itemType) {
-        const cartItem = items.find(
-          (i) => (i.productId ?? i.id) === idOrProductId && i.itemType === itemType,
-        );
+        const cartItem = itemLookup.get(`${itemType}:${idOrProductId}`);
         if (cartItem) return removeItemStore(cartItem.id);
       }
       return removeItemStore(idOrProductId);
     },
-    [items, removeItemStore],
+    [itemLookup, removeItemStore],
   );
 
   const updateQty = useCallback(
     async (idOrProductId: string, qty: number, itemType?: CartItemType) => {
       if (itemType) {
-        const cartItem = items.find(
-          (i) => (i.productId ?? i.id) === idOrProductId && i.itemType === itemType,
-        );
+        const cartItem = itemLookup.get(`${itemType}:${idOrProductId}`);
         if (cartItem) return updateQtyStore(cartItem.id, qty);
       }
       return updateQtyStore(idOrProductId, qty);
     },
-    [items, updateQtyStore],
+    [itemLookup, updateQtyStore],
   );
 
   const getItemQty = useCallback(
     (productId: string, itemType?: CartItemType): number => {
-      const item = items.find(
-        (i) => (i.productId ?? i.id) === productId && (!itemType || i.itemType === itemType),
-      );
+      const key = itemType ? `${itemType}:${productId}` : `any:${productId}`;
+      const item = itemLookup.get(key);
       return item?.qty ?? 0;
     },
-    [items],
+    [itemLookup],
   );
 
   const isInCart = useCallback(
     (productId: string, itemType?: CartItemType): boolean => {
-      return items.some(
-        (i) => (i.productId ?? i.id) === productId && (!itemType || i.itemType === itemType),
-      );
+      const key = itemType ? `${itemType}:${productId}` : `any:${productId}`;
+      return itemLookup.has(key);
     },
-    [items],
+    [itemLookup],
   );
 
   const getCartItemByProduct = useCallback(
     (productId: string, itemType: CartItemType): CartItem | undefined => {
-      return items.find(
-        (i) => (i.productId ?? i.id) === productId && i.itemType === itemType,
-      );
+      return itemLookup.get(`${itemType}:${productId}`);
     },
-    [items],
+    [itemLookup],
   );
 
   return {

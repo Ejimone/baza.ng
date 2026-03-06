@@ -40,13 +40,13 @@ export default function Button({
     <Pressable
       disabled={disabled}
       className="w-full py-[15px] items-center justify-center border"
-      style={[
+      style={(state) => [
         {
           backgroundColor: variantStyles.backgroundColor,
           borderColor: variantStyles.borderColor,
           opacity: disabled ? 0.5 : 1,
         },
-        style,
+        typeof style === "function" ? style(state) : style,
       ]}
       {...rest}
     >

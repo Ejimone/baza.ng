@@ -1,23 +1,24 @@
 import { usePathname, useRouter } from "expo-router";
 import {
-    House,
-    MagnifyingGlass,
-    ShoppingCart,
-    UserCircle,
+  House,
+  MagnifyingGlass,
+  ShoppingCart,
+  UserCircle,
 } from "phosphor-react-native";
-import { useEffect, useRef } from "react";
+import { memo, useCallback, useEffect, useRef } from "react";
 import {
-    Animated,
-    Easing,
-    Keyboard,
-    Platform,
-    Pressable,
-    Text,
-    View,
+  Animated,
+  Easing,
+  Keyboard,
+  Platform,
+  Pressable,
+  Text,
+  View,
 } from "react-native";
 import { getThemePalette } from "../../constants/appTheme";
-import { useCart } from "../../hooks/useCart";
+import { useCartStore } from "../../stores/cartStore";
 import { useThemeStore } from "../../stores/themeStore";
+import { perfMark } from "../../utils/perfLogger";
 
 const AnimatedView = Animated.createAnimatedComponent(View);
 
@@ -34,14 +35,14 @@ const NAV_ITEMS: NavItem[] = [
     key: "home",
     label: "HOME",
     icon: "home",
-    route: "/(app)",
+    route: "/",
     isActive: (pathname) => pathname === "/" || pathname === "/(app)",
   },
   {
     key: "browse",
     label: "BROWSE",
     icon: "browse",
-    route: "/(app)/modes/shoplist",
+    route: "/modes/shoplist",
     isActive: (pathname) =>
       pathname.includes("/modes/shoplist") ||
       pathname.includes("/modes/wholesale") ||
@@ -54,41 +55,74 @@ const NAV_ITEMS: NavItem[] = [
     key: "cart",
     label: "CART",
     icon: "cart",
-    route: "/(app)/cart",
+    route: "/cart",
     isActive: (pathname) => pathname.includes("/cart"),
   },
   {
     key: "account",
     label: "ACCOUNT",
     icon: "account",
-    route: "/(app)/profile",
+    route: "/profile",
     isActive: (pathname) => pathname.includes("/profile"),
   },
 ];
 
-export default function BottomNav() {
+function BottomNav() {
   const router = useRouter();
   const pathname = usePathname();
   const mode = useThemeStore((state) => state.mode);
-  const { count } = useCart();
+  const count = useCartStore((state) =>
+    state.items.reduce((sum, item) => sum + item.qty, 0),
+  );
   const palette = getThemePalette(mode);
   const translateY = useRef(new Animated.Value(0)).current;
+  const lastTapAtRef = useRef(0);
 
-  const renderIcon = (icon: NavItem["icon"], active: boolean) => {
-    const color = active ? palette.textPrimary : palette.textSecondary;
-    const weight = active ? "fill" : "regular";
+  const renderIcon = useCallback(
+    (icon: NavItem["icon"], active: boolean) => {
+      const color = active ? palette.textPrimary : palette.textSecondary;
+      const weight = active ? "fill" : "regular";
 
-    if (icon === "home") {
-      return <House size={24} color={color} weight={weight} />;
-    }
-    if (icon === "browse") {
-      return <MagnifyingGlass size={24} color={color} weight={weight} />;
-    }
-    if (icon === "cart") {
-      return <ShoppingCart size={24} color={color} weight={weight} />;
-    }
-    return <UserCircle size={24} color={color} weight={weight} />;
-  };
+      if (icon === "home") {
+        return <House size={24} color={color} weight={weight} />;
+      }
+      if (icon === "browse") {
+        return <MagnifyingGlass size={24} color={color} weight={weight} />;
+      }
+      if (icon === "cart") {
+        return <ShoppingCart size={24} color={color} weight={weight} />;
+      }
+      return <UserCircle size={24} color={color} weight={weight} />;
+    },
+    [palette.textPrimary, palette.textSecondary],
+  );
+
+  const handlePress = useCallback(
+    (route: string, active: boolean) => {
+      if (active) return;
+
+      const now = Date.now();
+      if (now - lastTapAtRef.current < 180) return;
+      lastTapAtRef.current = now;
+
+      perfMark("nav:tap");
+
+      // Avoid stack buildup from repeated tab pushes; replace keeps tab nav snappy.
+      requestAnimationFrame(() => {
+        router.replace(route as any);
+      });
+    },
+    [router],
+  );
+
+  useEffect(() => {
+    const prefetch = (router as any).prefetch;
+    if (typeof prefetch !== "function") return;
+
+    prefetch("/modes/shoplist");
+    prefetch("/cart");
+    prefetch("/profile");
+  }, [router]);
 
   useEffect(() => {
     const animateTo = (toValue: number, duration = 220) => {
@@ -154,8 +188,7 @@ export default function BottomNav() {
                 paddingVertical: 4,
               }}
               onPress={() => {
-                if (active) return;
-                router.push(item.route as any);
+                handlePress(item.route, active);
               }}
             >
               <View style={{ opacity: active ? 1 : 0.72 }}>
@@ -213,3 +246,5 @@ export default function BottomNav() {
     </AnimatedView>
   );
 }
+
+export default memo(BottomNav);

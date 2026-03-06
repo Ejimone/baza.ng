@@ -9,11 +9,11 @@ import { useThemeStore } from "../../../stores/themeStore";
 import { notificationsScreen as s } from "../../../styles/index";
 import type { NotificationPreferences } from "../../../types";
 
-const NOTIF_ROWS: Array<{
+const NOTIF_ROWS: {
   key: keyof NotificationPreferences;
   label: string;
   desc: string;
-}> = [
+}[] = [
   {
     key: "orders",
     label: "Order updates",
@@ -72,7 +72,15 @@ export default function NotificationsScreen() {
   return (
     <ScreenWrapper className="bg-[#070c08]">
       <View className={s.header} style={{ borderBottomColor: palette.border }}>
-        <Pressable onPress={() => router.back()}>
+        <Pressable
+          onPress={() => {
+            if ((router as any).canGoBack?.()) {
+              router.back();
+            } else {
+              router.replace("/(app)/profile" as any);
+            }
+          }}
+        >
           <Text
             className={s.backButton}
             style={{ color: palette.textSecondary }}

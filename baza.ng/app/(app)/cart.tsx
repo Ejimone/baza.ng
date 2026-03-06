@@ -2,16 +2,16 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Keyboard,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Alert,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import PhoneCaptureSheet from "../../components/checkout/PhoneCaptureSheet";
 import AddMoreItemsSheet from "../../components/ui/AddMoreItemsSheet";
@@ -25,8 +25,8 @@ import { useCart } from "../../hooks/useCart";
 import { useOrders } from "../../hooks/useOrders";
 import { useWallet } from "../../hooks/useWallet";
 import {
-    cartItemsToOrderItems,
-    initDirectCheckout,
+  cartItemsToOrderItems,
+  initDirectCheckout,
 } from "../../services/orders";
 import * as userService from "../../services/user";
 import { useThemeStore } from "../../stores/themeStore";
@@ -39,8 +39,16 @@ export default function CartScreen() {
   const router = useRouter();
   const mode = useThemeStore((state) => state.mode);
   const palette = getThemePalette(mode);
-  const { items, total, formattedTotal, isEmpty, error: cartError, removeItem, clear, fetchCart } =
-    useCart();
+  const {
+    items,
+    total,
+    formattedTotal,
+    isEmpty,
+    error: cartError,
+    removeItem,
+    clear,
+    fetchCart,
+  } = useCart();
   const { balance, formattedBalance } = useWallet();
   const { createOrder, verifyPayment, isLoading } = useOrders();
   const { user } = useAuth();
@@ -54,7 +62,9 @@ export default function CartScreen() {
   const [showAddMore, setShowAddMore] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("wallet");
   const [addresses, setAddresses] = useState<Address[]>([]);
-  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
+    null,
+  );
 
   // Paystack Inline state
   const [showPaystack, setShowPaystack] = useState(false);
@@ -128,8 +138,7 @@ export default function CartScreen() {
             { text: "Cancel", style: "cancel" },
             {
               text: "Add Address",
-              onPress: () =>
-                router.push("/(app)/settings/address" as any),
+              onPress: () => router.push("/(app)/settings/address" as any),
             },
           ],
         );
@@ -174,8 +183,7 @@ export default function CartScreen() {
             { text: "Cancel", style: "cancel" },
             {
               text: "Add Address",
-              onPress: () =>
-                router.push("/(app)/settings/address" as any),
+              onPress: () => router.push("/(app)/settings/address" as any),
             },
           ],
         );
@@ -333,7 +341,15 @@ export default function CartScreen() {
         className={s.header}
         style={{ borderBottomWidth: 1, borderBottomColor: palette.border }}
       >
-        <Pressable onPress={() => router.back()}>
+        <Pressable
+          onPress={() => {
+            if ((router as any).canGoBack?.()) {
+              router.back();
+            } else {
+              router.replace("/" as any);
+            }
+          }}
+        >
           <Text
             className={s.backButton}
             style={{ color: palette.textSecondary }}
@@ -515,9 +531,7 @@ export default function CartScreen() {
                 <Pressable
                   className={s.addressAddBtn}
                   style={{ borderColor: palette.border }}
-                  onPress={() =>
-                    router.push("/(app)/settings/address" as any)
-                  }
+                  onPress={() => router.push("/(app)/settings/address" as any)}
                 >
                   <Text
                     className="text-baza-green text-3xs tracking-wide-lg font-mono text-center"

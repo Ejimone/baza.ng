@@ -20,7 +20,9 @@ export default function WelcomeScreen() {
 
   const handleEmail = () => {
     router.push(
-      isSignInMode ? ("/(auth)/signin-email" as any) : ("/(auth)/signup-email" as any),
+      isSignInMode
+        ? ("/(auth)/signin-email" as any)
+        : ("/(auth)/signup-email" as any),
     );
   };
 
@@ -32,7 +34,12 @@ export default function WelcomeScreen() {
 
   return (
     <View className={s.welcomeContainer}>
-      <Text className={s.welcomeLogo} style={{ fontFamily: "NotoSerif_400Regular" }}>Baza.ng</Text>
+      <Text
+        className={s.welcomeLogo}
+        style={{ fontFamily: "NotoSerif_400Regular" }}
+      >
+        Baza.ng
+      </Text>
 
       <Text className={s.welcomeDesc}>
         The smarter way to stock your kitchen.{"\n"}
@@ -52,7 +59,11 @@ export default function WelcomeScreen() {
       >
         <GoogleLogo size={20} color="#333" weight="bold" />
         <Text className="text-[#333] font-bold">
-          {isLoading ? "Signing in..." : isSignInMode ? "Sign in with Google" : "Sign up with Google"}
+          {isLoading
+            ? "Signing in..."
+            : isSignInMode
+              ? "Sign in with Google"
+              : "Sign up with Google"}
         </Text>
       </Pressable>
 
@@ -97,7 +108,7 @@ export default function WelcomeScreen() {
       ) : null}
 
       <Text className={s.welcomeTerms}>
-        By continuing, you agree to Baza's{"\n"}Terms of Service & Privacy
+        By continuing, you agree to Baza&apos;s{"\n"}Terms of Service & Privacy
         Policy.
       </Text>
     </View>

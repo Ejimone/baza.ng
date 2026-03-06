@@ -1,6 +1,6 @@
 import { Redirect, Stack, usePathname } from "expo-router";
-import { useEffect } from "react";
-import { View } from "react-native";
+import { useEffect, useMemo } from "react";
+import { InteractionManager, View } from "react-native";
 import BottomNav from "../../components/layout/BottomNav";
 import { getThemePalette } from "../../constants/appTheme";
 import * as ordersService from "../../services/orders";
@@ -8,6 +8,7 @@ import * as productsService from "../../services/products";
 import * as walletService from "../../services/wallet";
 import { useAuthStore } from "../../stores/authStore";
 import { useThemeStore } from "../../stores/themeStore";
+import { perfMeasure } from "../../utils/perfLogger";
 
 export default function AppLayout() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -15,32 +16,45 @@ export default function AppLayout() {
   const palette = getThemePalette(mode);
   const pathname = usePathname();
 
-  const normalizedPath = pathname.replace("/(app)", "");
-  const isOrderDetail =
-    normalizedPath.startsWith("/orders/") && normalizedPath !== "/orders";
-  const isStockupDetail = normalizedPath.startsWith("/modes/stockup/");
-  const isCookmealDetail = normalizedPath.startsWith("/modes/cookmeal/");
-  const isPopupHeavyRoute =
-    normalizedPath === "/modes/readyeat" || normalizedPath === "/modes/chat";
-  const showBottomNav = !(
-    isOrderDetail ||
-    isStockupDetail ||
-    isCookmealDetail ||
-    isPopupHeavyRoute
-  );
+  const showBottomNav = useMemo(() => {
+    const normalizedPath = pathname.replace("/(app)", "");
+    const isOrderDetail =
+      normalizedPath.startsWith("/orders/") && normalizedPath !== "/orders";
+    const isStockupDetail = normalizedPath.startsWith("/modes/stockup/");
+    const isCookmealDetail = normalizedPath.startsWith("/modes/cookmeal/");
+    const isPopupHeavyRoute =
+      normalizedPath === "/modes/readyeat" || normalizedPath === "/modes/chat";
+
+    return !(
+      isOrderDetail ||
+      isStockupDetail ||
+      isCookmealDetail ||
+      isPopupHeavyRoute
+    );
+  }, [pathname]);
+
+  useEffect(() => {
+    perfMeasure("nav tap -> transition start", "nav:tap");
+  }, [pathname]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    void Promise.allSettled([
-      productsService.prefetchAllCatalog(),
-      ordersService.prefetchOrdersWarmup(),
-      walletService.prefetchWalletWarmup(),
-      (async () => {
-        const { useCartStore } = await import("../../stores/cartStore");
-        return useCartStore.getState().fetchCart();
-      })(),
-    ]);
+    const task = InteractionManager.runAfterInteractions(() => {
+      void Promise.allSettled([
+        productsService.prefetchAllCatalog(),
+        ordersService.prefetchOrdersWarmup(),
+        walletService.prefetchWalletWarmup(),
+        (async () => {
+          const { useCartStore } = await import("../../stores/cartStore");
+          return useCartStore.getState().fetchCart();
+        })(),
+      ]);
+    });
+
+    return () => {
+      task.cancel();
+    };
   }, [isAuthenticated]);
 
   if (!isAuthenticated) {
@@ -58,6 +72,7 @@ export default function AppLayout() {
       <Stack
         screenOptions={{
           headerShown: false,
+          freezeOnBlur: true,
           contentStyle: { backgroundColor: palette.background },
         }}
       />

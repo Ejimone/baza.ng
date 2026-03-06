@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Dimensions,
-    Pressable,
-    ScrollView,
-    Text,
-    View,
+  ActivityIndicator,
+  Dimensions,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
 } from "react-native";
 import { getThemePalette } from "../../constants/appTheme";
 import { colors } from "../../constants/theme";
@@ -49,12 +49,12 @@ export default function AddMoreItemsSheet({
 
   useEffect(() => {
     if (visible) {
-      fetchRestock();
+      void fetchRestock();
       setQuery("");
       setActiveCat("All");
       setAddedQtys(new Map());
     }
-  }, [visible]);
+  }, [fetchRestock, visible]);
 
   const doFetch = useCallback(
     (cat: string, q: string) => {

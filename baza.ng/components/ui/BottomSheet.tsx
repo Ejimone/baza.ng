@@ -63,7 +63,7 @@ export default function BottomSheet({
         isMounted.current = false;
       });
     }
-  }, [visible]);
+  }, [fadeAnim, slideAnim, visible]);
 
   if (!visible && !isMounted.current) return null;
 

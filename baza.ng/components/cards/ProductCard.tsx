@@ -1,4 +1,5 @@
 import { Minus, Plus } from "phosphor-react-native";
+import { memo } from "react";
 import { Pressable, Text, View } from "react-native";
 import { getThemePalette } from "../../constants/appTheme";
 import { useThemeStore } from "../../stores/themeStore";
@@ -16,7 +17,7 @@ interface ProductCardProps {
   onPress?: () => void;
 }
 
-export default function ProductCard({
+function ProductCard({
   item,
   qty,
   onAdd,
@@ -129,3 +130,14 @@ export default function ProductCard({
     </Pressable>
   );
 }
+
+export default memo(ProductCard, (prev, next) => {
+  return (
+    prev.qty === next.qty &&
+    prev.item.id === next.item.id &&
+    prev.item.price === next.item.price &&
+    prev.item.name === next.item.name &&
+    prev.item.brand === next.item.brand &&
+    prev.item.imageUrl === next.item.imageUrl
+  );
+});

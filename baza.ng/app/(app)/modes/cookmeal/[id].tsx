@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -34,9 +34,9 @@ export default function MealPackDetailScreen() {
 
   useEffect(() => {
     if (!pack && mealPacks.length === 0) {
-      fetchMealPacks();
+      void fetchMealPacks();
     }
-  }, [pack, mealPacks.length]);
+  }, [fetchMealPacks, pack, mealPacks.length]);
 
   const [plates, setPlates] = useState(4);
   const [removedItems, setRemovedItems] = useState<string[]>([]);
@@ -46,14 +46,14 @@ export default function MealPackDetailScreen() {
     emoji: string;
   } | null>(null);
   const [extraItems, setExtraItems] = useState<
-    Array<{
+    {
       id: string;
       name: string;
       emoji: string;
       imageUrl?: string;
       qty: number;
       unitPrice: number;
-    }>
+    }[]
   >([]);
 
   useEffect(() => {
@@ -69,12 +69,6 @@ export default function MealPackDetailScreen() {
     0,
   );
   const price = basePrice + extrasTotal;
-
-  const activeIngredients = useMemo(
-    () =>
-      (pack?.ingredients ?? []).filter((i) => !removedItems.includes(i.name)),
-    [pack, removedItems],
-  );
 
   const toggleIngredient = (name: string) => {
     setRemovedItems((prev) =>
@@ -128,7 +122,11 @@ export default function MealPackDetailScreen() {
       qty: 1,
     });
 
-    router.back();
+    if ((router as any).canGoBack?.()) {
+      router.back();
+    } else {
+      router.replace("/(app)/modes/cookmeal" as any);
+    }
   };
 
   if (!pack) {
@@ -202,7 +200,16 @@ export default function MealPackDetailScreen() {
             <Text style={previewStyles.tapHintText}>TAP TO PREVIEW</Text>
           </View>
         ) : null}
-        <Pressable className={s.heroBackBtn} onPress={() => router.back()}>
+        <Pressable
+          className={s.heroBackBtn}
+          onPress={() => {
+            if ((router as any).canGoBack?.()) {
+              router.back();
+            } else {
+              router.replace("/(app)/modes/cookmeal" as any);
+            }
+          }}
+        >
           <Text
             style={{
               color: palette.textSecondary,

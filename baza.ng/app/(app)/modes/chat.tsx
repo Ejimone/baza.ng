@@ -1,34 +1,34 @@
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    useWindowDimensions,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  useWindowDimensions,
+  View,
 } from "react-native";
-import ProductDetailSheet from "../../../components/chat/ProductDetailSheet";
 import ImageViewerModal from "../../../components/chat/ImageViewerModal";
+import ProductDetailSheet from "../../../components/chat/ProductDetailSheet";
 import ProductImage from "../../../components/ui/ProductImage";
 import { useProducts } from "../../../hooks/useProducts";
-import { useCartStore } from "../../../stores/cartStore";
 import * as aiService from "../../../services/ai";
+import { useCartStore } from "../../../stores/cartStore";
 import { chatMode as s } from "../../../styles";
-import {
-    logToolCalls,
-    logCartSync,
-    logError,
-    logWarn,
-    logToolFailure,
-} from "../../../utils/aiChatLogger";
 import type {
-    AIChatMessage,
-    AIMessageType,
-    AISuggestion,
+  AIChatMessage,
+  AIMessageType,
+  AISuggestion,
 } from "../../../types";
+import {
+  logCartSync,
+  logError,
+  logToolCalls,
+  logToolFailure,
+  logWarn,
+} from "../../../utils/aiChatLogger";
 import { SHOPPING_MODES } from "../../../utils/constants";
 import { formatPrice } from "../../../utils/format";
 
@@ -56,7 +56,7 @@ interface ChatMessage {
   from: "user" | "ai";
   messageType?: AIMessageType;
   toolName?: string;
-  toolCalls?: Array<{ name: string; arguments?: Record<string, unknown> }>;
+  toolCalls?: { name: string; arguments?: Record<string, unknown> }[];
   options?: string[];
   items?: ChatProductItem[];
   order?: ChatOrderMeta;
@@ -114,7 +114,7 @@ const CART_TOOLS = [
 
 const CART_CTA_TOOLS = ["add_to_cart", "view_cart", "checkout_cart"];
 
-const hasCartCta = (toolCalls?: Array<{ name?: string }>) => {
+const hasCartCta = (toolCalls?: { name?: string }[]) => {
   if (!toolCalls?.length) return false;
   return toolCalls.some((tc) =>
     CART_CTA_TOOLS.includes((tc.name ?? "").toLowerCase()),
@@ -122,7 +122,7 @@ const hasCartCta = (toolCalls?: Array<{ name?: string }>) => {
 };
 
 const hasCheckoutOrderCta = (
-  toolCalls?: Array<{ name?: string }>,
+  toolCalls?: { name?: string }[],
   order?: { orderId?: string },
 ) => {
   if (!order?.orderId) return false;
@@ -188,9 +188,8 @@ export default function ChatScreen() {
   const [selectedOptions, setSelectedOptions] = useState<
     Record<string, number>
   >({});
-  const [selectedProductForDetail, setSelectedProductForDetail] = useState<
-    ChatProductItem | null
-  >(null);
+  const [selectedProductForDetail, setSelectedProductForDetail] =
+    useState<ChatProductItem | null>(null);
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   const {
@@ -363,15 +362,15 @@ export default function ChatScreen() {
       };
 
       const meta = response.message.metadata ?? {};
-      const toolCalls = (meta.toolCalls ?? meta.tool_calls ?? []) as Array<{
+      const toolCalls = (meta.toolCalls ?? []) as {
         name?: string;
         arguments?: Record<string, unknown>;
-      }>;
-      const toolResults = (meta.toolResults ?? meta.tool_results ?? []) as Array<{
+      }[];
+      const toolResults = (meta.toolResults ?? []) as {
         name?: string;
         result?: unknown;
         error?: string;
-      }>;
+      }[];
 
       logToolCalls(toolCalls, `user: "${payload.slice(0, 50)}..."`);
       if (toolResults.length > 0) {
@@ -546,7 +545,12 @@ export default function ChatScreen() {
 
   const handleAddToCartFromSheet = async (item: ChatProductItem) => {
     setSelectedProductForDetail(null);
-    const productType = detectProductType(item) as "bundle" | "mealpack" | "readyeat" | "snack" | "product";
+    const productType = detectProductType(item) as
+      | "bundle"
+      | "mealpack"
+      | "readyeat"
+      | "snack"
+      | "product";
 
     try {
       await useCartStore.getState().addItem({
@@ -604,7 +608,15 @@ export default function ChatScreen() {
     >
       <View className={s.container}>
         <View className={s.header}>
-          <Pressable onPress={() => router.back()}>
+          <Pressable
+            onPress={() => {
+              if ((router as any).canGoBack?.()) {
+                router.back();
+              } else {
+                router.replace("/(app)/modes/shoplist" as any);
+              }
+            }}
+          >
             <Text className={s.backButton}>Back</Text>
           </Pressable>
           <View className={s.avatar}>
@@ -648,8 +660,11 @@ export default function ChatScreen() {
                 }
                 style={{
                   backgroundColor:
-                    msg.from === "user" ? WHATSAPP.bubbleUser : WHATSAPP.bubbleBot,
-                  borderRadius: msg.from === "user" ? "8px 0 8px 8px" : "0 8px 8px 8px",
+                    msg.from === "user"
+                      ? WHATSAPP.bubbleUser
+                      : WHATSAPP.bubbleBot,
+                  borderRadius:
+                    msg.from === "user" ? "8px 0 8px 8px" : "0 8px 8px 8px",
                   shadowColor: "#000",
                   shadowOffset: { width: 0, height: 1 },
                   shadowOpacity: msg.from === "ai" ? 0.02 : 0,
@@ -680,7 +695,9 @@ export default function ChatScreen() {
                     }}
                   >
                     {msg.order.orderId && (
-                      <Text style={{ fontSize: 11, color: WHATSAPP.textSecondary }}>
+                      <Text
+                        style={{ fontSize: 11, color: WHATSAPP.textSecondary }}
+                      >
                         Order: {toPlainText(msg.order.orderId)}
                       </Text>
                     )}
@@ -690,17 +707,27 @@ export default function ChatScreen() {
                       </Text>
                     )}
                     {msg.order.totalFormatted && (
-                      <Text style={{ fontSize: 12, fontWeight: "600", color: WHATSAPP.text }}>
+                      <Text
+                        style={{
+                          fontSize: 12,
+                          fontWeight: "600",
+                          color: WHATSAPP.text,
+                        }}
+                      >
                         Total: {toPlainText(msg.order.totalFormatted)}
                       </Text>
                     )}
                     {msg.order.eta && (
-                      <Text style={{ fontSize: 10, color: WHATSAPP.textSecondary }}>
+                      <Text
+                        style={{ fontSize: 10, color: WHATSAPP.textSecondary }}
+                      >
                         ETA: {toPlainText(msg.order.eta)}
                       </Text>
                     )}
                     {msg.order.walletFormatted && (
-                      <Text style={{ fontSize: 10, color: WHATSAPP.textSecondary }}>
+                      <Text
+                        style={{ fontSize: 10, color: WHATSAPP.textSecondary }}
+                      >
                         Wallet: {toPlainText(msg.order.walletFormatted)}
                       </Text>
                     )}
@@ -715,7 +742,13 @@ export default function ChatScreen() {
                         alignSelf: "flex-start",
                       }}
                     >
-                      <Text style={{ fontSize: 11, fontWeight: "600", color: "#fff" }}>
+                      <Text
+                        style={{
+                          fontSize: 11,
+                          fontWeight: "600",
+                          color: "#fff",
+                        }}
+                      >
                         View Orders
                       </Text>
                     </Pressable>
@@ -735,7 +768,13 @@ export default function ChatScreen() {
                         borderRadius: 8,
                       }}
                     >
-                      <Text style={{ fontSize: 11, fontWeight: "600", color: "#fff" }}>
+                      <Text
+                        style={{
+                          fontSize: 11,
+                          fontWeight: "600",
+                          color: "#fff",
+                        }}
+                      >
                         View Cart
                       </Text>
                     </Pressable>
@@ -755,7 +794,13 @@ export default function ChatScreen() {
                         borderRadius: 8,
                       }}
                     >
-                      <Text style={{ fontSize: 11, fontWeight: "600", color: "#fff" }}>
+                      <Text
+                        style={{
+                          fontSize: 11,
+                          fontWeight: "600",
+                          color: "#fff",
+                        }}
+                      >
                         View Order
                       </Text>
                     </Pressable>
@@ -972,7 +1017,9 @@ export default function ChatScreen() {
                       alignSelf: "flex-start",
                     }}
                   >
-                    <Text style={{ fontSize: 11, fontWeight: "600", color: "#fff" }}>
+                    <Text
+                      style={{ fontSize: 11, fontWeight: "600", color: "#fff" }}
+                    >
                       Retry
                     </Text>
                   </Pressable>

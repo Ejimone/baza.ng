@@ -1,19 +1,26 @@
 import { useCallback, useState } from "react";
 import * as ordersService from "../services/orders";
 import type {
-    Order,
-    OrderDetail,
-    OrderPaymentVerifyResponse,
-    OrderStatus,
-    Pagination,
+  Order,
+  OrderDetail,
+  OrderPaymentVerifyResponse,
+  OrderStatus,
+  Pagination,
 } from "../types";
 
 export function useOrders() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [ordersState, setOrdersState] = useState<{
+    orders: Order[];
+    pagination: Pagination | null;
+  }>({
+    orders: [],
+    pagination: null,
+  });
   const [currentOrder, setCurrentOrder] = useState<OrderDetail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { orders, pagination } = ordersState;
 
   const fetchOrders = useCallback(
     async (page = 1, limit = 20, status?: OrderStatus) => {
@@ -21,10 +28,10 @@ export function useOrders() {
       setError(null);
       try {
         const data = await ordersService.getOrders(page, limit, status);
-        setOrders((prev) =>
-          page === 1 ? data.orders : [...prev, ...data.orders],
-        );
-        setPagination(data.pagination);
+        setOrdersState((prev) => ({
+          orders: page === 1 ? data.orders : [...prev.orders, ...data.orders],
+          pagination: data.pagination,
+        }));
       } catch (err: any) {
         setError(err.response?.data?.error ?? "Failed to load orders");
       } finally {

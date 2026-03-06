@@ -1,11 +1,11 @@
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Pressable,
-    ScrollView,
-    Text,
-    View,
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
 } from "react-native";
 import SnackCard from "../../../components/cards/SnackCard";
 import FloatingCart from "../../../components/ui/FloatingCart";
@@ -27,8 +27,8 @@ export default function SnacksScreen() {
   const [activeCat, setActiveCat] = useState("All");
 
   useEffect(() => {
-    fetchSnacks();
-  }, []);
+    void fetchSnacks();
+  }, [fetchSnacks]);
 
   const filtered =
     activeCat === "All"
@@ -61,7 +61,15 @@ export default function SnacksScreen() {
       style={{ backgroundColor: palette.background }}
     >
       <View className={s.header}>
-        <Pressable onPress={() => router.back()}>
+        <Pressable
+          onPress={() => {
+            if ((router as any).canGoBack?.()) {
+              router.back();
+            } else {
+              router.replace("/(app)/modes/shoplist" as any);
+            }
+          }}
+        >
           <Text
             className={s.backButton}
             style={{ color: palette.textSecondary }}
@@ -86,33 +94,34 @@ export default function SnacksScreen() {
         <View className={s.catFilter}>
           {(snackCategories.length > 0 ? snackCategories : ["All"]).map(
             (cat) => (
-            <Pressable
-              key={cat}
-              className={`${s.catButton} ${activeCat === cat ? s.catButtonActive : s.catButtonInactive}`}
-              style={{
-                backgroundColor:
-                  activeCat === cat
-                    ? `${colors.accent.purple}18`
-                    : "transparent",
-                borderWidth: 1,
-                borderColor:
-                  activeCat === cat
-                    ? `${colors.accent.purple}66`
-                    : palette.border,
-              }}
-              onPress={() => setActiveCat(cat)}
-            >
-              <Text
+              <Pressable
+                key={cat}
+                className={`${s.catButton} ${activeCat === cat ? s.catButtonActive : s.catButtonInactive}`}
                 style={{
-                  color: activeCat === cat ? "#c77dff" : palette.textSecondary,
-                  fontSize: 9,
-                  letterSpacing: 1,
-                  fontFamily: "NotoSerif_400Regular",
+                  backgroundColor:
+                    activeCat === cat
+                      ? `${colors.accent.purple}18`
+                      : "transparent",
+                  borderWidth: 1,
+                  borderColor:
+                    activeCat === cat
+                      ? `${colors.accent.purple}66`
+                      : palette.border,
                 }}
+                onPress={() => setActiveCat(cat)}
               >
-                {cat}
-              </Text>
-            </Pressable>
+                <Text
+                  style={{
+                    color:
+                      activeCat === cat ? "#c77dff" : palette.textSecondary,
+                    fontSize: 9,
+                    letterSpacing: 1,
+                    fontFamily: "NotoSerif_400Regular",
+                  }}
+                >
+                  {cat}
+                </Text>
+              </Pressable>
             ),
           )}
         </View>

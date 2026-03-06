@@ -1,28 +1,31 @@
 import { useLocalSearchParams, usePathname, useRouter } from "expo-router";
 import { Minus, Plus } from "phosphor-react-native";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Image,
-    Modal,
-    Pressable,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Image,
+  InteractionManager,
+  Modal,
+  Pressable,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import ProductCard from "../../../components/cards/ProductCard";
 import ProductImage from "../../../components/ui/ProductImage";
 import SearchBar from "../../../components/ui/SearchBar";
 import { getThemePalette } from "../../../constants/appTheme";
 import { colors } from "../../../constants/theme";
-import { useCart } from "../../../hooks/useCart";
 import { useProducts } from "../../../hooks/useProducts";
+import { useCartStore } from "../../../stores/cartStore";
 import { useThemeStore } from "../../../stores/themeStore";
 import { restockMode as s } from "../../../styles";
 import type { RestockItem } from "../../../types";
 import { formatPrice } from "../../../utils/format";
+import { perfMeasure } from "../../../utils/perfLogger";
 
 export default function ShopListScreen() {
   const router = useRouter();
@@ -30,7 +33,10 @@ export default function ShopListScreen() {
   const { itemId } = useLocalSearchParams<{ itemId?: string }>();
   const { restockItems, restockCategories, isLoading, error, fetchRestock } =
     useProducts();
-  const { addItem, getItemQty, updateQty, removeItem } = useCart();
+  const cartItems = useCartStore((state) => state.items);
+  const addItemStore = useCartStore((state) => state.addItem);
+  const updateQtyStore = useCartStore((state) => state.updateQty);
+  const removeItemStore = useCartStore((state) => state.removeItem);
   const mode = useThemeStore((state) => state.mode);
   const palette = getThemePalette(mode);
 
@@ -38,11 +44,53 @@ export default function ShopListScreen() {
   const [activeCat, setActiveCat] = useState("All");
   const [selectedItem, setSelectedItem] = useState<RestockItem | null>(null);
   const [hasHandledItemParam, setHasHandledItemParam] = useState(false);
+  const hasInitialCacheRef = useRef(restockItems.length > 0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isWholesale = pathname.includes("/modes/wholesale");
 
+  const cartLookup = useMemo(() => {
+    const qtyByProductId = new Map<string, number>();
+    const cartIdByProductId = new Map<string, string>();
+
+    for (const item of cartItems) {
+      if (item.itemType !== "product") continue;
+      const productId = String(item.productId ?? item.id);
+      qtyByProductId.set(productId, item.qty);
+      cartIdByProductId.set(productId, item.id);
+    }
+
+    return { qtyByProductId, cartIdByProductId };
+  }, [cartItems]);
+
+  const getQtyForProduct = useCallback(
+    (productId: string) => cartLookup.qtyByProductId.get(productId) ?? 0,
+    [cartLookup.qtyByProductId],
+  );
+
   useEffect(() => {
-    fetchRestock();
+    let cancelled = false;
+    const task = InteractionManager.runAfterInteractions(() => {
+      if (cancelled) return;
+      if (hasInitialCacheRef.current) {
+        void fetchRestock(undefined, undefined, { background: true });
+      } else {
+        void fetchRestock();
+      }
+      perfMeasure("browse tab -> list ready", "nav:tap");
+    });
+
+    return () => {
+      cancelled = true;
+      task.cancel();
+    };
+  }, [fetchRestock]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -78,24 +126,52 @@ export default function ShopListScreen() {
   const handleSetQty = useCallback(
     async (item: RestockItem, newQty: number) => {
       const clamped = Math.max(0, Math.min(20, newQty));
-      const currentQty = getItemQty(item.id, "product");
+      const currentQty = cartLookup.qtyByProductId.get(item.id) ?? 0;
+      const cartItemId = cartLookup.cartIdByProductId.get(item.id);
 
       if (clamped === 0) {
-        await removeItem(item.id, "product");
+        if (cartItemId) {
+          await removeItemStore(cartItemId);
+        }
       } else if (currentQty === 0) {
-        await addItem({
+        await addItemStore({
           productId: item.id,
           itemType: "product",
           qty: clamped,
         });
       } else {
-        await updateQty(item.id, clamped, "product");
+        if (cartItemId) {
+          await updateQtyStore(cartItemId, clamped);
+        }
       }
     },
-    [addItem, updateQty, removeItem, getItemQty],
+    [
+      addItemStore,
+      cartLookup.cartIdByProductId,
+      cartLookup.qtyByProductId,
+      removeItemStore,
+      updateQtyStore,
+    ],
   );
 
   const categories = restockCategories.length > 0 ? restockCategories : ["All"];
+
+  const renderProduct = useCallback(
+    ({ item }: { item: RestockItem }) => {
+      const qty = getQtyForProduct(item.id);
+      return (
+        <ProductCard
+          item={item}
+          qty={qty}
+          onAdd={() => handleSetQty(item, 1)}
+          onIncrement={() => handleSetQty(item, qty + 1)}
+          onDecrement={() => handleSetQty(item, qty - 1)}
+          onPress={() => setSelectedItem(item)}
+        />
+      );
+    },
+    [getQtyForProduct, handleSetQty],
+  );
 
   return (
     <View
@@ -106,7 +182,15 @@ export default function ShopListScreen() {
         className={s.header}
         style={{ borderBottomWidth: 1, borderBottomColor: palette.border }}
       >
-        <Pressable onPress={() => router.back()}>
+        <Pressable
+          onPress={() => {
+            if ((router as any).canGoBack?.()) {
+              router.back();
+            } else {
+              router.replace("/" as any);
+            }
+          }}
+        >
           <Text
             className={s.backButton}
             style={{ color: palette.textSecondary }}
@@ -161,7 +245,7 @@ export default function ShopListScreen() {
         </View>
       </ScrollView>
 
-      {isLoading && restockItems.length === 0 ? (
+      {!hasInitialCacheRef.current && isLoading && restockItems.length === 0 ? (
         <View
           style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
         >
@@ -209,39 +293,32 @@ export default function ShopListScreen() {
           </Text>
         </View>
       ) : (
-        <ScrollView
+        <FlatList
+          data={restockItems}
+          keyExtractor={(item) => item.id}
+          renderItem={renderProduct}
           className={s.list}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 120 }}
-        >
-          {restockItems.map((item) => {
-            const qty = getItemQty(item.id, "product");
-            return (
-              <ProductCard
-                key={item.id}
-                item={item}
-                qty={qty}
-                onAdd={() => handleSetQty(item, 1)}
-                onIncrement={() => handleSetQty(item, qty + 1)}
-                onDecrement={() => handleSetQty(item, qty - 1)}
-                onPress={() => setSelectedItem(item)}
-              />
-            );
-          })}
-        </ScrollView>
+          initialNumToRender={5}
+          maxToRenderPerBatch={5}
+          windowSize={5}
+          removeClippedSubviews
+          updateCellsBatchingPeriod={32}
+        />
       )}
 
       {selectedItem ? (
         <RestockItemPopup
           item={selectedItem}
-          qty={getItemQty(selectedItem.id, "product")}
+          qty={getQtyForProduct(selectedItem.id)}
           onClose={() => setSelectedItem(null)}
           onAdd={() => handleSetQty(selectedItem, 1)}
           onIncrement={() =>
-            handleSetQty(selectedItem, getItemQty(selectedItem.id, "product") + 1)
+            handleSetQty(selectedItem, getQtyForProduct(selectedItem.id) + 1)
           }
           onDecrement={() =>
-            handleSetQty(selectedItem, getItemQty(selectedItem.id, "product") - 1)
+            handleSetQty(selectedItem, getQtyForProduct(selectedItem.id) - 1)
           }
           palette={palette}
           isLight={mode === "light"}
@@ -429,10 +506,7 @@ function RestockItemPopup({
             </Pressable>
           ) : (
             <View style={popupStyles.stepperRow}>
-              <Pressable
-                style={popupStyles.stepperBtn}
-                onPress={onDecrement}
-              >
+              <Pressable style={popupStyles.stepperBtn} onPress={onDecrement}>
                 <Minus size={18} color={colors.accent.blue} weight="bold" />
               </Pressable>
               <Text
@@ -443,10 +517,7 @@ function RestockItemPopup({
               >
                 {qty}
               </Text>
-              <Pressable
-                style={popupStyles.stepperBtn}
-                onPress={onIncrement}
-              >
+              <Pressable style={popupStyles.stepperBtn} onPress={onIncrement}>
                 <Plus size={18} color={colors.accent.blue} weight="bold" />
               </Pressable>
             </View>

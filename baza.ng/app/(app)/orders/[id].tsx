@@ -1,11 +1,11 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Pressable,
-    ScrollView,
-    Text,
-    View,
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
 } from "react-native";
 import ScreenWrapper from "../../../components/layout/ScreenWrapper";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
@@ -55,7 +55,7 @@ export default function OrderDetailScreen() {
 
   if (isLoading && !currentOrder) {
     return (
-      <ScreenWrapper className="" backgroundColor={palette.background}>
+      <ScreenWrapper className="">
         <LoadingSpinner message="LOADING ORDER" />
       </ScreenWrapper>
     );
@@ -63,12 +63,20 @@ export default function OrderDetailScreen() {
 
   if (error && !currentOrder) {
     return (
-      <ScreenWrapper className="" backgroundColor={palette.background}>
+      <ScreenWrapper className="">
         <View
           className="pt-[52px] px-6 pb-4 border-b"
           style={{ borderColor: palette.border }}
         >
-          <Pressable onPress={() => router.back()}>
+          <Pressable
+            onPress={() => {
+              if ((router as any).canGoBack?.()) {
+                router.back();
+              } else {
+                router.replace("/(app)/orders" as any);
+              }
+            }}
+          >
             <Text
               className="bg-transparent text-[11px] tracking-[0.2em] mb-3 p-0 font-mono"
               style={{ color: palette.textSecondary }}
@@ -110,12 +118,20 @@ export default function OrderDetailScreen() {
   const currentStepIdx = STATUS_STEPS.indexOf(order.status as OrderStatus);
 
   return (
-    <ScreenWrapper className="" backgroundColor={palette.background}>
+    <ScreenWrapper className="">
       <View
         className="px-6 pb-4 border-b"
         style={{ borderColor: palette.border }}
       >
-        <Pressable onPress={() => router.back()}>
+        <Pressable
+          onPress={() => {
+            if ((router as any).canGoBack?.()) {
+              router.back();
+            } else {
+              router.replace("/(app)/orders" as any);
+            }
+          }}
+        >
           <Text
             className="bg-transparent text-[11px] tracking-[0.2em] mb-3 p-0 font-mono"
             style={{ color: palette.textSecondary }}
@@ -695,7 +711,13 @@ export default function OrderDetailScreen() {
 
         {/* Back to orders button */}
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => {
+            if ((router as any).canGoBack?.()) {
+              router.back();
+            } else {
+              router.replace("/(app)/orders" as any);
+            }
+          }}
           className="py-3 border items-center mt-2"
           style={{ borderColor: palette.border }}
         >

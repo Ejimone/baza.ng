@@ -2,13 +2,13 @@ import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    Alert,
-    Pressable,
-    ScrollView,
-    Share,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  Pressable,
+  ScrollView,
+  Share,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import ScreenWrapper from "../../../components/layout/ScreenWrapper";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
@@ -19,9 +19,9 @@ import { useThemeStore } from "../../../stores/themeStore";
 import { referScreen as s } from "../../../styles/index";
 import type { Referral, ReferralStats } from "../../../types";
 import {
-    formatNigerianPhoneInput,
-    isValidNigerianPhone,
-    normalizePhoneNumber,
+  formatNigerianPhoneInput,
+  isValidNigerianPhone,
+  normalizePhoneNumber,
 } from "../../../utils/format";
 
 const PERKS = [
@@ -84,7 +84,15 @@ export default function ReferScreen() {
   return (
     <ScreenWrapper className="bg-[#0a0a08]">
       <View className={s.header} style={{ borderBottomColor: palette.border }}>
-        <Pressable onPress={() => router.back()}>
+        <Pressable
+          onPress={() => {
+            if ((router as any).canGoBack?.()) {
+              router.back();
+            } else {
+              router.replace("/(app)/profile" as any);
+            }
+          }}
+        >
           <Text
             className={s.backButton}
             style={{ color: palette.textSecondary }}

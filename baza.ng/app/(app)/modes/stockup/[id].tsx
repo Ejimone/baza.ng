@@ -1,15 +1,15 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    Image,
-    Modal,
-    Pressable,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Image,
+  Modal,
+  Pressable,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import AddMoreItemsSheet from "../../../../components/ui/AddMoreItemsSheet";
 import ProductImage from "../../../../components/ui/ProductImage";
@@ -39,9 +39,9 @@ export default function BundleDetailScreen() {
 
   useEffect(() => {
     if (!bundle && bundles.length === 0) {
-      fetchBundles();
+      void fetchBundles();
     }
-  }, [bundle, bundles.length]);
+  }, [fetchBundles, bundle, bundles.length]);
 
   const [items, setItems] = useState<EditableItem[]>([]);
   const [showAddMore, setShowAddMore] = useState(false);
@@ -109,7 +109,11 @@ export default function BundleDetailScreen() {
       qty: 1,
     });
 
-    router.back();
+    if ((router as any).canGoBack?.()) {
+      router.back();
+    } else {
+      router.replace("/(app)/modes/stockup" as any);
+    }
   };
 
   if (!bundle) {
@@ -166,7 +170,15 @@ export default function BundleDetailScreen() {
       </Modal>
 
       <View className={s.header}>
-        <Pressable onPress={() => router.back()}>
+        <Pressable
+          onPress={() => {
+            if ((router as any).canGoBack?.()) {
+              router.back();
+            } else {
+              router.replace("/(app)/modes/stockup" as any);
+            }
+          }}
+        >
           <Text className={s.backButton} style={{ color: bundle.color + "aa" }}>
             ← BUNDLES
           </Text>

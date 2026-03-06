@@ -1,12 +1,12 @@
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    Pressable,
-    RefreshControl,
-    Text,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  RefreshControl,
+  Text,
+  View,
 } from "react-native";
 import OrderCard from "../../components/cards/OrderCard";
 import ScreenWrapper from "../../components/layout/ScreenWrapper";
@@ -19,7 +19,7 @@ import { useThemeStore } from "../../stores/themeStore";
 import { ordersScreen as styles } from "../../styles/index";
 import type { Order, OrderStatus } from "../../types";
 
-const STATUS_FILTERS: Array<{ key: OrderStatus | "ALL"; label: string }> = [
+const STATUS_FILTERS: { key: OrderStatus | "ALL"; label: string }[] = [
   { key: "ALL", label: "ALL" },
   { key: "CONFIRMED", label: "ACTIVE" },
   { key: "PREPARING", label: "PREPARING" },
@@ -85,9 +85,17 @@ export default function OrdersScreen() {
   };
 
   return (
-    <ScreenWrapper className="" backgroundColor={palette.background}>
+    <ScreenWrapper className="">
       <View className={styles.header}>
-        <Pressable onPress={() => router.back()}>
+        <Pressable
+          onPress={() => {
+            if ((router as any).canGoBack?.()) {
+              router.back();
+            } else {
+              router.replace("/" as any);
+            }
+          }}
+        >
           <Text
             className={styles.backButton}
             style={{ color: palette.textSecondary }}

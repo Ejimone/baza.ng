@@ -1,11 +1,11 @@
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import {
-    ActivityIndicator,
-    Pressable,
-    ScrollView,
-    Text,
-    View,
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
 } from "react-native";
 import BundleCard from "../../../components/cards/BundleCard";
 import FloatingCart from "../../../components/ui/FloatingCart";
@@ -24,8 +24,8 @@ export default function StockUpScreen() {
   const palette = getThemePalette(mode);
 
   useEffect(() => {
-    fetchBundles();
-  }, []);
+    void fetchBundles();
+  }, [fetchBundles]);
 
   return (
     <View
@@ -36,7 +36,15 @@ export default function StockUpScreen() {
         className={s.header}
         style={{ borderBottomWidth: 1, borderBottomColor: palette.border }}
       >
-        <Pressable onPress={() => router.back()}>
+        <Pressable
+          onPress={() => {
+            if ((router as any).canGoBack?.()) {
+              router.back();
+            } else {
+              router.replace("/(app)/modes/shoplist" as any);
+            }
+          }}
+        >
           <Text
             className={s.backButton}
             style={{ color: palette.textSecondary }}
@@ -72,7 +80,10 @@ export default function StockUpScreen() {
           >
             {error}
           </Text>
-          <Pressable onPress={fetchBundles} style={{ marginTop: 16 }}>
+          <Pressable
+            onPress={() => void fetchBundles()}
+            style={{ marginTop: 16 }}
+          >
             <Text
               style={{
                 color: colors.accent.green,

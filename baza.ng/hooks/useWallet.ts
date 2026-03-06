@@ -1,12 +1,13 @@
 import { useCallback, useRef, useState } from "react";
+import { InteractionManager } from "react-native";
 import * as walletService from "../services/wallet";
 import { useWalletStore } from "../stores/walletStore";
 import type {
-    Pagination,
-    PaystackConfig,
-    TopupInitResponse,
-    WalletAccountResponse,
-    WalletTransaction,
+  Pagination,
+  PaystackConfig,
+  TopupInitResponse,
+  WalletAccountResponse,
+  WalletTransaction,
 } from "../types";
 import { WALLET_POLL_INTERVAL_MS } from "../utils/constants";
 import { formatPrice } from "../utils/format";
@@ -99,15 +100,22 @@ export function useWallet() {
 
   // Polling: call startPolling() when wallet screen mounts, stopPolling() on unmount
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const interactionTaskRef = useRef<{ cancel: () => void } | null>(null);
 
   const startPolling = useCallback(() => {
     stopPolling();
-    pollRef.current = setInterval(() => {
-      refreshBalance();
-    }, WALLET_POLL_INTERVAL_MS);
+    interactionTaskRef.current = InteractionManager.runAfterInteractions(() => {
+      pollRef.current = setInterval(() => {
+        void refreshBalance();
+      }, WALLET_POLL_INTERVAL_MS);
+    });
   }, [refreshBalance]);
 
   const stopPolling = useCallback(() => {
+    if (interactionTaskRef.current) {
+      interactionTaskRef.current.cancel();
+      interactionTaskRef.current = null;
+    }
     if (pollRef.current) {
       clearInterval(pollRef.current);
       pollRef.current = null;

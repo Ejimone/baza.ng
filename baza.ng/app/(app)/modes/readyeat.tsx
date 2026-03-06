@@ -40,8 +40,8 @@ export default function ReadyEatScreen() {
   const [hasHandledItemParam, setHasHandledItemParam] = useState(false);
 
   useEffect(() => {
-    fetchReadyEat();
-  }, []);
+    void fetchReadyEat();
+  }, [fetchReadyEat]);
 
   useEffect(() => {
     if (!itemId || hasHandledItemParam || readyEat.length === 0) return;
@@ -69,7 +69,15 @@ export default function ReadyEatScreen() {
         className={s.header}
         style={{ borderBottomWidth: 1, borderBottomColor: palette.border }}
       >
-        <Pressable onPress={() => router.back()}>
+        <Pressable
+          onPress={() => {
+            if ((router as any).canGoBack?.()) {
+              router.back();
+            } else {
+              router.replace("/(app)/modes/shoplist" as any);
+            }
+          }}
+        >
           <Text
             className={s.backButton}
             style={{ color: palette.textSecondary }}
