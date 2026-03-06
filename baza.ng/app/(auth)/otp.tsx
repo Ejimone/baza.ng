@@ -15,12 +15,16 @@ import { authScreen as s } from "../../styles";
 import { OTP_LENGTH, OTP_RESEND_COOLDOWN_SECONDS } from "../../utils/constants";
 
 export default function OTPScreen() {
-  const { phone, name, referralCode, mode } = useLocalSearchParams<{
+  const { phone, name, referralCode, mode, channel } = useLocalSearchParams<{
     phone: string;
     name?: string;
     referralCode?: string;
     mode?: string;
+    channel?: string;
   }>();
+
+  const authIntent = mode === "signup" ? "signup" : "login";
+  const authChannel = channel === "whatsapp" ? "whatsapp" : "sms";
 
   const { verifyOtp, requestOtp, isLoading, error, clearError } = useAuth();
   const modeTheme = useThemeStore((state) => state.mode);
@@ -78,6 +82,8 @@ export default function OTPScreen() {
       await verifyOtp({
         phone: phone!,
         otp: otpCode,
+        intent: authIntent,
+        channel: authChannel,
         name: name || undefined,
         referralCode: referralCode || undefined,
       });
@@ -92,7 +98,11 @@ export default function OTPScreen() {
     setOtp(Array(OTP_LENGTH).fill(""));
     inputRefs.current[0]?.focus();
     try {
-      await requestOtp(phone!);
+      await requestOtp({
+        phone: phone!,
+        intent: authIntent,
+        channel: authChannel,
+      });
       setCooldown(OTP_RESEND_COOLDOWN_SECONDS);
     } catch {
       // error state managed by hook
@@ -113,7 +123,8 @@ export default function OTPScreen() {
         <Text className={s.otpLabel}>VERIFICATION</Text>
         <Text className={s.otpTitle}>Enter the code</Text>
         <Text className={s.otpSentTo}>
-          Sent to <Text className={s.otpPhone}>{phone}</Text>
+          Sent via {authChannel === "whatsapp" ? "WhatsApp" : "SMS"} to{" "}
+          <Text className={s.otpPhone}>{phone}</Text>
         </Text>
       </View>
 

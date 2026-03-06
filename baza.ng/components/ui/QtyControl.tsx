@@ -1,4 +1,5 @@
-import { View, Text, Pressable } from "react-native";
+import { Minus, Plus } from "phosphor-react-native";
+import { Pressable, Text, View } from "react-native";
 import { qtyControl as s } from "../../styles";
 
 interface QtyControlProps {
@@ -22,43 +23,38 @@ export default function QtyControl({
 }: QtyControlProps) {
   const atMin = value <= min;
   const atMax = value >= max;
+  const iconSize = small ? 14 : 16;
 
   return (
-    <View className={small ? s.containerSmall : s.container}>
+    <View
+      className={small ? s.stepperRowSmall : s.stepperRow}
+      style={{
+        borderColor: `${accentColor}44`,
+      }}
+    >
       <Pressable
-        className={small ? s.buttonSmall : s.button}
-        style={{
-          borderColor: atMin ? `${accentColor}22` : `${accentColor}66`,
-          opacity: atMin ? 0.4 : 1,
-        }}
+        className={small ? s.stepperBtnSmall : s.stepperBtn}
         onPress={onDecrement}
         disabled={atMin}
+        style={{ opacity: atMin ? 0.4 : 1 }}
       >
-        <Text
-          className={small ? s.buttonTextSmall : s.buttonText}
-          style={{ color: accentColor }}
-        >
-          −
-        </Text>
+        <Minus size={iconSize} color={accentColor} weight="bold" />
       </Pressable>
 
-      <Text className={small ? s.valueSmall : s.value}>{value}</Text>
+      <Text
+        className={small ? s.stepperValueSmall : s.stepperValue}
+        style={{ color: "#f0f0e8" }}
+      >
+        {value}
+      </Text>
 
       <Pressable
-        className={small ? s.buttonSmall : s.button}
-        style={{
-          borderColor: atMax ? `${accentColor}22` : `${accentColor}66`,
-          opacity: atMax ? 0.4 : 1,
-        }}
+        className={small ? s.stepperBtnSmall : s.stepperBtn}
         onPress={onIncrement}
         disabled={atMax}
+        style={{ opacity: atMax ? 0.4 : 1 }}
       >
-        <Text
-          className={small ? s.buttonTextSmall : s.buttonText}
-          style={{ color: accentColor }}
-        >
-          +
-        </Text>
+        <Plus size={iconSize} color={accentColor} weight="bold" />
       </Pressable>
     </View>
   );

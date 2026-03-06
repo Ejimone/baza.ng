@@ -1,46 +1,39 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    Text,
-    TextInput,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { getThemePalette } from "../../constants/appTheme";
 import { useAuth } from "../../hooks/useAuth";
 import { useThemeStore } from "../../stores/themeStore";
 import { authScreen as s } from "../../styles";
-import {
-    formatNigerianPhoneInput,
-    isValidNigerianPhone,
-    normalizePhoneNumber,
-} from "../../utils/format";
 
-export default function SignInScreen() {
-  const [phone, setPhone] = useState("");
-  const { requestOtp, signInWithGoogle, isLoading, error, clearError } =
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function isValidEmail(email: string): boolean {
+  return EMAIL_REGEX.test(email.trim());
+}
+
+export default function SignInEmailScreen() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { signInWithEmail, signInWithGoogle, isLoading, error, clearError } =
     useAuth();
   const mode = useThemeStore((state) => state.mode);
   const palette = getThemePalette(mode);
 
-  const normalizedPhone = normalizePhoneNumber(phone);
-  const isValid = isValidNigerianPhone(normalizedPhone);
+  const isValid = isValidEmail(email) && password.length >= 1;
 
-  const handleSendCode = async () => {
+  const handleSignIn = async () => {
     if (!isValid || isLoading) return;
     clearError();
     try {
-      await requestOtp({
-        phone: normalizedPhone,
-        intent: "login",
-        channel: "sms",
-      });
-      router.push({
-        pathname: "/(auth)/otp",
-        params: { phone: normalizedPhone, mode: "signin", channel: "sms" },
-      });
+      await signInWithEmail(email.trim().toLowerCase(), password);
     } catch {
       // error state is set by the hook
     }
@@ -56,19 +49,31 @@ export default function SignInScreen() {
           <Text className={s.signinBack}>← BACK</Text>
         </Pressable>
         <Text className={s.signinLabel}>WELCOME BACK</Text>
-        <Text className={s.signinTitle}>Sign in</Text>
+        <Text className={s.signinTitle}>Sign in with email</Text>
       </View>
 
       <View className={s.signinForm}>
-        <Text className={s.signinFieldLabel}>PHONE NUMBER</Text>
+        <Text className={s.signinFieldLabel}>EMAIL</Text>
         <TextInput
-          value={phone}
-          onChangeText={(value) => setPhone(formatNigerianPhoneInput(value))}
-          placeholder="0901 234 5678"
+          value={email}
+          onChangeText={setEmail}
+          placeholder="you@example.com"
           placeholderTextColor={palette.textSecondary}
-          keyboardType="phone-pad"
-          maxLength={13}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
           autoFocus
+          className={s.signinInput}
+        />
+
+        <Text className={s.signinFieldLabel}>PASSWORD</Text>
+        <TextInput
+          value={password}
+          onChangeText={setPassword}
+          placeholder="Your password"
+          placeholderTextColor={palette.textSecondary}
+          secureTextEntry
+          autoCapitalize="none"
           className={s.signinInput}
         />
 
@@ -79,7 +84,7 @@ export default function SignInScreen() {
         ) : null}
 
         <Pressable
-          onPress={handleSendCode}
+          onPress={handleSignIn}
           className={`${s.signinSubmitBtn} ${isValid ? s.signinSubmitActive : s.signinSubmitInactive}`}
           disabled={!isValid || isLoading}
         >
@@ -87,14 +92,14 @@ export default function SignInScreen() {
             className={`text-[11px] tracking-wide-2xl font-mono font-bold text-center ${isValid ? "text-black" : ""}`}
             style={!isValid ? { color: palette.textSecondary } : undefined}
           >
-            {isLoading ? "SENDING..." : "SEND CODE"}
+            {isLoading ? "SIGNING IN..." : "SIGN IN"}
           </Text>
         </Pressable>
 
         <Text className={s.signinSwitch}>
-          Don’t have an account?{" "}
+          Don't have an account?{" "}
           <Text
-            onPress={() => router.replace("/(auth)/signup")}
+            onPress={() => router.replace("/(auth)/signup-email" as any)}
             className={s.signinSwitchLink}
           >
             SIGN UP
@@ -119,12 +124,12 @@ export default function SignInScreen() {
         </Pressable>
 
         <Text className={s.signinSwitch}>
-          Or sign in with email?{" "}
+          Or sign in with phone?{" "}
           <Text
-            onPress={() => router.replace("/(auth)/signin-email" as any)}
+            onPress={() => router.replace("/(auth)/signin")}
             className={s.signinSwitchLink}
           >
-            USE EMAIL
+            USE PHONE
           </Text>
         </Text>
       </View>

@@ -39,7 +39,7 @@ export interface NotificationPreferences {
 export interface User {
   id: string;
   name: string;
-  phone: string;
+  phone?: string;
   email?: string;
   memberSince: string;
   walletBalance: number;

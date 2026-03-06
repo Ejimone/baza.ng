@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Baza.ng",
-    "slug": "baza.ng",
+    "slug": "baza-ng",
     "version": "2.7.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -11,7 +11,8 @@
     "ios": {
       "supportsTablet": true,
       "buildNumber": "7",
-      "bundleIdentifier": "com.opencodeceo.baza.ng",
+      "bundleIdentifier": "com.baza.mobile",
+      "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "CFBundleDisplayName": "Baza.ng",
         "CFBundleName": "Baza.ng",
@@ -21,6 +22,7 @@
     "android": {
       "versionCode": 7,
       "softwareKeyboardLayoutMode": "resize",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -29,13 +31,19 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.opencodeceo.baza.ng"
+      "package": "com.baza.mobile"
     },
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.30504101922-hsleh13ueea8ve44nbndq7q3t9s9bjp0"
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",
@@ -49,7 +57,15 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

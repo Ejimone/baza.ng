@@ -1,85 +1,48 @@
 {
   "project_info": {
-    "project_number": "11119285834",
-    "firebase_url": "https://ejimone-a2da3-default-rtdb.firebaseio.com",
-    "project_id": "ejimone-a2da3",
-    "storage_bucket": "ejimone-a2da3.firebasestorage.app"
+    "project_number": "30504101922",
+    "project_id": "baza-c408e",
+    "storage_bucket": "baza-c408e.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:11119285834:android:40ed9e37551303871238b3",
+        "mobilesdk_app_id": "1:30504101922:android:c240cfa59260afa690427b",
         "android_client_info": {
-          "package_name": "com.jonkech.inventory"
+          "package_name": "com.baza.mobile"
         }
       },
       "oauth_client": [
         {
-          "client_id": "11119285834-gnnj9kp01dqq3mjc93l6fmkq9l96euop.apps.googleusercontent.com",
+          "client_id": "30504101922-3i2n2sbcskan9826n5d8suqetd26gp6i.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.jonkech.inventory",
-            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+            "package_name": "com.baza.mobile",
+            "certificate_hash": "861b38f486d95371a5183ff244db3b23caab85e4"
           }
         },
         {
-          "client_id": "11119285834-ei9vif4b0vvlqosv0lqa9r109h6mf239.apps.googleusercontent.com",
+          "client_id": "30504101922-dh38e0b7qk1jllfud4k5hfeg7vqufam9.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyA3ZR2HSNkx9khYusokwZnbXKiPew-VSxw"
+          "current_key": "AIzaSyCTnuDeEvcCZ4y_O4lYj623MNSx-j7dOCU"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "11119285834-ei9vif4b0vvlqosv0lqa9r109h6mf239.apps.googleusercontent.com",
+              "client_id": "30504101922-dh38e0b7qk1jllfud4k5hfeg7vqufam9.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "11119285834-a7653nlor55q0jhd18lpfta7kvdetppt.apps.googleusercontent.com",
+              "client_id": "30504101922-hsleh13ueea8ve44nbndq7q3t9s9bjp0.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.jonkech.inventory"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:11119285834:android:0721bc5ecda030a61238b3",
-        "android_client_info": {
-          "package_name": "com.opencodeceo.baza.ng"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "11119285834-ei9vif4b0vvlqosv0lqa9r109h6mf239.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyA3ZR2HSNkx9khYusokwZnbXKiPew-VSxw"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "11119285834-ei9vif4b0vvlqosv0lqa9r109h6mf239.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "11119285834-a7653nlor55q0jhd18lpfta7kvdetppt.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.jonkech.inventory"
+                "bundle_id": "com.baza.mobile"
               }
             }
           ]

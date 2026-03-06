@@ -2,6 +2,16 @@
 
 ## Completed
 
+- Extended Nigerian-friendly phone input UX beyond auth to the referral share screen: referral phone input now live-formats as local NG style (`0901 234 5678`), validates against Nigerian mobile format before enabling send, and still normalizes internally to `+234...` (`app/(app)/settings/refer.tsx`, `utils/format.ts`).
+
+- Improved auth phone UX for Nigerian users by adding live local-number formatting in sign-in/sign-up inputs (`0901 234 5678` style) while still normalizing to backend-safe E.164 (`+234...`) before API calls. Input now gracefully accepts local (`0901...`), short (`901...`), and international (`+234...`/`234...`) entry styles (`utils/format.ts`, `app/(auth)/signin.tsx`, `app/(auth)/signup.tsx`).
+
+- Reverted frontend phone auth from Firebase back to backend Termii OTP flow. Replaced Firebase verification logic in `services/auth.ts` with `POST /v1/auth/otp-request` and `POST /v1/auth/otp-verify` payloads (`intent` + `channel`), updated `hooks/useAuth.ts` to backend error-code mapping, and updated auth screens (`app/(auth)/signin.tsx`, `app/(auth)/signup.tsx`, `app/(auth)/otp.tsx`) to pass login/signup intent and resend with consistent channel. Removed Firebase auth artifacts (`services/firebaseAuth.ts`, `plugins/withFirebaseFix.js`, Firebase deps/plugins in `package.json` and `app.json`). Updated auth docs in `docs/termii-phone-auth.md`.
+
+- Updated Firebase Phone Auth integration documentation with the exact frontend↔backend handshake contract and route expectations (`POST /v1/auth/firebase-verify`), plus targeted troubleshooting for `This app is not authorized for Firebase Authentication` and backend `404` mismatches (`docs/firebase-phone-auth.md`).
+
+- Implemented Firebase Phone Authentication for the frontend auth flow: replaced Termii/backend-based OTP sending with `@react-native-firebase/auth` `signInWithPhoneNumber`. Firebase now sends SMS directly; OTP verification is handled client-side via Firebase, then a Firebase ID token is sent to the backend (`POST /auth/firebase-verify`) for server-side verification and JWT issuance. Added `services/firebaseAuth.ts` (Firebase wrapper), updated `services/auth.ts` (Firebase integration), updated `hooks/useAuth.ts` (Firebase error mapping), updated `app/(auth)/otp.tsx` (resend flow), and configured `app.json` with Firebase plugins (`@react-native-firebase/app`, `@react-native-firebase/auth`, `expo-build-properties`), Google services files, and iOS static frameworks. Added implementation doc: `docs/firebase-phone-auth.md`.
+
 - Improved Help Me Decide response quality and tool usability: assistant text now strips markdown/link raw artifacts and product-list replies are normalized to concise copy while cards render details below; added in-chat tool shortcut chips for full tool flow coverage (including `checkout_cart`) and persisted tool-call metadata on messages (`app/(app)/modes/chat.tsx`).
 
 - Fixed AI chat product-list cards so each item reliably shows image + details in-card by enriching AI item payloads with live catalog data (lookup by id/name across bundles, meal packs, ready-to-eat, snacks, and restock) and adding a visible image fallback when an item image URL is missing (`app/(app)/modes/chat.tsx`).

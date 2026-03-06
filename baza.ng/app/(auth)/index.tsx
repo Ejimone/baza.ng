@@ -1,18 +1,38 @@
 import { router } from "expo-router";
+import { Envelope, GoogleLogo, Phone } from "phosphor-react-native";
+import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
-import { getThemePalette } from "../../constants/appTheme";
-import { useThemeStore } from "../../stores/themeStore";
+import { useAuth } from "../../hooks/useAuth";
 import { authScreen as s } from "../../styles";
 
 export default function WelcomeScreen() {
-  const mode = useThemeStore((state) => state.mode);
-  const palette = getThemePalette(mode);
+  const [isSignInMode, setIsSignInMode] = useState(false);
+  const { signInWithGoogle, isLoading, error, clearError } = useAuth();
+
+  const handleGoogle = async () => {
+    clearError();
+    try {
+      await signInWithGoogle();
+    } catch {
+      // error state is set by the hook
+    }
+  };
+
+  const handleEmail = () => {
+    router.push(
+      isSignInMode ? ("/(auth)/signin-email" as any) : ("/(auth)/signup-email" as any),
+    );
+  };
+
+  const handlePhone = () => {
+    router.push(
+      isSignInMode ? ("/(auth)/signin" as any) : ("/(auth)/signup" as any),
+    );
+  };
 
   return (
     <View className={s.welcomeContainer}>
-      {/* <Text className={s.welcomeTagline}>MEMBERS ONLY · LAGOS</Text> */}
-      <Text className={s.welcomeLogo}>Baza.ng</Text>
-      {/* <Text className={s.welcomeDot}>.ng</Text> */}
+      <Text className={s.welcomeLogo} style={{ fontFamily: "NotoSerif_400Regular" }}>Baza.ng</Text>
 
       <Text className={s.welcomeDesc}>
         The smarter way to stock your kitchen.{"\n"}
@@ -21,29 +41,63 @@ export default function WelcomeScreen() {
         </Text>
       </Text>
 
+      <Text className={s.welcomeSectionLabel}>
+        {isSignInMode ? "SIGN IN" : "CREATE ACCOUNT"}
+      </Text>
+
       <Pressable
-        onPress={() => router.push("/(auth)/signup")}
-        className={s.welcomeCreateBtn}
+        onPress={handleGoogle}
+        disabled={isLoading}
+        className={`${s.welcomeAuthBtn} ${s.welcomeAuthBtnGoogle}`}
       >
-        <Text className="text-black text-[11px] tracking-wide-2xl font-mono font-bold text-center">
-          CREATE ACCOUNT
+        <GoogleLogo size={20} color="#333" weight="bold" />
+        <Text className="text-[#333] font-bold">
+          {isLoading ? "Signing in..." : isSignInMode ? "Sign in with Google" : "Sign up with Google"}
         </Text>
       </Pressable>
 
       <Pressable
-        onPress={() => router.push("/(auth)/signin")}
-        className={s.welcomeSignInBtn}
+        onPress={handleEmail}
+        className={`${s.welcomeAuthBtn} ${s.welcomeAuthBtnEmail}`}
       >
-        <Text
-          className="text-xxs tracking-wide-xl font-mono text-center"
-          style={{ color: palette.textSecondary }}
-        >
-          SIGN IN
+        <Envelope size={20} color="#fff" weight="bold" />
+        <Text className="text-white font-bold">
+          {isSignInMode ? "Sign in with Email" : "Sign up with Email"}
         </Text>
       </Pressable>
+
+      <Pressable
+        onPress={handlePhone}
+        className={`${s.welcomeAuthBtn} ${s.welcomeAuthBtnPhone}`}
+      >
+        <Phone size={20} color="#fff" weight="bold" />
+        <Text className="text-white font-bold">
+          {isSignInMode ? "Sign in with Phone" : "Sign up with Phone"}
+        </Text>
+      </Pressable>
+
+      <Pressable
+        onPress={() => {
+          setIsSignInMode((m) => !m);
+          clearError();
+        }}
+        className="mt-4"
+      >
+        <Text className="text-baza-green text-3xs tracking-wide-md font-mono">
+          {isSignInMode
+            ? "Don't have an account? Sign up"
+            : "Already have an account? Sign in"}
+        </Text>
+      </Pressable>
+
+      {error ? (
+        <Text className="mt-3 text-3xs text-baza-red tracking-wide-sm font-mono text-center">
+          {error}
+        </Text>
+      ) : null}
 
       <Text className={s.welcomeTerms}>
-        By continuing, you agree to Baza’s{"\n"}Terms of Service & Privacy
+        By continuing, you agree to Baza's{"\n"}Terms of Service & Privacy
         Policy.
       </Text>
     </View>

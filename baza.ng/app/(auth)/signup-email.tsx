@@ -1,58 +1,56 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { getThemePalette } from "../../constants/appTheme";
 import { useAuth } from "../../hooks/useAuth";
 import { useThemeStore } from "../../stores/themeStore";
 import { authScreen as s } from "../../styles";
-import {
-    formatNigerianPhoneInput,
-    isValidNigerianPhone,
-    normalizePhoneNumber,
-} from "../../utils/format";
 
-export default function SignUpScreen() {
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MIN_PASSWORD_LENGTH = 6;
+
+function isValidEmail(email: string): boolean {
+  return EMAIL_REGEX.test(email.trim());
+}
+
+export default function SignUpEmailScreen() {
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [refCode, setRefCode] = useState("");
   const [refApplied, setRefApplied] = useState(false);
-  const { requestOtp, signInWithGoogle, isLoading, error, clearError } =
+  const { signUpWithEmail, signInWithGoogle, isLoading, error, clearError } =
     useAuth();
   const mode = useThemeStore((state) => state.mode);
   const palette = getThemePalette(mode);
 
-  const normalizedPhone = normalizePhoneNumber(phone);
-
+  const passwordsMatch = password === confirmPassword;
+  const passwordValid = password.length >= MIN_PASSWORD_LENGTH;
   const isValid =
-    name.trim().length >= 1 && isValidNigerianPhone(normalizedPhone);
+    name.trim().length >= 1 &&
+    isValidEmail(email) &&
+    passwordValid &&
+    passwordsMatch;
 
-  const handleSendCode = async () => {
+  const handleSignUp = async () => {
     if (!isValid || isLoading) return;
     clearError();
     try {
-      await requestOtp({
-        phone: normalizedPhone,
-        intent: "signup",
-        channel: "sms",
-      });
-      router.push({
-        pathname: "/(auth)/otp",
-        params: {
-          phone: normalizedPhone,
-          name: name.trim(),
-          referralCode: refApplied ? refCode : "",
-          mode: "signup",
-          channel: "sms",
-        },
-      });
+      await signUpWithEmail(
+        email.trim().toLowerCase(),
+        password,
+        name.trim(),
+        refApplied ? refCode : undefined,
+      );
     } catch {
       // error state is set by the hook
     }
@@ -72,7 +70,7 @@ export default function SignUpScreen() {
           <Text className={s.signupBack}>← BACK</Text>
         </Pressable>
         <Text className={s.signupLabel}>NEW MEMBER</Text>
-        <Text className={s.signupTitle}>Create account</Text>
+        <Text className={s.signupTitle}>Create account with email</Text>
       </View>
 
       <ScrollView className={s.signupForm} keyboardShouldPersistTaps="handled">
@@ -83,17 +81,42 @@ export default function SignUpScreen() {
           placeholder="Thrive"
           placeholderTextColor={palette.textSecondary}
           autoFocus
+          autoCapitalize="words"
+          autoCorrect={false}
           className={s.signupInput}
         />
 
-        <Text className={s.signupFieldLabel}>PHONE NUMBER</Text>
+        <Text className={s.signupFieldLabel}>EMAIL</Text>
         <TextInput
-          value={phone}
-          onChangeText={(value) => setPhone(formatNigerianPhoneInput(value))}
-          placeholder="0901 234 5678"
+          value={email}
+          onChangeText={setEmail}
+          placeholder="you@example.com"
           placeholderTextColor={palette.textSecondary}
-          keyboardType="phone-pad"
-          maxLength={13}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
+          className={s.signupInput}
+        />
+
+        <Text className={s.signupFieldLabel}>PASSWORD</Text>
+        <TextInput
+          value={password}
+          onChangeText={setPassword}
+          placeholder="At least 6 characters"
+          placeholderTextColor={palette.textSecondary}
+          secureTextEntry
+          autoCapitalize="none"
+          className={s.signupInput}
+        />
+
+        <Text className={s.signupFieldLabel}>CONFIRM PASSWORD</Text>
+        <TextInput
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          placeholder="Re-enter password"
+          placeholderTextColor={palette.textSecondary}
+          secureTextEntry
+          autoCapitalize="none"
           className={s.signupInput}
         />
 
@@ -133,8 +156,7 @@ export default function SignUpScreen() {
         ) : null}
 
         <Text className={`${s.signupHint} mt-5`}>
-          We’ll send a verification code to your number.{"\n"}
-          <Text className={s.signupHintDim}>Standard SMS rates may apply.</Text>
+          Create an account with your email and password.
         </Text>
 
         {error ? (
@@ -144,7 +166,7 @@ export default function SignUpScreen() {
         ) : null}
 
         <Pressable
-          onPress={handleSendCode}
+          onPress={handleSignUp}
           className={`${s.signupSubmitBtn} ${isValid ? s.signupSubmitActive : s.signupSubmitInactive}`}
           disabled={!isValid || isLoading}
         >
@@ -152,7 +174,7 @@ export default function SignUpScreen() {
             className={`text-[11px] tracking-wide-2xl font-mono font-bold text-center ${isValid ? "text-black" : ""}`}
             style={!isValid ? { color: palette.textSecondary } : undefined}
           >
-            {isLoading ? "SENDING..." : "SEND VERIFICATION CODE"}
+            {isLoading ? "CREATING ACCOUNT..." : "CREATE ACCOUNT"}
           </Text>
         </Pressable>
 
@@ -174,12 +196,12 @@ export default function SignUpScreen() {
         </Pressable>
 
         <Text className={s.signinSwitch}>
-          Or sign up with email?{" "}
+          Or sign up with phone?{" "}
           <Text
-            onPress={() => router.replace("/(auth)/signup-email" as any)}
+            onPress={() => router.replace("/(auth)/signup" as any)}
             className={s.signinSwitchLink}
           >
-            USE EMAIL
+            USE PHONE
           </Text>
         </Text>
       </ScrollView>

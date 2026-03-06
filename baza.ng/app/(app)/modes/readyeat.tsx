@@ -14,6 +14,7 @@ import {
 import AddMoreItemsSheet from "../../../components/ui/AddMoreItemsSheet";
 import FloatingCart from "../../../components/ui/FloatingCart";
 import ProductImage from "../../../components/ui/ProductImage";
+import QtyControl from "../../../components/ui/QtyControl";
 import { getThemePalette } from "../../../constants/appTheme";
 import { colors } from "../../../constants/theme";
 import { useCart } from "../../../hooks/useCart";
@@ -242,54 +243,23 @@ export default function ReadyEatScreen() {
                       </Text>
                     </Pressable>
                   ) : (
-                    <View className={s.stepperCol}>
-                      <View
-                        className={s.stepperRow}
-                        style={{
-                          borderWidth: 1,
-                          borderColor: item.color + "44",
+                    <View
+                      className={s.stepperCol}
+                      onStartShouldSetResponder={() => true}
+                    >
+                      <QtyControl
+                        value={qty}
+                        onIncrement={() =>
+                          updateQty(item.id, qty + 1, "readyeat")
+                        }
+                        onDecrement={() => {
+                          if (qty === 1) removeItem(item.id, "readyeat");
+                          else updateQty(item.id, qty - 1, "readyeat");
                         }}
-                      >
-                        <Pressable
-                          className={s.stepperBtn}
-                          style={{
-                            backgroundColor:
-                              qty === 1 ? "#2a0a0a" : item.color + "12",
-                          }}
-                          onPress={(e) => {
-                            e.stopPropagation?.();
-                            if (qty === 1) removeItem(item.id, "readyeat");
-                            else updateQty(item.id, qty - 1, "readyeat");
-                          }}
-                        >
-                          <Text
-                            style={{
-                              color: qty === 1 ? "#e85c3a" : item.color,
-                              fontFamily: "NotoSerif_400Regular",
-                            }}
-                          >
-                            {qty === 1 ? "×" : "−"}
-                          </Text>
-                        </Pressable>
-                        <Text className={s.stepperValue}>{qty}</Text>
-                        <Pressable
-                          className={s.stepperBtn}
-                          style={{ backgroundColor: item.color + "12" }}
-                          onPress={(e) => {
-                            e.stopPropagation?.();
-                            updateQty(item.id, qty + 1, "readyeat");
-                          }}
-                        >
-                          <Text
-                            style={{
-                              color: item.color,
-                              fontFamily: "NotoSerif_400Regular",
-                            }}
-                          >
-                            +
-                          </Text>
-                        </Pressable>
-                      </View>
+                        min={0}
+                        max={99}
+                        accentColor={item.color}
+                      />
                       <Text
                         className={s.stepperLabel}
                         style={{ color: item.color + "88" }}
@@ -583,52 +553,14 @@ function ReadyEatPopup({
                   </Text>
                 </View>
 
-                <View
-                  className={readyEatMode.popupPlatesStepper}
-                  style={{ borderWidth: 1, borderColor: item.color + "55" }}
-                >
-                  <Pressable
-                    className={readyEatMode.popupPlatesBtn}
-                    onPress={handleDecrease}
-                    style={{
-                      backgroundColor:
-                        selectedQty === 1 ? "#2a0a0a" : item.color + "12",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: selectedQty === 1 ? "#e85c3a" : item.color,
-                        fontFamily: "NotoSerif_400Regular",
-                        fontSize: 18,
-                      }}
-                    >
-                      {selectedQty === 1 ? "−" : "−"}
-                    </Text>
-                  </Pressable>
-
-                  <Text
-                    className={readyEatMode.popupPlatesValue}
-                    style={{ color: palette.textPrimary }}
-                  >
-                    {selectedQty}
-                  </Text>
-
-                  <Pressable
-                    className={readyEatMode.popupPlatesBtn}
-                    onPress={handleIncrease}
-                    style={{ backgroundColor: item.color + "12" }}
-                  >
-                    <Text
-                      style={{
-                        color: item.color,
-                        fontFamily: "NotoSerif_400Regular",
-                        fontSize: 18,
-                      }}
-                    >
-                      +
-                    </Text>
-                  </Pressable>
-                </View>
+                <QtyControl
+                  value={selectedQty}
+                  onIncrement={handleIncrease}
+                  onDecrement={handleDecrease}
+                  min={qty > 0 ? 0 : 1}
+                  max={20}
+                  accentColor={item.color}
+                />
               </View>
 
               <View className={readyEatMode.popupPriceRow}>

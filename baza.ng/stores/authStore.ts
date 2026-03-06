@@ -1,7 +1,7 @@
 import { create } from "zustand";
+import { setAuthAccessors } from "../services/api";
 import type { User } from "../types";
 import { deleteRefreshToken } from "../utils/storage";
-import { setAuthAccessors } from "../services/api";
 
 interface AuthState {
   user: User | null;

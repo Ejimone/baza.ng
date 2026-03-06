@@ -18,6 +18,11 @@ import * as referralService from "../../../services/referral";
 import { useThemeStore } from "../../../stores/themeStore";
 import { referScreen as s } from "../../../styles/index";
 import type { Referral, ReferralStats } from "../../../types";
+import {
+    formatNigerianPhoneInput,
+    isValidNigerianPhone,
+    normalizePhoneNumber,
+} from "../../../utils/format";
 
 const PERKS = [
   { who: "YOU", earn: "₦2,000", when: "Friend places first order" },
@@ -32,6 +37,9 @@ export default function ReferScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [inputPhone, setInputPhone] = useState("");
+  const normalizedInvitePhone = normalizePhoneNumber(inputPhone);
+  const canSendInvite =
+    Boolean(stats?.code) && isValidNigerianPhone(normalizedInvitePhone);
 
   useEffect(() => {
     (async () => {
@@ -54,7 +62,7 @@ export default function ReferScreen() {
   };
 
   const handleSendInvite = async () => {
-    if (!inputPhone.trim() || !stats?.code) return;
+    if (!canSendInvite || !stats?.code) return;
     try {
       await Share.share({
         message: `Join Baza.ng with my referral code ${stats.code} and get ₦1,000 off your first order! Download: https://baza.ng`,
@@ -171,14 +179,22 @@ export default function ReferScreen() {
               borderColor: palette.border,
               color: palette.textPrimary,
             }}
-            placeholder="+234 800 000 0000"
+            placeholder="0901 234 5678"
             placeholderTextColor={palette.textSecondary}
             value={inputPhone}
-            onChangeText={setInputPhone}
+            onChangeText={(value) =>
+              setInputPhone(formatNigerianPhoneInput(value))
+            }
             keyboardType="phone-pad"
+            maxLength={13}
           />
-          <Pressable onPress={handleSendInvite}>
-            <Text className={s.inviteSendBtn}>SEND</Text>
+          <Pressable onPress={handleSendInvite} disabled={!canSendInvite}>
+            <Text
+              className={s.inviteSendBtn}
+              style={!canSendInvite ? { opacity: 0.5 } : undefined}
+            >
+              SEND
+            </Text>
           </Pressable>
         </View>
 

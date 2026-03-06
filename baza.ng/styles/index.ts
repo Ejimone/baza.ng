@@ -4,6 +4,7 @@
 // Dynamic values (per-item colors, conditional states) use inline style props.
 
 // ─── SHARED: QtyControl ──────────────────────────────────────────────────────
+// Matches Wholesale/Shoplist stepper: single border, rounded, connected segments
 
 export const qtyControl = {
   container: "flex-row items-center gap-3",
@@ -15,6 +16,18 @@ export const qtyControl = {
   buttonTextSmall: "text-sm font-mono",
   value: "text-sm text-txt-primary font-mono min-w-[16px] text-center",
   valueSmall: "text-xs text-txt-primary font-mono min-w-[16px] text-center",
+  // Wholesale-style unified stepper (used on bundle pages)
+  stepperRow:
+    "flex-row items-center border rounded overflow-hidden bg-transparent",
+  stepperRowSmall:
+    "flex-row items-center border rounded overflow-hidden bg-transparent",
+  stepperBtn: "w-8 h-8 items-center justify-center bg-transparent",
+  stepperBtnSmall:
+    "w-[26px] h-[26px] items-center justify-center bg-transparent",
+  stepperValue:
+    "min-w-7 text-center text-[13px] font-mono bg-transparent px-1 leading-8",
+  stepperValueSmall:
+    "min-w-[18px] text-center text-xs font-mono bg-transparent px-0.5 leading-[26px]",
 };
 
 // ─── SPLASH ──────────────────────────────────────────────────────────────────
@@ -470,6 +483,13 @@ export const cartScreen = {
   deliveryRow:
     "flex-row justify-between mb-4 text-3xs text-[#2a3a2a] tracking-wide-lg font-mono",
   deliveryValue: "text-baza-green font-mono",
+  addressSection: "mb-3.5",
+  addressLabel: "text-3xs text-[#2a3a2a] tracking-wide-lg mb-2 font-mono",
+  addressCard: "p-3 mb-2 border border-[#1a2a1c] rounded-lg",
+  addressCardSelected: "border-baza-green border-2 bg-[#4caf7d08]",
+  addressCardText: "text-xs text-txt-primary font-mono",
+  addressAddBtn:
+    "py-3 border border-dashed border-[#1a2a1c] text-baza-green text-3xs tracking-wide-lg font-mono text-center",
   noteSection: "mb-3.5",
   noteLabel: "text-2xs text-[#2a3a2a] tracking-wide-lg mb-1.5 font-mono",
   noteOptional: "text-[#1a2a1a] font-mono",
@@ -494,6 +514,26 @@ export const paymentSelector = {
   optionLabel: "text-xxs text-txt-primary tracking-wide-sm font-mono",
   optionDetail: "text-3xs text-[#2a3a2a] font-mono mt-0.5",
   optionDetailRed: "text-3xs text-baza-red font-mono mt-0.5",
+};
+
+// ─── PHONE CAPTURE SHEET ─────────────────────────────────────────────────────
+
+export const phoneCaptureSheet = {
+  overlay: "absolute inset-0 z-[500] bg-black/85 flex-col justify-end",
+  sheet:
+    "bg-[#080f09] border-t border-[#1a2a1c] rounded-t-sheet pt-7 px-6 pb-12 font-mono",
+  handle: "w-9 h-1 bg-[#1a2a1c] rounded-sm mx-auto mb-6",
+  label: "text-3xs tracking-wide-2xl text-[#2a4a2a] mb-2 font-mono",
+  title: "text-[22px] text-txt-primary font-serif tracking-tight-sm mb-1.5",
+  desc: "text-[11px] text-[#3a5c3a] mb-5 leading-relaxed font-mono",
+  fieldLabel: "text-3xs text-[#2a4a2a] tracking-wide-xl mb-2 font-mono",
+  input:
+    "w-full bg-[#0d1a0f] border border-[#1a2a1c] py-[11px] px-3.5 text-txt-primary text-sm font-mono mb-4",
+  saveBtn:
+    "w-full py-[15px] mb-3 text-[11px] tracking-wide-2xl font-mono font-bold items-center justify-center",
+  saveBtnText: "text-black text-[11px] tracking-wide-2xl font-mono font-bold",
+  cancelBtn:
+    "w-full py-3 text-xxs tracking-wide-lg font-mono text-center",
 };
 
 // ─── INSUFFICIENT FUNDS SHEET ────────────────────────────────────────────────
@@ -727,9 +767,9 @@ export const authScreen = {
   // Welcome
   welcomeContainer:
     "flex-1 bg-[#060d07] flex-col items-center justify-center font-mono px-8",
-  welcomeTagline: "text-3xs tracking-wide-3xl text-[#2a4a2a] mb-7 font-mono",
+  welcomeTagline: "text-3xs tracking-wide-lg text-[#2a4a2a] mb-2 font-mono",
   welcomeLogo:
-    "text-[64px] font-black text-txt-primary font-serif tracking-tight-1 leading-none",
+    "text-[64px] font-black text-txt-primary font-serif tracking-tight-half leading-tight",
   welcomeDot: "text-sm text-baza-green font-mono tracking-wide-sm mb-12",
   welcomeDesc:
     "text-[13px] text-[#4a6a4a] text-center leading-loose mb-12 font-mono",
@@ -738,6 +778,18 @@ export const authScreen = {
     "w-full py-4 bg-baza-green text-black text-[11px] tracking-wide-2xl font-mono font-bold mb-3",
   welcomeSignInBtn:
     "w-full py-3.5 bg-transparent border border-[#1a2a1c] text-[#3a5c3a] text-xxs tracking-wide-xl font-mono",
+  welcomeSectionLabel:
+    "text-3xs text-[#5a7a5a] tracking-wide-lg mb-2 font-mono",
+  welcomeAuthBtn:
+    "w-full py-3.5 flex-row items-center justify-center gap-2 text-[11px] tracking-wide-xl font-mono font-bold mb-2 rounded-[20px] overflow-hidden",
+  welcomeAuthBtnGoogle:
+    "bg-white text-[#333] border border-[#ddd]",
+  welcomeAuthBtnEmail:
+    "bg-[#1a2a1c] text-white",
+  welcomeAuthBtnPhone:
+    "bg-[#1a2a1c] text-white",
+  welcomeDivider:
+    "my-5 w-full border-t border-[#1a2a1c]",
   welcomeTerms:
     "mt-8 text-3xs text-[#1a2a1a] text-center leading-loose tracking-wide-sm font-mono",
 

@@ -16,6 +16,11 @@ export async function updateNotifications(
   return data;
 }
 
+export async function updatePhone(phone: string): Promise<User> {
+  const { data } = await api.put("/user/phone", { phone });
+  return data;
+}
+
 export async function getAddresses(): Promise<{ addresses: Address[] }> {
   const { data } = await api.get("/user/addresses/");
   return data;

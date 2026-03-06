@@ -1,5 +1,6 @@
+import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -12,6 +13,7 @@ import {
     TextInput,
     View,
 } from "react-native";
+import PhoneCaptureSheet from "../../components/checkout/PhoneCaptureSheet";
 import AddMoreItemsSheet from "../../components/ui/AddMoreItemsSheet";
 import FundPrompt from "../../components/ui/FundPrompt";
 import InsufficientFundsSheet from "../../components/ui/InsufficientFundsSheet";
@@ -26,10 +28,11 @@ import {
     cartItemsToOrderItems,
     initDirectCheckout,
 } from "../../services/orders";
+import * as userService from "../../services/user";
 import { useThemeStore } from "../../stores/themeStore";
 import { useWalletStore } from "../../stores/walletStore";
 import { addMoreButton, cartScreen as s } from "../../styles";
-import type { PaymentMethod } from "../../types";
+import type { Address, PaymentMethod } from "../../types";
 import { formatPrice } from "../../utils/format";
 
 export default function CartScreen() {
@@ -45,10 +48,13 @@ export default function CartScreen() {
   const [done, setDone] = useState(false);
   const [showFund, setShowFund] = useState(false);
   const [showInsufficientSheet, setShowInsufficientSheet] = useState(false);
+  const [showPhoneCapture, setShowPhoneCapture] = useState(false);
   const [orderNote, setOrderNote] = useState("");
   const [eta, setEta] = useState("");
   const [showAddMore, setShowAddMore] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("wallet");
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
 
   // Paystack Inline state
   const [showPaystack, setShowPaystack] = useState(false);
@@ -59,9 +65,37 @@ export default function CartScreen() {
   const hasFunds = balance >= total;
   const shortfall = total - balance;
 
+  const defaultAddressId =
+    addresses.find((a) => a.isDefault)?.id ?? addresses[0]?.id ?? null;
+  const effectiveAddressId = selectedAddressId ?? defaultAddressId;
+
+  const fetchAddresses = useCallback(async () => {
+    try {
+      const { addresses: addrs } = await userService.getAddresses();
+      setAddresses(addrs);
+      setSelectedAddressId((prev) => {
+        if (prev && addrs.some((a) => a.id === prev)) return prev;
+        const defaultId = addrs.find((a) => a.isDefault)?.id ?? addrs[0]?.id;
+        return defaultId ?? null;
+      });
+    } catch {
+      // Ignore — user may not have addresses yet
+    }
+  }, []);
+
   useEffect(() => {
     fetchCart();
   }, [fetchCart]);
+
+  useEffect(() => {
+    if (!isEmpty) fetchAddresses();
+  }, [isEmpty, fetchAddresses]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!isEmpty) fetchAddresses();
+    }, [isEmpty, fetchAddresses]),
+  );
 
   const handleWalletCheckout = async () => {
     try {
@@ -70,6 +104,7 @@ export default function CartScreen() {
         total,
         note: orderNote.trim() || undefined,
         paymentMethod: "wallet" as const,
+        addressId: effectiveAddressId!,
       };
 
       const result = await createOrder(payload);
@@ -83,6 +118,21 @@ export default function CartScreen() {
 
       if (code === "INSUFFICIENT_BALANCE") {
         setShowInsufficientSheet(true);
+      } else if (code === "PHONE_REQUIRED") {
+        setShowPhoneCapture(true);
+      } else if (code === "ADDRESS_REQUIRED" || code === "ADDRESS_NOT_FOUND") {
+        Alert.alert(
+          "Address Required",
+          "Please add a delivery address before placing your order.",
+          [
+            { text: "Cancel", style: "cancel" },
+            {
+              text: "Add Address",
+              onPress: () =>
+                router.push("/(app)/settings/address" as any),
+            },
+          ],
+        );
       } else {
         Alert.alert("Order Failed", message);
       }
@@ -97,6 +147,7 @@ export default function CartScreen() {
         total,
         note: orderNote.trim() || undefined,
         paymentMethod: "paystack_direct" as const,
+        addressId: effectiveAddressId!,
       };
 
       const result = await initDirectCheckout(payload);
@@ -109,9 +160,28 @@ export default function CartScreen() {
       setPaystackEmail(email);
       setShowPaystack(true);
     } catch (err: any) {
+      const code = err.response?.data?.code;
       const message =
         err.response?.data?.error ?? "Failed to initialise payment";
-      Alert.alert("Order Failed", message);
+
+      if (code === "PHONE_REQUIRED") {
+        setShowPhoneCapture(true);
+      } else if (code === "ADDRESS_REQUIRED" || code === "ADDRESS_NOT_FOUND") {
+        Alert.alert(
+          "Address Required",
+          "Please add a delivery address before placing your order.",
+          [
+            { text: "Cancel", style: "cancel" },
+            {
+              text: "Add Address",
+              onPress: () =>
+                router.push("/(app)/settings/address" as any),
+            },
+          ],
+        );
+      } else {
+        Alert.alert("Order Failed", message);
+      }
     }
   };
 
@@ -154,6 +224,37 @@ export default function CartScreen() {
   };
 
   const handleCheckout = async () => {
+    // Prerequisite: phone number
+    if (!user?.phone?.trim()) {
+      setShowPhoneCapture(true);
+      return;
+    }
+
+    // Prerequisite: at least one address
+    if (addresses.length === 0) {
+      Alert.alert(
+        "Address Required",
+        "Please add a delivery address before placing your order.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Add Address",
+            onPress: () => router.push("/(app)/settings/address" as any),
+          },
+        ],
+      );
+      return;
+    }
+
+    // Prerequisite: address selected (effectiveAddressId is set from default or selection)
+    if (!effectiveAddressId) {
+      Alert.alert(
+        "Select Address",
+        "Please select a delivery address before placing your order.",
+      );
+      return;
+    }
+
     if (paymentMethod === "paystack") {
       await handleCardCheckout();
       return;
@@ -403,6 +504,75 @@ export default function CartScreen() {
               <Text className={s.deliveryValue}>FREE</Text>
             </View>
 
+            <View className={s.addressSection}>
+              <Text
+                className={s.addressLabel}
+                style={{ color: palette.textSecondary }}
+              >
+                DELIVERY ADDRESS
+              </Text>
+              {addresses.length === 0 ? (
+                <Pressable
+                  className={s.addressAddBtn}
+                  style={{ borderColor: palette.border }}
+                  onPress={() =>
+                    router.push("/(app)/settings/address" as any)
+                  }
+                >
+                  <Text
+                    className="text-baza-green text-3xs tracking-wide-lg font-mono text-center"
+                    style={{ color: "#4caf7d" }}
+                  >
+                    + ADD DELIVERY ADDRESS
+                  </Text>
+                </Pressable>
+              ) : (
+                <>
+                  {addresses.map((addr) => (
+                    <Pressable
+                      key={addr.id}
+                      className={`${s.addressCard} ${
+                        effectiveAddressId === addr.id
+                          ? s.addressCardSelected
+                          : ""
+                      }`}
+                      style={{
+                        borderColor:
+                          effectiveAddressId === addr.id
+                            ? "#4caf7d"
+                            : palette.border,
+                        backgroundColor:
+                          effectiveAddressId === addr.id
+                            ? "#4caf7d12"
+                            : palette.card,
+                      }}
+                      onPress={() => setSelectedAddressId(addr.id)}
+                    >
+                      <Text
+                        className={s.addressCardText}
+                        style={{ color: palette.textPrimary }}
+                      >
+                        {addr.label}: {addr.address}
+                        {addr.landmark ? ` · ${addr.landmark}` : ""}
+                      </Text>
+                    </Pressable>
+                  ))}
+                  <Pressable
+                    onPress={() =>
+                      router.push("/(app)/settings/address" as any)
+                    }
+                  >
+                    <Text
+                      className="text-3xs text-baza-green tracking-wide-md font-mono mt-2"
+                      style={{ color: "#4caf7d" }}
+                    >
+                      + ADD ANOTHER ADDRESS
+                    </Text>
+                  </Pressable>
+                </>
+              )}
+            </View>
+
             <View className={s.noteSection}>
               <Text
                 className={s.noteLabel}
@@ -487,6 +657,11 @@ export default function CartScreen() {
         onPayWithCard={handleInsufficientPayWithCard}
         onFundWallet={handleInsufficientFundWallet}
         onDismiss={() => setShowInsufficientSheet(false)}
+      />
+
+      <PhoneCaptureSheet
+        visible={showPhoneCapture}
+        onDismiss={() => setShowPhoneCapture(false)}
       />
 
       <PaystackInline
