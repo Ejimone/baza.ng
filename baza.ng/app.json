@@ -2,7 +2,7 @@
   "expo": {
     "name": "Baza.ng",
     "slug": "baza-ng",
-    "version": "2.7.0",
+    "version": "2.7.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "bazang",
@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "7",
+      "buildNumber": "8",
       "bundleIdentifier": "com.baza.mobile",
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
@@ -20,7 +20,7 @@
       }
     },
     "android": {
-      "versionCode": 7,
+      "versionCode": 8,
       "softwareKeyboardLayoutMode": "resize",
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
