@@ -62,16 +62,17 @@ export const intentGate = {
 export const intentGateBalance = {
   container: "flex-1 bg-[#080f09] flex-col font-mono relative",
   topBar: "pt-[70px] px-6 flex-row justify-between items-start",
-  walletLabel: "text-3xs tracking-wide-2xl text-[#2a4a2a] mb-[5px] font-mono",
+  walletLabel:
+    "text-xs tracking-wide-2xl text-[#2a4a2a] mb-[4px] font-mono font-bold",
   balanceRow: "flex-row items-center gap-3",
   balanceAmount:
-    "text-[24px] text-txt-primary font-bold font-serif tracking-tight-half",
+    "text-[20px] text-txt-primary font-bold font-serif tracking-tight-half",
   topUpButton: "py-1 px-2.5 bg-[#4caf7d18] border border-[#4caf7d44] font-mono",
   topUpText: "text-3xs tracking-wide-lg text-baza-green font-mono",
   availableLabel: "text-3xs text-[#2a4a2a] tracking-wide-md mt-[3px] font-mono",
   avatarButton:
     "w-10 h-10 rounded-full bg-[#0d1a0f] border border-[#2a4a2c] items-center justify-center text-lg",
-  greeting: "px-6 pt-5 pb-4",
+  greeting: "px-6 pt-2 pb-4",
   greetingTime: "text-3xs tracking-wide-lg text-[#2a4a2a] mb-1 font-mono",
   greetingTitle:
     "text-[26px] text-txt-primary font-serif tracking-tight-half leading-tight",

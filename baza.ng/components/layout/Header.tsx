@@ -28,8 +28,6 @@ function Header() {
           className={s.balanceAmount}
           style={{ color: palette.textPrimary }}
         >
-          {/*           {`WELCOME ${shortName}`}
-           */}
           {`WELCOME ${shortName}`}
         </Text>
       </View>
