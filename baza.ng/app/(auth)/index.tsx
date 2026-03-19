@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { useAuth } from "../../hooks/useAuth";
 import { authScreen as s } from "../../styles";
+import { PHONE_AUTH_FEATURES_ENABLED } from "../../utils/constants";
 
 export default function WelcomeScreen() {
   const [isSignInMode, setIsSignInMode] = useState(false);
@@ -23,12 +24,6 @@ export default function WelcomeScreen() {
       isSignInMode
         ? ("/(auth)/signin-email" as any)
         : ("/(auth)/signup-email" as any),
-    );
-  };
-
-  const handlePhone = () => {
-    router.push(
-      isSignInMode ? ("/(auth)/signin" as any) : ("/(auth)/signup" as any),
     );
   };
 
@@ -77,15 +72,23 @@ export default function WelcomeScreen() {
         </Text>
       </Pressable>
 
-      <Pressable
-        onPress={handlePhone}
-        className={`${s.welcomeAuthBtn} ${s.welcomeAuthBtnPhone}`}
-      >
-        <Phone size={20} color="#fff" weight="bold" />
-        <Text className="text-white font-bold">
-          {isSignInMode ? "Sign in with Phone" : "Sign up with Phone"}
-        </Text>
-      </Pressable>
+      {PHONE_AUTH_FEATURES_ENABLED ? (
+        <Pressable
+          onPress={() =>
+            router.push(
+              isSignInMode
+                ? ("/(auth)/signin" as any)
+                : ("/(auth)/signup" as any),
+            )
+          }
+          className={`${s.welcomeAuthBtn} ${s.welcomeAuthBtnPhone}`}
+        >
+          <Phone size={20} color="#fff" weight="bold" />
+          <Text className="text-white font-bold">
+            {isSignInMode ? "Sign in with Phone" : "Sign up with Phone"}
+          </Text>
+        </Pressable>
+      ) : null}
 
       <Pressable
         onPress={() => {

@@ -2,25 +2,36 @@
 
 ## Overview
 
-Baza supports **three payment modes** for ordering products and a **wallet topup** flow. Every user receives a unique account number on signup for wallet identification.
+Baza supports multiple payment modes and wallet funding APIs at backend level.
+
+## Temporary Frontend Mode (Current)
+
+The app is currently running with wallet UI disabled temporarily:
+
+- Checkout is **card-only** in frontend flows.
+- Wallet and DVA surfaces are hidden from Home/Profile/Cart.
+- Wallet code remains in the repo for future re-enable.
 
 ### Payment Modes
 
-| Mode | Field Value | How It Works |
-|------|------------|--------------|
-| **Wallet** | `"wallet"` | Deducts from user's wallet balance. Order confirmed instantly. |
-| **Paystack Direct** | `"paystack"` | Backend initialises a Paystack transaction. Frontend redirects to Paystack checkout or uses `resumeTransaction`. Order confirmed after verification. |
-| **Paystack Inline** | `"paystack_inline"` | Frontend opens Paystack popup with the public key. Order confirmed after verification. _(Recommended for best UX)_ |
+| Mode                           | Field Value         | Current App Status                |
+| ------------------------------ | ------------------- | --------------------------------- |
+| **Wallet**                     | `"wallet"`          | Temporarily hidden in frontend UI |
+| **Paystack Direct**            | `"paystack"`        | Available at backend level        |
+| **Paystack Inline**            | `"paystack_inline"` | Available at backend level        |
+| **Direct Checkout (app flow)** | `"paystack_direct"` | Active checkout path used by cart |
+
+> Note: This document still includes full wallet and multi-mode reference for future reactivation.
 
 ### Amount Convention
 
 All monetary values are in **kobo** (₦1 = 100 kobo). Never send naira floats.
 
-| Display | Kobo |
-|---------|------|
-| ₦500 | 50000 |
-| ₦1,000 | 100000 |
-| ₦5,000 | 500000 |
+| Display | Kobo   |
+| ------- | ------ |
+| ₦500    | 50000  |
+| ₦1,000  | 100000 |
+| ₦5,000  | 500000 |
 
 ---
 
@@ -64,6 +75,7 @@ Authorization: Bearer <token>
 ```
 
 **Response:**
+
 ```json
 {
   "id": "209abc40-...",
@@ -88,11 +100,11 @@ Before paying from wallet, users must fund it. See [paystack-inline-integration.
 ### Topup via Paystack Inline (Recommended)
 
 ```jsx
-import PaystackPop from '@paystack/inline-js';
+import PaystackPop from "@paystack/inline-js";
 
 async function topUpWallet(amountKobo, user, token) {
   // 1. Get Paystack public key
-  const res = await fetch('/v1/wallet/paystack-config', {
+  const res = await fetch("/v1/wallet/paystack-config", {
     headers: { Authorization: `Bearer ${token}` },
   });
   const { publicKey } = await res.json();
@@ -103,32 +115,34 @@ async function topUpWallet(amountKobo, user, token) {
     key: publicKey,
     email: user.email || `${user.phone}@baza.ng`,
     amount: amountKobo,
-    currency: 'NGN',
+    currency: "NGN",
     reference: `topup_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
-    metadata: { user_id: user.id, purpose: 'wallet_topup' },
+    metadata: { user_id: user.id, purpose: "wallet_topup" },
     onSuccess: async (txn) => {
       // 3. Verify on backend
       const verify = await fetch(
         `/v1/wallet/verify-topup?reference=${txn.reference}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       const result = await verify.json();
       // result.walletBalance has the updated balance
     },
-    onCancel: () => { /* user closed popup */ },
+    onCancel: () => {
+      /* user closed popup */
+    },
   });
 }
 ```
 
 ### Topup Endpoints
 
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| `GET` | `/v1/wallet/paystack-config` | Get Paystack public key |
-| `POST` | `/v1/wallet/topup` | Server-init topup (returns `authorizationUrl`) |
-| `GET` | `/v1/wallet/verify-topup?reference=xxx` | Verify topup & credit wallet |
-| `GET` | `/v1/wallet/balance` | Check current wallet balance |
-| `GET` | `/v1/wallet/transactions` | Paginated wallet transaction history |
+| Method | Endpoint                                | Purpose                                        |
+| ------ | --------------------------------------- | ---------------------------------------------- |
+| `GET`  | `/v1/wallet/paystack-config`            | Get Paystack public key                        |
+| `POST` | `/v1/wallet/topup`                      | Server-init topup (returns `authorizationUrl`) |
+| `GET`  | `/v1/wallet/verify-topup?reference=xxx` | Verify topup & credit wallet                   |
+| `GET`  | `/v1/wallet/balance`                    | Check current wallet balance                   |
+| `GET`  | `/v1/wallet/transactions`               | Paginated wallet transaction history           |
 
 ---
 
@@ -180,15 +194,15 @@ The simplest flow. Deducts from the user's wallet and confirms the order immedia
 
 ```jsx
 async function payWithWallet(orderData, token) {
-  const res = await fetch('/v1/orders/create', {
-    method: 'POST',
+  const res = await fetch("/v1/orders/create", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
       ...orderData,
-      paymentMethod: 'wallet',
+      paymentMethod: "wallet",
     }),
   });
 
@@ -200,12 +214,13 @@ async function payWithWallet(orderData, token) {
   }
 
   // Order is already CONFIRMED
-  console.log(data.order);        // { id, status: "CONFIRMED", total, ... }
+  console.log(data.order); // { id, status: "CONFIRMED", total, ... }
   console.log(data.walletBalance); // updated wallet balance in kobo
 }
 ```
 
 **Success Response (201):**
+
 ```json
 {
   "order": {
@@ -235,20 +250,20 @@ async function payWithWallet(orderData, token) {
 Backend initialises a Paystack transaction. The frontend redirects the user to Paystack's checkout page (or uses `resumeTransaction`), then verifies.
 
 ```jsx
-import PaystackPop from '@paystack/inline-js';
+import PaystackPop from "@paystack/inline-js";
 
 async function payWithPaystackDirect(orderData, token) {
   // 1. Create order — backend initialises Paystack transaction
-  const res = await fetch('/v1/orders/create', {
-    method: 'POST',
+  const res = await fetch("/v1/orders/create", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
       ...orderData,
-      paymentMethod: 'paystack',
-      callbackUrl: 'https://yourapp.com/payment/callback',
+      paymentMethod: "paystack",
+      callbackUrl: "https://yourapp.com/payment/callback",
     }),
   });
 
@@ -268,24 +283,25 @@ async function payWithPaystackDirect(orderData, token) {
       // 3. Verify payment
       const verify = await fetch(
         `/v1/orders/verify-payment?reference=${reference}&orderId=${order.id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       const result = await verify.json();
 
-      if (result.status === 'success') {
+      if (result.status === "success") {
         // Order is now CONFIRMED
         console.log(result.order); // { status: "CONFIRMED", ... }
       }
     },
     onCancel: () => {
       // Order stays PENDING — user can retry
-      console.log('Payment cancelled. Order', order.id, 'is still pending.');
+      console.log("Payment cancelled. Order", order.id, "is still pending.");
     },
   });
 }
 ```
 
 **Create Response (201):**
+
 ```json
 {
   "order": {
@@ -309,25 +325,25 @@ async function payWithPaystackDirect(orderData, token) {
 Frontend opens the Paystack popup directly. Best UX because the user never leaves the app.
 
 ```jsx
-import PaystackPop from '@paystack/inline-js';
+import PaystackPop from "@paystack/inline-js";
 
 async function payWithPaystackInline(orderData, user, token) {
   // 1. Get public key
-  const configRes = await fetch('/v1/wallet/paystack-config', {
+  const configRes = await fetch("/v1/wallet/paystack-config", {
     headers: { Authorization: `Bearer ${token}` },
   });
   const { publicKey } = await configRes.json();
 
   // 2. Create order (returns PENDING order)
-  const createRes = await fetch('/v1/orders/create', {
-    method: 'POST',
+  const createRes = await fetch("/v1/orders/create", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
       ...orderData,
-      paymentMethod: 'paystack_inline',
+      paymentMethod: "paystack_inline",
     }),
   });
 
@@ -344,22 +360,22 @@ async function payWithPaystackInline(orderData, user, token) {
     key: publicKey,
     email: user.email || `${user.phone}@baza.ng`,
     amount: order.total,
-    currency: 'NGN',
+    currency: "NGN",
     reference,
     metadata: {
       user_id: user.id,
-      purpose: 'order_payment',
+      purpose: "order_payment",
       order_id: order.id,
     },
     onSuccess: async (txn) => {
       // 4. Verify payment on backend
       const verifyRes = await fetch(
         `/v1/orders/verify-payment?reference=${txn.reference}&orderId=${order.id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       const result = await verifyRes.json();
 
-      if (result.status === 'success') {
+      if (result.status === "success") {
         // Order confirmed!
         console.log(result.order); // { status: "CONFIRMED", eta: "Tomorrow by 10am" }
       }
@@ -368,13 +384,14 @@ async function payWithPaystackInline(orderData, user, token) {
       // Order stays PENDING — user can retry later
     },
     onError: (error) => {
-      console.error('Payment error:', error);
+      console.error("Payment error:", error);
     },
   });
 }
 ```
 
 **Create Response (201):**
+
 ```json
 {
   "order": {
@@ -400,6 +417,7 @@ Authorization: Bearer <token>
 ```
 
 **Success Response:**
+
 ```json
 {
   "status": "success",
@@ -418,15 +436,15 @@ Authorization: Bearer <token>
 
 **Error Responses:**
 
-| HTTP | Code | Meaning |
-|------|------|---------|
-| 400 | `MISSING_REFERENCE` | No `reference` query param |
-| 400 | `MISSING_ORDER_ID` | No `orderId` query param |
-| 404 | `NOT_FOUND` | Order doesn't exist or doesn't belong to user |
-| 400 | `INVALID_ORDER_STATUS` | Order is not PENDING (e.g. already CANCELLED) |
-| 502 | `VERIFICATION_FAILED` | Paystack API error |
-| 400 | `PAYMENT_FAILED` | Paystack says payment wasn't successful |
-| 400 | `AMOUNT_MISMATCH` | Paid amount ≠ order total |
+| HTTP | Code                   | Meaning                                       |
+| ---- | ---------------------- | --------------------------------------------- |
+| 400  | `MISSING_REFERENCE`    | No `reference` query param                    |
+| 400  | `MISSING_ORDER_ID`     | No `orderId` query param                      |
+| 404  | `NOT_FOUND`            | Order doesn't exist or doesn't belong to user |
+| 400  | `INVALID_ORDER_STATUS` | Order is not PENDING (e.g. already CANCELLED) |
+| 502  | `VERIFICATION_FAILED`  | Paystack API error                            |
+| 400  | `PAYMENT_FAILED`       | Paystack says payment wasn't successful       |
+| 400  | `AMOUNT_MISMATCH`      | Paid amount ≠ order total                     |
 
 **Idempotent:** Calling verify-payment twice for an already-confirmed order returns success without side effects.
 
@@ -441,6 +459,7 @@ The backend automatically handles `charge.success` webhooks from Paystack. If th
 3. Confirm the order and record the wallet transaction
 
 **Webhook URL (set in Paystack Dashboard):**
+
 ```
 https://baza-chi.vercel.app/v1/webhooks/paystack
 ```
@@ -452,8 +471,8 @@ No frontend action needed — this is a backend safety net.
 ## 6. Complete React Component Example
 
 ```jsx
-import { useState } from 'react';
-import PaystackPop from '@paystack/inline-js';
+import { useState } from "react";
+import PaystackPop from "@paystack/inline-js";
 
 export function Checkout({ cart, user, token, onOrderComplete }) {
   const [loading, setLoading] = useState(false);
@@ -480,13 +499,13 @@ export function Checkout({ cart, user, token, onOrderComplete }) {
     setError(null);
 
     try {
-      const res = await fetch('/v1/orders/create', {
-        method: 'POST',
+      const res = await fetch("/v1/orders/create", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ ...orderData, paymentMethod: 'wallet' }),
+        body: JSON.stringify({ ...orderData, paymentMethod: "wallet" }),
       });
 
       const data = await res.json();
@@ -507,19 +526,22 @@ export function Checkout({ cart, user, token, onOrderComplete }) {
 
     try {
       // Get public key
-      const configRes = await fetch('/v1/wallet/paystack-config', {
+      const configRes = await fetch("/v1/wallet/paystack-config", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const { publicKey } = await configRes.json();
 
       // Create PENDING order
-      const createRes = await fetch('/v1/orders/create', {
-        method: 'POST',
+      const createRes = await fetch("/v1/orders/create", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ ...orderData, paymentMethod: 'paystack_inline' }),
+        body: JSON.stringify({
+          ...orderData,
+          paymentMethod: "paystack_inline",
+        }),
       });
 
       const createData = await createRes.json();
@@ -534,30 +556,32 @@ export function Checkout({ cart, user, token, onOrderComplete }) {
         key: publicKey,
         email: user.email || `${user.phone}@baza.ng`,
         amount: order.total,
-        currency: 'NGN',
+        currency: "NGN",
         reference,
         metadata: {
           user_id: user.id,
-          purpose: 'order_payment',
+          purpose: "order_payment",
           order_id: order.id,
         },
         onSuccess: async (txn) => {
           // Verify on backend
           const verifyRes = await fetch(
             `/v1/orders/verify-payment?reference=${txn.reference}&orderId=${order.id}`,
-            { headers: { Authorization: `Bearer ${token}` } }
+            { headers: { Authorization: `Bearer ${token}` } },
           );
           const result = await verifyRes.json();
 
-          if (result.status === 'success') {
+          if (result.status === "success") {
             onOrderComplete(result.order);
           } else {
-            setError('Payment verification failed. Your order will be confirmed shortly via webhook.');
+            setError(
+              "Payment verification failed. Your order will be confirmed shortly via webhook.",
+            );
           }
           setLoading(false);
         },
         onCancel: () => {
-          setError('Payment cancelled. Your order is saved — you can retry.');
+          setError("Payment cancelled. Your order is saved — you can retry.");
           setLoading(false);
         },
         onError: (err) => {
@@ -575,9 +599,9 @@ export function Checkout({ cart, user, token, onOrderComplete }) {
     <div>
       <h2>Checkout — ₦{(orderData.total / 100).toLocaleString()}</h2>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <div style={{ display: 'flex', gap: 12 }}>
+      <div style={{ display: "flex", gap: 12 }}>
         <button disabled={loading} onClick={handleWalletPay}>
           Pay from Wallet (₦{(user.walletBalance / 100).toLocaleString()})
         </button>
@@ -614,27 +638,27 @@ PENDING → CONFIRMED → PREPARING → DISPATCHED → DELIVERED
 
 ### Order Endpoints
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| `POST` | `/v1/orders/create` | JWT | Create order with payment |
-| `GET` | `/v1/orders/verify-payment` | JWT | Verify Paystack payment for order |
-| `GET` | `/v1/orders/` | JWT | List user's orders (paginated) |
-| `GET` | `/v1/orders/<id>` | JWT | Get order detail |
+| Method | Endpoint                    | Auth | Description                       |
+| ------ | --------------------------- | ---- | --------------------------------- |
+| `POST` | `/v1/orders/create`         | JWT  | Create order with payment         |
+| `GET`  | `/v1/orders/verify-payment` | JWT  | Verify Paystack payment for order |
+| `GET`  | `/v1/orders/`               | JWT  | List user's orders (paginated)    |
+| `GET`  | `/v1/orders/<id>`           | JWT  | Get order detail                  |
 
 ### Wallet Endpoints
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| `GET` | `/v1/wallet/balance` | JWT | Current wallet balance |
-| `GET` | `/v1/wallet/transactions` | JWT | Transaction history |
-| `GET` | `/v1/wallet/paystack-config` | JWT | Get Paystack public key |
-| `POST` | `/v1/wallet/topup` | JWT | Server-init wallet topup |
-| `GET` | `/v1/wallet/verify-topup` | JWT | Verify wallet topup payment |
+| Method | Endpoint                     | Auth | Description                 |
+| ------ | ---------------------------- | ---- | --------------------------- |
+| `GET`  | `/v1/wallet/balance`         | JWT  | Current wallet balance      |
+| `GET`  | `/v1/wallet/transactions`    | JWT  | Transaction history         |
+| `GET`  | `/v1/wallet/paystack-config` | JWT  | Get Paystack public key     |
+| `POST` | `/v1/wallet/topup`           | JWT  | Server-init wallet topup    |
+| `GET`  | `/v1/wallet/verify-topup`    | JWT  | Verify wallet topup payment |
 
 ### Webhook
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
+| Method | Endpoint                | Auth     | Description                     |
+| ------ | ----------------------- | -------- | ------------------------------- |
 | `POST` | `/v1/webhooks/paystack` | HMAC sig | Paystack charge.success handler |
 
 ---
@@ -674,11 +698,13 @@ if (!res.ok) {
 Use these cURL commands to test against the backend:
 
 ### Check wallet balance
+
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" https://baza-chi.vercel.app/v1/wallet/balance
 ```
 
 ### Create wallet order
+
 ```bash
 curl -s -X POST https://baza-chi.vercel.app/v1/orders/create \
   -H "Authorization: Bearer $TOKEN" \
@@ -691,6 +717,7 @@ curl -s -X POST https://baza-chi.vercel.app/v1/orders/create \
 ```
 
 ### Create Paystack order
+
 ```bash
 curl -s -X POST https://baza-chi.vercel.app/v1/orders/create \
   -H "Authorization: Bearer $TOKEN" \
@@ -703,6 +730,7 @@ curl -s -X POST https://baza-chi.vercel.app/v1/orders/create \
 ```
 
 ### Verify order payment
+
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
   "https://baza-chi.vercel.app/v1/orders/verify-payment?reference=REF_HERE&orderId=ORDER_ID_HERE"

@@ -1,12 +1,10 @@
 import { Redirect, Stack } from "expo-router";
 import { getThemePalette } from "../../constants/appTheme";
 import { useAuthStore } from "../../stores/authStore";
-import { useThemeStore } from "../../stores/themeStore";
 
 export default function AuthLayout() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const mode = useThemeStore((s) => s.mode);
-  const palette = getThemePalette(mode);
+  const palette = getThemePalette("light");
 
   if (isAuthenticated) {
     return <Redirect href="/(app)" />;

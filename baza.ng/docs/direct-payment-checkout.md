@@ -2,56 +2,42 @@
 
 ## Overview
 
-Users can now choose between **Wallet** and **Pay with Card** (Paystack) at checkout. Previously, only wallet payment was supported. The backend already supports multiple payment methods — this feature connects the frontend to that capability.
+The frontend is now running in a temporary **card-only checkout mode**.
+
+- Wallet and DVA funding UI are hidden in the app.
+- Checkout goes directly through **Paystack direct payment**.
+- Wallet code and components are preserved in the codebase for future re-enable.
 
 ## Payment Methods
 
-| Method            | Button Text        | Flow                                                                             |
-| ----------------- | ------------------ | -------------------------------------------------------------------------------- |
-| **Wallet**        | `CONFIRM ORDER`    | Deducts from wallet balance instantly. Order confirmed.                          |
-| **Pay with Card** | `PAY ₦X WITH CARD` | Creates a PENDING order, opens Paystack checkout in browser, verifies on return. |
+| Method            | Frontend Status              | Flow                                                                     |
+| ----------------- | ---------------------------- | ------------------------------------------------------------------------ |
+| **Wallet**        | Temporarily hidden in app UI | Preserved for later re-enable. Not selectable during this phase.         |
+| **Pay with Card** | Active                       | Creates a pending checkout, opens Paystack checkout, verifies on return. |
 
 ## User Flow
 
-### Wallet Payment (existing, enhanced)
+### Card Payment (active)
 
-1. User selects **Wallet** in the payment method selector
-2. If balance is sufficient → taps "CONFIRM ORDER" → order placed → wallet debited → done screen
-3. If balance is insufficient → `InsufficientFundsSheet` appears with two options:
-   - **PAY WITH CARD** — switches to Paystack flow and proceeds immediately
-   - **FUND WALLET INSTEAD** — opens existing `FundPrompt` for wallet top-up
-
-### Card Payment (new)
-
-1. User selects **Pay with Card** in the payment method selector
-2. Taps "PAY ₦X WITH CARD" (green button)
-3. `POST /v1/orders/create` is called with `paymentMethod: "paystack"`
-4. Backend returns `authorizationUrl`, `reference`, and a PENDING order
-5. Paystack checkout opens in `expo-web-browser` (same pattern as wallet top-up in `FundPrompt`)
-6. After browser closes, `GET /v1/orders/verify-payment` is called with the `reference` and `orderId`
-7. If verified → cart clears → done screen shown
-8. If pending/failed → Alert explains the order will be confirmed automatically (webhook fallback)
+1. User taps "PAY ₦X WITH CARD"
+2. `POST /v1/orders/direct-checkout` is called with `paymentMethod: "paystack_direct"`
+3. Backend returns `authorizationUrl`, `reference`, and `publicKey`
+4. Paystack inline modal opens in-app
+5. On success, frontend calls `GET /v1/orders/verify-payment` with the `reference`
+6. If verified → cart clears → done screen shown
+7. If pending/failed → Alert explains the order will be confirmed automatically (webhook fallback)
 
 ## Components
 
-### `PaymentMethodSelector` (`components/ui/PaymentMethodSelector.tsx`)
+### Current Checkout Surface
 
-- Two side-by-side option cards: Wallet (👛) and Card (💳)
-- Active option has green-tinted background with stronger border (`#4caf7d55`)
-- Inactive option uses dark card background with subtle border (`#1a2a1c`)
-- Wallet option shows current balance; displays "LOW" in red when insufficient
-- Sharp corners, monospace uppercase labels — matches Baza design system
-
-### `InsufficientFundsSheet` (`components/ui/InsufficientFundsSheet.tsx`)
-
-- Bottom sheet overlay (same pattern as `FundPrompt`)
-- Shows shortfall amount in amber
-- Two CTAs: "PAY WITH CARD" (primary, white bg) and "FUND WALLET INSTEAD" (outline, green text)
-- Cancel button at bottom
+- Cart now renders a single card-payment CTA.
+- Wallet selector, insufficient-wallet sheet, and fund-wallet prompt are hidden.
+- This is UI-level deactivation only; wallet modules remain in the repository.
 
 ## API Integration
 
-### Types Added (`types/index.ts`)
+### Types (`types/index.ts`)
 
 - `PaymentMethod`: `"wallet" | "paystack"`
 - `paymentMethod?` and `paymentReference?` fields on `Order` and `OrderDetail`
@@ -59,9 +45,8 @@ Users can now choose between **Wallet** and **Pay with Card** (Paystack) at chec
 
 ### Service Functions (`services/orders.ts`)
 
-- `CreateOrderPayload` now includes optional `paymentMethod` and `callbackUrl`
-- `CreateOrderResponse` now includes optional `authorizationUrl`, `accessCode`, `reference`
-- New function: `verifyOrderPayment(reference, orderId)` → `GET /orders/verify-payment`
+- `initDirectCheckout(payload)` starts direct card checkout via `/orders/direct-checkout`
+- `verifyOrderPayment(reference, orderId?)` confirms payment via `/orders/verify-payment`
 
 ### Hook (`hooks/useOrders.ts`)
 
@@ -69,10 +54,10 @@ Users can now choose between **Wallet** and **Pay with Card** (Paystack) at chec
 
 ## Design Decisions
 
-- **Paystack Direct via `expo-web-browser`** — reuses the proven pattern from wallet top-up. No new dependencies needed. React Native cannot run `PaystackPop` (web-only).
-- **Both options always visible** — wallet and card selectors are always shown regardless of balance, giving users maximum flexibility.
+- **Temporary card-only mode** — wallet is disabled in app UI while backend wallet endpoints stay available.
+- **Direct checkout preserved** — existing Paystack direct flow remains the only active checkout path.
 - **Cart screen accent: `#4caf7d`** — per `ScreenTheme.cart` in design tokens.
-- **Card confirm button uses `bg-baza-green`** (`#4caf7d`) to visually distinguish from wallet's white button.
+- **No wallet deletion** — components/services are retained for a future re-enable.
 - **Webhook safety net** — if user closes browser after paying but before verify call completes, the backend webhook auto-confirms the order.
 
 ## Styling

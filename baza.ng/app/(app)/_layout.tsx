@@ -8,6 +8,7 @@ import * as productsService from "../../services/products";
 import * as walletService from "../../services/wallet";
 import { useAuthStore } from "../../stores/authStore";
 import { useThemeStore } from "../../stores/themeStore";
+import { WALLET_FEATURES_ENABLED } from "../../utils/constants";
 import { perfMeasure } from "../../utils/perfLogger";
 
 export default function AppLayout() {
@@ -41,15 +42,20 @@ export default function AppLayout() {
     if (!isAuthenticated) return;
 
     const task = InteractionManager.runAfterInteractions(() => {
-      void Promise.allSettled([
+      const warmupTasks: Promise<unknown>[] = [
         productsService.prefetchAllCatalog(),
         ordersService.prefetchOrdersWarmup(),
-        walletService.prefetchWalletWarmup(),
         (async () => {
           const { useCartStore } = await import("../../stores/cartStore");
           return useCartStore.getState().fetchCart();
         })(),
-      ]);
+      ];
+
+      if (WALLET_FEATURES_ENABLED) {
+        warmupTasks.push(walletService.prefetchWalletWarmup());
+      }
+
+      void Promise.allSettled(warmupTasks);
     });
 
     return () => {
@@ -59,6 +65,11 @@ export default function AppLayout() {
 
   if (!isAuthenticated) {
     return <Redirect href="/(auth)" />;
+  }
+
+  const normalizedPath = pathname.replace("/(app)", "");
+  if (!WALLET_FEATURES_ENABLED && normalizedPath === "/wallet") {
+    return <Redirect href="/(app)/profile" />;
   }
 
   return (

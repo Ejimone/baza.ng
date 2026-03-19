@@ -2,24 +2,18 @@ import { useRouter } from "expo-router";
 import { memo } from "react";
 import { Pressable, Text, View } from "react-native";
 import { getThemePalette } from "../../constants/appTheme";
-import { useWallet } from "../../hooks/useWallet";
 import { useAuthStore } from "../../stores/authStore";
 import { useThemeStore } from "../../stores/themeStore";
 import { intentGateBalance as s } from "../../styles";
 
-interface HeaderProps {
-  onTopUpPress?: () => void;
-}
-
-function Header({ onTopUpPress }: HeaderProps) {
+function Header() {
   const router = useRouter();
-  const { formattedBalance } = useWallet();
   const userName = useAuthStore((state) => state.user?.name ?? "");
   const mode = useThemeStore((state) => state.mode);
   const palette = getThemePalette(mode);
-  const isLight = mode === "light";
 
   const initial = userName.charAt(0).toUpperCase() || "?";
+  const shortName = userName.split(" ")[0]?.toUpperCase() || "MEMBER";
 
   return (
     <View className={s.topBar}>
@@ -28,27 +22,14 @@ function Header({ onTopUpPress }: HeaderProps) {
           className={s.walletLabel}
           style={{ color: palette.textSecondary }}
         >
-          WALLET
+          BAZA
         </Text>
-        <View className={s.balanceRow}>
-          <Text
-            className={s.balanceAmount}
-            style={{ color: palette.textPrimary }}
-          >
-            {formattedBalance}
-          </Text>
-          <Pressable
-            className={s.topUpButton}
-            onPress={onTopUpPress}
-            style={{
-              backgroundColor: isLight ? "#4caf7d20" : "#4caf7d18",
-              borderColor: isLight ? "#4caf7d66" : "#4caf7d44",
-            }}
-          >
-            <Text className={s.topUpText}>TOP UP</Text>
-          </Pressable>
-        </View>
-        {/* <Text className={s.availableLabel}>AVAILABLE</Text> */}
+        <Text
+          className={s.balanceAmount}
+          style={{ color: palette.textPrimary }}
+        >
+          {`WELCOME ${shortName}`}
+        </Text>
       </View>
 
       <Pressable

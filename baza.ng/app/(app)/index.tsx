@@ -1,18 +1,11 @@
 import { useRouter } from "expo-router";
-import * as WebBrowser from "expo-web-browser";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Animated,
   InteractionManager,
-  Keyboard,
-  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import ModeCard from "../../components/cards/ModeCard";
@@ -23,18 +16,16 @@ import { getThemePalette } from "../../constants/appTheme";
 import { colors } from "../../constants/theme";
 import { useOrders } from "../../hooks/useOrders";
 import { useProducts } from "../../hooks/useProducts";
-import { useWallet } from "../../hooks/useWallet";
 import { useThemeStore } from "../../stores/themeStore";
 import { intentGateBalance as s } from "../../styles";
 import { SHOPPING_MODES } from "../../utils/constants";
-import { formatPrice, getGreeting } from "../../utils/format";
+import { getGreeting } from "../../utils/format";
 import { perfMeasure } from "../../utils/perfLogger";
 
 export default function IntentGateScreen() {
   const router = useRouter();
   const mode = useThemeStore((state) => state.mode);
   const palette = getThemePalette(mode);
-  const { refreshBalance } = useWallet();
   const { orders, fetchOrders, isLoading: isLoadingOrders } = useOrders();
   const {
     bundles,
@@ -63,7 +54,6 @@ export default function IntentGateScreen() {
 
   useEffect(() => {
     perfMeasure("nav tap -> first shell paint", "nav:tap");
-    refreshBalance();
     fetchOrders(1, 5);
 
     let cancelled = false;
@@ -94,16 +84,13 @@ export default function IntentGateScreen() {
     fetchReadyEat,
     fetchRestock,
     fetchSnacks,
-    refreshBalance,
   ]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([refreshBalance(), fetchOrders(1, 5)]);
+    await fetchOrders(1, 5);
     setRefreshing(false);
-  }, [refreshBalance, fetchOrders]);
-
-  const [showTopUp, setShowTopUp] = useState(false);
+  }, [fetchOrders]);
 
   const universalResults = useMemo(() => {
     const q = globalQuery.trim().toLowerCase();
@@ -313,7 +300,7 @@ export default function IntentGateScreen() {
       className={s.container}
       style={{ backgroundColor: palette.background }}
     >
-      <Header onTopUpPress={() => setShowTopUp(true)} />
+      <Header />
 
       {isSearchOpen && (
         <Pressable
@@ -635,288 +622,6 @@ export default function IntentGateScreen() {
           </View>
         ) : null}
       </ScrollView>
-
-      {showTopUp && <TopUpSheet onClose={() => setShowTopUp(false)} />}
-    </View>
-  );
-}
-
-function TopUpSheet({ onClose }: { onClose: () => void }) {
-  const mode = useThemeStore((state) => state.mode);
-  const palette = getThemePalette(mode);
-  const {
-    accountNumber,
-    bankName,
-    accountName,
-    initTopup,
-    verifyTopup,
-    refreshBalance,
-  } = useWallet();
-  const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [customAmount, setCustomAmount] = useState("");
-  const [isCustom, setIsCustom] = useState(false);
-  const keyboardTranslateY = useRef(new Animated.Value(0)).current;
-
-  const quickAmounts = [500000, 1000000, 2000000, 5000000];
-
-  const customAmountKobo = Math.round(parseFloat(customAmount || "0") * 100);
-  const isValidCustom = isCustom && customAmountKobo >= 10000; // min ₦100
-  const effectiveAmount = isCustom
-    ? isValidCustom
-      ? customAmountKobo
-      : null
-    : selectedAmount;
-  const canConfirm = effectiveAmount !== null && effectiveAmount > 0;
-
-  const handleSelectQuick = (amt: number) => {
-    setSelectedAmount(amt);
-    setIsCustom(false);
-    setCustomAmount(String(amt / 100));
-  };
-
-  const handleCustomFocus = () => {
-    setIsCustom(true);
-    setSelectedAmount(null);
-  };
-
-  const handleCustomChange = (text: string) => {
-    const sanitized = text.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1");
-    setCustomAmount(sanitized);
-    setIsCustom(true);
-    setSelectedAmount(null);
-  };
-
-  const handleConfirm = async () => {
-    if (!effectiveAmount) return;
-    setIsProcessing(true);
-    try {
-      const { authorizationUrl, reference } = await initTopup(effectiveAmount);
-      await WebBrowser.openBrowserAsync(authorizationUrl, {
-        dismissButtonStyle: "close",
-        presentationStyle: WebBrowser.WebBrowserPresentationStyle.FORM_SHEET,
-      });
-      const result = await verifyTopup(reference);
-      if (result.status === "success") {
-        await refreshBalance();
-      } else {
-        Alert.alert("Top-up Pending", "Your balance will update shortly.");
-        await refreshBalance();
-      }
-      onClose();
-    } catch (err: any) {
-      Alert.alert(
-        "Top-up Failed",
-        err.response?.data?.error ?? "Please try again.",
-      );
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  useEffect(() => {
-    const showEvent =
-      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
-    const hideEvent =
-      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
-
-    const showSub = Keyboard.addListener(showEvent, (event) => {
-      const height = event.endCoordinates?.height ?? 0;
-      Animated.timing(keyboardTranslateY, {
-        toValue: -height,
-        duration: event.duration ?? 250,
-        useNativeDriver: true,
-      }).start();
-    });
-
-    const hideSub = Keyboard.addListener(hideEvent, (event) => {
-      Animated.timing(keyboardTranslateY, {
-        toValue: 0,
-        duration: event?.duration ?? 220,
-        useNativeDriver: true,
-      }).start();
-    });
-
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-    };
-  }, [keyboardTranslateY]);
-
-  return (
-    <View
-      className={s.topUpSheet}
-      style={{
-        backgroundColor:
-          mode === "dark" ? "rgba(0,0,0,0.85)" : "rgba(0,0,0,0.35)",
-      }}
-    >
-      <Pressable style={{ flex: 1 }} onPress={onClose} />
-      <Animated.View
-        style={{ transform: [{ translateY: keyboardTranslateY }] }}
-      >
-        <ScrollView
-          bounces={false}
-          keyboardShouldPersistTaps="handled"
-          style={{ flexGrow: 0 }}
-        >
-          <View
-            className={s.topUpSheetInner}
-            style={{
-              backgroundColor: palette.background,
-              borderColor: palette.border,
-            }}
-          >
-            <View
-              className={s.topUpHandle}
-              style={{ backgroundColor: palette.border }}
-            />
-            <Text
-              className={s.topUpLabel}
-              style={{ color: palette.textSecondary }}
-            >
-              FUND YOUR WALLET
-            </Text>
-            <Text
-              className={s.topUpTitle}
-              style={{ color: palette.textPrimary }}
-            >
-              How much?
-            </Text>
-
-            <View className={s.topUpGrid}>
-              {quickAmounts.map((amount) => (
-                <Pressable
-                  key={amount}
-                  style={{
-                    width: "48%",
-                    paddingVertical: 13,
-                    alignItems: "center",
-                    backgroundColor:
-                      selectedAmount === amount ? "#4caf7d18" : "transparent",
-                    borderWidth: 1,
-                    borderColor:
-                      selectedAmount === amount ? "#4caf7d66" : palette.border,
-                  }}
-                  onPress={() => handleSelectQuick(amount)}
-                >
-                  <Text
-                    style={{
-                      color:
-                        selectedAmount === amount
-                          ? "#4caf7d"
-                          : palette.textSecondary,
-                      fontFamily: "NotoSerif_400Regular",
-                      fontSize: 13,
-                    }}
-                  >
-                    {formatPrice(amount)}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-
-            <Text
-              className={s.topUpCustomLabel}
-              style={{ color: palette.textSecondary }}
-            >
-              OR ENTER CUSTOM AMOUNT
-            </Text>
-            <View
-              className={`${s.topUpCustomRow} ${isCustom ? s.topUpCustomRowActive : ""}`}
-              style={{
-                borderColor: isCustom ? "#4caf7d66" : palette.border,
-                backgroundColor: isCustom ? "#4caf7d08" : "transparent",
-              }}
-            >
-              <Text
-                className={s.topUpCustomPrefix}
-                style={{ color: palette.textSecondary }}
-              >
-                ₦
-              </Text>
-              <TextInput
-                className={s.topUpCustomInput}
-                placeholder="e.g. 2500"
-                placeholderTextColor={palette.textSecondary}
-                keyboardType="decimal-pad"
-                value={customAmount}
-                onFocus={handleCustomFocus}
-                onChangeText={handleCustomChange}
-                selectionColor="#4caf7d"
-                style={{ color: palette.textPrimary }}
-              />
-            </View>
-
-            {accountNumber && (
-              <View
-                className={s.topUpAcctBox}
-                style={{
-                  backgroundColor: palette.card,
-                  borderColor: palette.border,
-                }}
-              >
-                <Text
-                  className={s.topUpAcctLabel}
-                  style={{ color: palette.textSecondary }}
-                >
-                  OR TRANSFER TO
-                </Text>
-                <Text
-                  className={s.topUpAcctNumber}
-                  style={{ color: palette.textPrimary }}
-                >
-                  {accountNumber}
-                </Text>
-                <Text
-                  className={s.topUpAcctBank}
-                  style={{ color: palette.textSecondary }}
-                >
-                  {bankName ?? "Providus Bank"} · {accountName ?? "Baza NG Ltd"}
-                </Text>
-              </View>
-            )}
-
-            <Pressable
-              className={s.topUpConfirmBtn}
-              style={{
-                backgroundColor: canConfirm ? "#4caf7d" : palette.card,
-                alignItems: "center",
-              }}
-              onPress={handleConfirm}
-              disabled={!canConfirm || isProcessing}
-            >
-              {isProcessing ? (
-                <ActivityIndicator color="#000" size="small" />
-              ) : (
-                <Text
-                  style={{
-                    color: canConfirm ? "#000" : palette.textSecondary,
-                    textAlign: "center",
-                    fontFamily: "NotoSerif_400Regular",
-                    fontSize: 11,
-                    fontWeight: "bold",
-                    letterSpacing: 2,
-                  }}
-                >
-                  {canConfirm
-                    ? `CONFIRM ${formatPrice(effectiveAmount!)}`
-                    : "SELECT AMOUNT"}
-                </Text>
-              )}
-            </Pressable>
-
-            <Pressable onPress={onClose}>
-              <Text
-                className={s.topUpCancelBtn}
-                style={{ textAlign: "center", color: palette.textSecondary }}
-              >
-                CANCEL
-              </Text>
-            </Pressable>
-          </View>
-        </ScrollView>
-      </Animated.View>
     </View>
   );
 }

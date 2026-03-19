@@ -6,6 +6,8 @@ export const DEEP_LINK_SCHEME = "bazang";
 export const TOKEN_REFRESH_BUFFER_MS = 60_000;
 
 export const WALLET_POLL_INTERVAL_MS = 10_000;
+export const WALLET_FEATURES_ENABLED = false;
+export const PHONE_AUTH_FEATURES_ENABLED = false;
 
 export const OTP_LENGTH = 6;
 export const OTP_EXPIRY_SECONDS = 300;

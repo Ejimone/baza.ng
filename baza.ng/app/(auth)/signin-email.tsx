@@ -1,16 +1,15 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  Text,
-  TextInput,
-  View,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 import { getThemePalette } from "../../constants/appTheme";
 import { useAuth } from "../../hooks/useAuth";
-import { useThemeStore } from "../../stores/themeStore";
 import { authScreen as s } from "../../styles";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -24,8 +23,7 @@ export default function SignInEmailScreen() {
   const [password, setPassword] = useState("");
   const { signInWithEmail, signInWithGoogle, isLoading, error, clearError } =
     useAuth();
-  const mode = useThemeStore((state) => state.mode);
-  const palette = getThemePalette(mode);
+  const palette = getThemePalette("light");
 
   const isValid = isValidEmail(email) && password.length >= 1;
 
@@ -122,16 +120,6 @@ export default function SignInEmailScreen() {
             {isLoading ? "Signing in..." : "Or sign in with Google"}
           </Text>
         </Pressable>
-
-        <Text className={s.signinSwitch}>
-          Or sign in with phone?{" "}
-          <Text
-            onPress={() => router.replace("/(auth)/signin")}
-            className={s.signinSwitchLink}
-          >
-            USE PHONE
-          </Text>
-        </Text>
       </View>
     </KeyboardAvoidingView>
   );

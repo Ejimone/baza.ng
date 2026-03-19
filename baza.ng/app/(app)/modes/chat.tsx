@@ -1,14 +1,14 @@
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  useWindowDimensions,
-  View,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    useWindowDimensions,
+    View,
 } from "react-native";
 import ImageViewerModal from "../../../components/chat/ImageViewerModal";
 import ProductDetailSheet from "../../../components/chat/ProductDetailSheet";
@@ -18,16 +18,16 @@ import * as aiService from "../../../services/ai";
 import { useCartStore } from "../../../stores/cartStore";
 import { chatMode as s } from "../../../styles";
 import type {
-  AIChatMessage,
-  AIMessageType,
-  AISuggestion,
+    AIChatMessage,
+    AIMessageType,
+    AISuggestion,
 } from "../../../types";
 import {
-  logCartSync,
-  logError,
-  logToolCalls,
-  logToolFailure,
-  logWarn,
+    logCartSync,
+    logError,
+    logToolCalls,
+    logToolFailure,
+    logWarn,
 } from "../../../utils/aiChatLogger";
 import { SHOPPING_MODES } from "../../../utils/constants";
 import { formatPrice } from "../../../utils/format";
@@ -47,7 +47,6 @@ interface ChatOrderMeta {
   status?: string;
   totalFormatted?: string;
   eta?: string;
-  walletFormatted?: string;
 }
 
 interface ChatMessage {
@@ -722,13 +721,6 @@ export default function ChatScreen() {
                         style={{ fontSize: 10, color: WHATSAPP.textSecondary }}
                       >
                         ETA: {toPlainText(msg.order.eta)}
-                      </Text>
-                    )}
-                    {msg.order.walletFormatted && (
-                      <Text
-                        style={{ fontSize: 10, color: WHATSAPP.textSecondary }}
-                      >
-                        Wallet: {toPlainText(msg.order.walletFormatted)}
                       </Text>
                     )}
                     <Pressable

@@ -1,13 +1,13 @@
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 import ScreenWrapper from "../../../components/layout/ScreenWrapper";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
@@ -21,7 +21,6 @@ import type { SupportMessage } from "../../../types";
 const QUICK_REPLIES = [
   "Track my order",
   "Something was missing",
-  "Wallet issue",
   "Cancel an order",
   "Talk to a person",
 ];

@@ -323,8 +323,7 @@ export const snacksDrinksMode = {
   stepperDec: "w-[26px] h-[26px] items-center justify-center bg-transparent",
   stepperValue:
     "min-w-[22px] text-center text-xs text-txt-primary font-mono bg-transparent leading-[26px]",
-  stepperInc:
-    "w-[26px] h-[26px] items-center justify-center bg-transparent",
+  stepperInc: "w-[26px] h-[26px] items-center justify-center bg-transparent",
 };
 
 // ─── RESTOCK (SHOP YOUR LIST) MODE ───────────────────────────────────────────
@@ -368,16 +367,14 @@ export const restockMode = {
   stepperDec: "w-8 h-[30px] items-center justify-center bg-transparent",
   stepperValue:
     "min-w-7 text-center text-[13px] text-txt-primary font-mono bg-transparent px-1 leading-[30px]",
-  stepperInc:
-    "w-8 h-[30px] items-center justify-center bg-transparent",
+  stepperInc: "w-8 h-[30px] items-center justify-center bg-transparent",
 };
 
 // ─── CHAT (HELP ME DECIDE) MODE - WhatsApp Business style ───────────────────
 
 export const chatMode = {
   container: "flex-1 bg-[#e5ddd5] flex-col font-mono",
-  header:
-    "pt-status px-5 pb-3.5 bg-[#075e54] flex-row items-center gap-3",
+  header: "pt-status px-5 pb-3.5 bg-[#075e54] flex-row items-center gap-3",
   backButton: "bg-transparent text-[11px] text-white p-0",
   avatar:
     "w-[34px] h-[34px] bg-[#128c7e] rounded-full items-center justify-center text-base",
@@ -391,13 +388,13 @@ export const chatMode = {
     "max-w-[78%] p-2.5 px-3.5 bg-[#dcf8c6] text-xs text-[#111b21] leading-relaxed font-mono",
   messageBubbleBot:
     "max-w-[78%] p-2.5 px-3.5 bg-white text-xs text-[#111b21] leading-relaxed font-mono",
-  typingIndicator:
-    "flex-row gap-1 p-2.5 px-3.5 bg-white w-14",
+  typingIndicator: "flex-row gap-1 p-2.5 px-3.5 bg-white w-14",
   typingDot: "w-[5px] h-[5px] bg-[#667781] rounded-full",
   quickReplies: "py-2 px-4 flex-row gap-2",
   quickReplyBtn:
     "py-[7px] px-3.5 bg-transparent border border-[#e9edef] text-[#667781] text-xxs tracking-wide-sm font-mono",
-  inputBar: "py-2.5 px-4 pb-9 flex-row gap-2.5 border-t border-[#e9edef] bg-[#f0f2f5]",
+  inputBar:
+    "py-2.5 px-4 pb-9 flex-row gap-2.5 border-t border-[#e9edef] bg-[#f0f2f5]",
   input:
     "flex-1 bg-white border border-[#e9edef] py-[11px] px-3.5 text-[#111b21] text-xs font-mono",
   sendBtn: "py-[11px] px-4 bg-[#25d366] text-white text-sm font-mono",
@@ -532,8 +529,7 @@ export const phoneCaptureSheet = {
   saveBtn:
     "w-full py-[15px] mb-3 text-[11px] tracking-wide-2xl font-mono font-bold items-center justify-center",
   saveBtnText: "text-black text-[11px] tracking-wide-2xl font-mono font-bold",
-  cancelBtn:
-    "w-full py-3 text-xxs tracking-wide-lg font-mono text-center",
+  cancelBtn: "w-full py-3 text-xxs tracking-wide-lg font-mono text-center",
 };
 
 // ─── INSUFFICIENT FUNDS SHEET ────────────────────────────────────────────────
@@ -766,103 +762,99 @@ export const referScreen = {
 export const authScreen = {
   // Welcome
   welcomeContainer:
-    "flex-1 bg-[#060d07] flex-col items-center justify-center font-mono px-8",
-  welcomeTagline: "text-3xs tracking-wide-lg text-[#2a4a2a] mb-2 font-mono",
+    "flex-1 bg-[#f4f7f2] flex-col items-center justify-center font-mono px-8",
+  welcomeTagline: "text-3xs tracking-wide-lg text-[#557263] mb-2 font-mono",
   welcomeLogo:
-    "text-[64px] font-black text-txt-primary font-serif tracking-tight-half leading-tight",
+    "text-[64px] font-black text-[#102015] font-serif tracking-tight-half leading-tight",
   welcomeDot: "text-sm text-baza-green font-mono tracking-wide-sm mb-12",
   welcomeDesc:
-    "text-[13px] text-[#4a6a4a] text-center leading-loose mb-12 font-mono",
-  welcomeDescHint: "text-[#2a4a2a] font-mono",
+    "text-[13px] text-[#44624d] text-center leading-loose mb-12 font-mono",
+  welcomeDescHint: "text-[#6b7f6f] font-mono",
   welcomeCreateBtn:
     "w-full py-4 bg-baza-green text-black text-[11px] tracking-wide-2xl font-mono font-bold mb-3",
   welcomeSignInBtn:
-    "w-full py-3.5 bg-transparent border border-[#1a2a1c] text-[#3a5c3a] text-xxs tracking-wide-xl font-mono",
+    "w-full py-3.5 bg-transparent border border-[#d8e2d6] text-[#44624d] text-xxs tracking-wide-xl font-mono",
   welcomeSectionLabel:
-    "text-3xs text-[#5a7a5a] tracking-wide-lg mb-2 font-mono",
+    "text-3xs text-[#557263] tracking-wide-lg mb-2 font-mono",
   welcomeAuthBtn:
     "w-full py-3.5 flex-row items-center justify-center gap-2 text-[11px] tracking-wide-xl font-mono font-bold mb-2 rounded-[20px] overflow-hidden",
-  welcomeAuthBtnGoogle:
-    "bg-white text-[#333] border border-[#ddd]",
-  welcomeAuthBtnEmail:
-    "bg-[#1a2a1c] text-white",
-  welcomeAuthBtnPhone:
-    "bg-[#1a2a1c] text-white",
-  welcomeDivider:
-    "my-5 w-full border-t border-[#1a2a1c]",
+  welcomeAuthBtnGoogle: "bg-white text-[#333] border border-[#ddd]",
+  welcomeAuthBtnEmail: "bg-[#102015] text-white",
+  welcomeAuthBtnPhone: "bg-[#102015] text-white",
+  welcomeDivider: "my-5 w-full border-t border-[#d8e2d6]",
   welcomeTerms:
-    "mt-8 text-3xs text-[#1a2a1a] text-center leading-loose tracking-wide-sm font-mono",
+    "mt-8 text-3xs text-[#6b7f6f] text-center leading-loose tracking-wide-sm font-mono",
 
   // Sign Up
-  signupContainer: "flex-1 bg-[#060d07] flex-col font-mono",
+  signupContainer: "flex-1 bg-[#f4f7f2] flex-col font-mono",
   signupHeader: "pt-[60px] px-6 pb-8",
   signupBack:
-    "bg-transparent text-[11px] text-[#3a5c3a] tracking-wide-lg mb-5 p-0",
-  signupLabel: "text-3xs text-[#2a4a2a] tracking-wide-2xl mb-2 font-mono",
-  signupTitle: "text-[28px] text-txt-primary font-serif tracking-tight-half",
+    "bg-transparent text-[11px] text-[#44624d] tracking-wide-lg mb-5 p-0",
+  signupLabel: "text-3xs text-[#557263] tracking-wide-2xl mb-2 font-mono",
+  signupTitle: "text-[28px] text-[#102015] font-serif tracking-tight-half",
   signupForm: "flex-1 px-6",
-  signupFieldLabel: "text-2xs text-[#2a4a2a] tracking-wide-xl mb-2 font-mono",
+  signupFieldLabel: "text-2xs text-[#557263] tracking-wide-xl mb-2 font-mono",
   signupInput:
-    "w-full bg-[#0d1a0f] border border-[#1a2a1c] py-3.5 px-4 text-txt-primary text-sm font-mono mb-4",
-  signupRefLabel: "text-2xs text-[#2a4a2a] tracking-wide-xl mb-2 font-mono",
-  signupRefOptional: "text-[#1a2a1a] font-mono",
+    "w-full bg-[#ffffff] border border-[#d8e2d6] py-3.5 px-4 text-[#102015] text-sm font-mono mb-4",
+  signupRefLabel: "text-2xs text-[#557263] tracking-wide-xl mb-2 font-mono",
+  signupRefOptional: "text-[#6b7f6f] font-mono",
   signupRefRow: "flex-row gap-2",
   signupRefInput:
-    "flex-1 bg-[#0d1a0f] border border-[#1a2a1c] py-3 px-3.5 text-txt-primary text-[13px] font-mono tracking-wide-sm",
+    "flex-1 bg-[#ffffff] border border-[#d8e2d6] py-3 px-3.5 text-[#102015] text-[13px] font-mono tracking-wide-sm",
   signupRefInputApplied: "border-[#4caf7d66] text-baza-green",
   signupApplyBtn: "py-3 px-4 text-3xs tracking-wide-md font-mono",
   signupApplyActive: "bg-[#4caf7d18] border border-[#4caf7d55] text-baza-green",
-  signupApplyInactive: "bg-transparent border border-[#1a2a1c] text-[#3a5c3a]",
+  signupApplyInactive: "bg-transparent border border-[#d8e2d6] text-[#44624d]",
   signupRefCredit: "text-3xs text-baza-green mt-1.5 tracking-wide-sm font-mono",
   signupHint:
-    "text-3xs text-[#2a4a2a] tracking-wide-sm mb-7 leading-loose font-mono",
-  signupHintDim: "text-[#1a2a1a] font-mono",
+    "text-3xs text-[#44624d] tracking-wide-sm mb-7 leading-loose font-mono",
+  signupHintDim: "text-[#6b7f6f] font-mono",
   signupSubmitBtn:
     "w-full py-4 text-[11px] tracking-wide-2xl font-mono font-bold",
   signupSubmitActive: "bg-baza-green text-black",
-  signupSubmitInactive: "bg-[#1a2a1c] text-[#2a3a2a]",
+  signupSubmitInactive: "bg-[#d8e2d6] text-[#44624d]",
 
   // Sign In
-  signinContainer: "flex-1 bg-[#060d07] flex-col font-mono",
+  signinContainer: "flex-1 bg-[#f4f7f2] flex-col font-mono",
   signinHeader: "pt-[60px] px-6 pb-8",
   signinBack:
-    "bg-transparent text-[11px] text-[#3a5c3a] tracking-wide-lg mb-5 p-0",
-  signinLabel: "text-3xs text-[#2a4a2a] tracking-wide-2xl mb-2 font-mono",
-  signinTitle: "text-[28px] text-txt-primary font-serif tracking-tight-half",
+    "bg-transparent text-[11px] text-[#44624d] tracking-wide-lg mb-5 p-0",
+  signinLabel: "text-3xs text-[#557263] tracking-wide-2xl mb-2 font-mono",
+  signinTitle: "text-[28px] text-[#102015] font-serif tracking-tight-half",
   signinForm: "flex-1 px-6",
-  signinFieldLabel: "text-2xs text-[#2a4a2a] tracking-wide-xl mb-2 font-mono",
+  signinFieldLabel: "text-2xs text-[#557263] tracking-wide-xl mb-2 font-mono",
   signinInput:
-    "w-full bg-[#0d1a0f] border border-[#1a2a1c] py-3.5 px-4 text-txt-primary text-sm font-mono mb-7",
+    "w-full bg-[#ffffff] border border-[#d8e2d6] py-3.5 px-4 text-[#102015] text-sm font-mono mb-7",
   signinSubmitBtn:
     "w-full py-4 text-[11px] tracking-wide-2xl font-mono font-bold",
   signinSubmitActive: "bg-baza-green text-black",
-  signinSubmitInactive: "bg-[#1a2a1c] text-[#2a3a2a]",
+  signinSubmitInactive: "bg-[#d8e2d6] text-[#44624d]",
   signinSwitch:
-    "mt-5 text-3xs text-[#1a2a1a] text-center tracking-wide-sm font-mono",
+    "mt-5 text-3xs text-[#6b7f6f] text-center tracking-wide-sm font-mono",
   signinSwitchLink:
     "bg-transparent text-baza-green text-3xs tracking-wide-sm p-0",
 
   // OTP
-  otpContainer: "flex-1 bg-[#060d07] flex-col font-mono",
+  otpContainer: "flex-1 bg-[#f4f7f2] flex-col font-mono",
   otpHeader: "pt-[60px] px-6 pb-8",
   otpBack:
-    "bg-transparent text-[11px] text-[#3a5c3a] tracking-wide-lg mb-5 p-0",
-  otpLabel: "text-3xs text-[#2a4a2a] tracking-wide-2xl mb-2 font-mono",
-  otpTitle: "text-[28px] text-txt-primary font-serif tracking-tight-half mb-2",
-  otpSentTo: "text-[11px] text-[#3a5c3a] leading-relaxed font-mono",
-  otpPhone: "text-txt-primary font-mono",
+    "bg-transparent text-[11px] text-[#44624d] tracking-wide-lg mb-5 p-0",
+  otpLabel: "text-3xs text-[#557263] tracking-wide-2xl mb-2 font-mono",
+  otpTitle: "text-[28px] text-[#102015] font-serif tracking-tight-half mb-2",
+  otpSentTo: "text-[11px] text-[#44624d] leading-relaxed font-mono",
+  otpPhone: "text-[#102015] font-mono",
   otpForm: "flex-1 px-6",
   otpBoxRow: "flex-row gap-2.5 justify-center mb-8",
   otpBox:
-    "w-[46px] h-14 text-center bg-[#0d1a0f] text-txt-primary text-[22px] font-mono",
-  otpBoxEmpty: "border border-[#1a2a1c]",
+    "w-[46px] h-14 text-center bg-[#ffffff] text-[#102015] text-[22px] font-mono",
+  otpBoxEmpty: "border border-[#d8e2d6]",
   otpBoxFilled: "border border-[#4caf7d66]",
   otpHint:
-    "text-center text-3xs text-[#2a4a2a] tracking-wide-md mb-6 font-mono",
+    "text-center text-3xs text-[#44624d] tracking-wide-md mb-6 font-mono",
   otpVerifyBtn:
-    "w-full py-4 bg-[#1a2a1c] text-[#2a3a2a] text-[11px] tracking-wide-2xl font-mono font-bold",
+    "w-full py-4 bg-[#d8e2d6] text-[#44624d] text-[11px] tracking-wide-2xl font-mono font-bold",
   otpResendBtn:
-    "mt-5 bg-transparent text-[#2a4a2a] text-3xs tracking-wide-md p-0 text-center",
+    "mt-5 bg-transparent text-[#44624d] text-3xs tracking-wide-md p-0 text-center",
 };
 
 // ─── SUPPORT CHAT SCREEN ─────────────────────────────────────────────────────
