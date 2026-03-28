@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Fixed Google re-login flow after sign-out by fully clearing provider session state: logout now clears backend session, Firebase auth session, and native Google Sign-In session, and Google sign-in now drops any cached prior Google session before starting so account chooser appears consistently on each attempt (`hooks/useAuth.ts`, `services/firebaseEmailAuth.ts`).
+
 - Temporarily removed phone-number authentication from auth screens while preserving implementation for future re-enable: hidden phone auth entry on auth welcome, removed phone fallback links on email sign-in/sign-up screens, and redirected legacy phone routes (`/(auth)/signin`, `/(auth)/signup`, `/(auth)/otp`) to email/default auth screens. Added a toggle constant for future restoration (`utils/constants.ts`, `app/(auth)/index.tsx`, `app/(auth)/signin-email.tsx`, `app/(auth)/signup-email.tsx`, `app/(auth)/signin.tsx`, `app/(auth)/signup.tsx`, `app/(auth)/otp.tsx`).
 
 - Temporarily deactivated wallet and DVA frontend surfaces while preserving wallet code for future re-enable: checkout is now card-only via direct Paystack flow, wallet UI was removed from Home/Header/Profile/Cart entry points, direct wallet route is blocked by app-layout redirect when wallet features are disabled, wallet warmup prefetch is skipped, and secondary wallet mentions were removed from support quick replies and chat order summaries (`utils/constants.ts`, `app/(app)/_layout.tsx`, `app/(app)/cart.tsx`, `app/(app)/index.tsx`, `components/layout/Header.tsx`, `app/(app)/profile.tsx`, `app/(app)/settings/support.tsx`, `app/(app)/modes/chat.tsx`, `docs/direct-payment-checkout.md`, `docs/payment-system.md`).

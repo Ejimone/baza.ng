@@ -1,9 +1,6 @@
 import { router } from "expo-router";
 import { useCallback, useState } from "react";
-import type {
-  OtpRequestPayload,
-  OtpVerifyPayload,
-} from "../services/auth";
+import type { OtpRequestPayload, OtpVerifyPayload } from "../services/auth";
 import * as authService from "../services/auth";
 import * as firebaseEmailAuth from "../services/firebaseEmailAuth";
 import { useAuthStore } from "../stores/authStore";
@@ -142,7 +139,10 @@ export function useAuth() {
       router.replace("/(app)");
       return userData;
     } catch (err: any) {
-      if (mapGoogleSignInError(err) === null && err?.code === "SIGN_IN_CANCELLED") {
+      if (
+        mapGoogleSignInError(err) === null &&
+        err?.code === "SIGN_IN_CANCELLED"
+      ) {
         // User cancelled, don't show error
       } else {
         const msg = getAuthErrorMessage(
@@ -163,6 +163,13 @@ export function useAuth() {
     } catch {
       // Logout API call may fail if token expired — proceed anyway
     }
+
+    try {
+      await firebaseEmailAuth.signOut();
+    } catch {
+      // Provider sign-out failures should not block local logout.
+    }
+
     clearCartLocal();
     storeLogout();
     router.replace("/(auth)");

@@ -1,5 +1,4 @@
 import Constants from "expo-constants";
-import { Platform } from "react-native";
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
@@ -7,6 +6,7 @@ import {
   signInWithEmailAndPassword,
   type User,
 } from "firebase/auth";
+import { Platform } from "react-native";
 import { auth } from "../config/firebase";
 
 const WEB_CLIENT_ID =
@@ -40,6 +40,16 @@ export async function signInWithGoogle(): Promise<User> {
     iosClientId: IOS_CLIENT_ID,
     offlineAccess: true,
   });
+
+  // Ensure chooser appears on every attempt instead of silently reusing a cached Google account.
+  try {
+    const hasPrevious = await GoogleSignin.hasPreviousSignIn();
+    if (hasPrevious) {
+      await GoogleSignin.signOut();
+    }
+  } catch {
+    // Best effort only; continue to sign-in flow.
+  }
 
   // hasPlayServices is Android-specific; skip on iOS to avoid native issues.
   if (Platform.OS === "android") {
@@ -78,4 +88,29 @@ export async function getIdToken(user: User): Promise<string> {
 
 export async function signOut(): Promise<void> {
   await auth.signOut();
+
+  // Also clear native Google session so next sign-in shows account picker.
+  if (isExpoGo) {
+    return;
+  }
+
+  try {
+    const { GoogleSignin } =
+      await import("@react-native-google-signin/google-signin");
+
+    GoogleSignin.configure({
+      webClientId: WEB_CLIENT_ID,
+      iosClientId: IOS_CLIENT_ID,
+      offlineAccess: true,
+    });
+
+    await GoogleSignin.signOut();
+    try {
+      await GoogleSignin.revokeAccess();
+    } catch {
+      // Revoke may fail if there is no active Google session.
+    }
+  } catch {
+    // Ignore Google native sign-out failures; Firebase sign-out already happened.
+  }
 }
