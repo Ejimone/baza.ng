@@ -7,24 +7,41 @@ interface AuthState {
   user: User | null;
   accessToken: string | null;
   isAuthenticated: boolean;
+  needsReferralOnboarding: boolean;
 
-  login: (user: User, token: string) => void;
+  login: (
+    user: User,
+    token: string,
+    options?: { needsReferralOnboarding?: boolean },
+  ) => void;
   logout: () => void;
   setAccessToken: (token: string) => void;
   updateUser: (partial: Partial<User>) => void;
+  completeReferralOnboarding: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   accessToken: null,
   isAuthenticated: false,
+  needsReferralOnboarding: false,
 
-  login: (user, token) =>
-    set({ user, accessToken: token, isAuthenticated: true }),
+  login: (user, token, options) =>
+    set({
+      user,
+      accessToken: token,
+      isAuthenticated: true,
+      needsReferralOnboarding: Boolean(options?.needsReferralOnboarding),
+    }),
 
   logout: () => {
     deleteRefreshToken();
-    set({ user: null, accessToken: null, isAuthenticated: false });
+    set({
+      user: null,
+      accessToken: null,
+      isAuthenticated: false,
+      needsReferralOnboarding: false,
+    });
   },
 
   setAccessToken: (token) => set({ accessToken: token }),
@@ -33,6 +50,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set((state) => ({
       user: state.user ? { ...state.user, ...partial } : null,
     })),
+
+  completeReferralOnboarding: () => set({ needsReferralOnboarding: false }),
 }));
 
 // Wire up the API client so it can read the token and handle refresh failures

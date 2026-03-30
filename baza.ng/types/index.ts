@@ -52,6 +52,7 @@ export interface User {
 
 export interface AuthResponse {
   accessToken: string;
+  isNewUser: boolean;
   user: User;
 }
 
@@ -296,6 +297,20 @@ export interface ReferralStats {
   referrals: Referral[];
 }
 
+export interface ApplyReferralRequest {
+  referralCode: string;
+}
+
+export interface ApplyReferralResponse {
+  message: "Referral code applied";
+  referralCode: string;
+  referrer: {
+    name: string;
+    phone: string | null;
+    email: string | null;
+  };
+}
+
 // Support
 
 export interface SupportMessage {
@@ -400,6 +415,55 @@ export interface Pagination {
 export interface PaginatedResponse<T> {
   data: T;
   pagination: Pagination;
+}
+
+// Notifications
+
+export type NotificationEventType =
+  | "order_created"
+  | "order_status_changed"
+  | "payment_success"
+  | "cart_item_added"
+  | "cart_item_updated"
+  | "cart_item_removed"
+  | "admin_order_created"
+  | "admin_order_status_changed"
+  | "product_status_changed";
+
+export interface AppNotification {
+  id: string;
+  eventType: NotificationEventType;
+  title: string;
+  body: string;
+  audience: "customer" | "admin";
+  data: {
+    orderId?: string;
+    status?: string;
+    userId?: string;
+  };
+  isRead: boolean;
+  readAt: string | null;
+  createdAt: string;
+}
+
+export interface NotificationsListResponse {
+  notifications: AppNotification[];
+  count: number;
+  unreadCount: number;
+  pagination: {
+    limit: number;
+    offset: number;
+  };
+}
+
+export type WebSocketMessage =
+  | { type: "connected"; message: string }
+  | { type: "notification"; notification: AppNotification };
+
+export interface DeviceTokenResponse {
+  id: string;
+  platform: string;
+  isActive: boolean;
 }
 
 // API Error

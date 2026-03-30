@@ -10,6 +10,7 @@ export interface FirebaseVerifyPayload {
   idToken: string;
   name?: string;
   phone?: string;
+  referralCode?: string;
 }
 
 export type OtpIntent = "signup" | "login";

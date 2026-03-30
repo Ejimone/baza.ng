@@ -11,6 +11,7 @@ import ScreenWrapper from "../../components/layout/ScreenWrapper";
 import { getThemePalette } from "../../constants/appTheme";
 import { useAuth } from "../../hooks/useAuth";
 import { useOrders } from "../../hooks/useOrders";
+import { useNotificationStore } from "../../stores/notificationStore";
 import { useThemeStore } from "../../stores/themeStore";
 import { profileScreen as s } from "../../styles/index";
 
@@ -46,6 +47,8 @@ export default function ProfileScreen() {
     ? new Date(user.memberSince).getFullYear()
     : new Date().getFullYear();
 
+  const unreadCount = useNotificationStore((s) => s.unreadCount);
+
   const navRows = [
     {
       icon: "📦",
@@ -60,7 +63,7 @@ export default function ProfileScreen() {
     {
       icon: "🔔",
       label: "Notifications",
-      sub: "MANAGE PREFERENCES",
+      sub: unreadCount > 0 ? `${unreadCount} UNREAD` : "ALL CAUGHT UP",
       route: "/(app)/settings/notifications",
     },
     {

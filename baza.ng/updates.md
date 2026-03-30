@@ -2,6 +2,10 @@
 
 ## Completed
 
+- Bumped mobile app release version to `2.7.2` with Android `versionCode 9` and iOS `buildNumber 9` for the next APK build (`app.json`, `android/app/build.gradle`).
+
+- Activated referral onboarding for Email/Google auth with backend `isNewUser` gating: first-time users now route to a post-signup referral step with Apply/Skip actions (`POST /v1/referral/apply-code`), existing users continue directly to app, and auth contracts now support `isNewUser` plus optional `referralCode` on Firebase verify (`types/index.ts`, `services/auth.ts`, `services/referral.ts`, `stores/authStore.ts`, `hooks/useAuth.ts`, `app/(app)/_layout.tsx`, `app/(app)/onboarding/referral.tsx`, `app/(auth)/signup-email.tsx`).
+
 - Fixed Google re-login flow after sign-out by fully clearing provider session state: logout now clears backend session, Firebase auth session, and native Google Sign-In session, and Google sign-in now drops any cached prior Google session before starting so account chooser appears consistently on each attempt (`hooks/useAuth.ts`, `services/firebaseEmailAuth.ts`).
 
 - Temporarily removed phone-number authentication from auth screens while preserving implementation for future re-enable: hidden phone auth entry on auth welcome, removed phone fallback links on email sign-in/sign-up screens, and redirected legacy phone routes (`/(auth)/signin`, `/(auth)/signup`, `/(auth)/otp`) to email/default auth screens. Added a toggle constant for future restoration (`utils/constants.ts`, `app/(auth)/index.tsx`, `app/(auth)/signin-email.tsx`, `app/(auth)/signup-email.tsx`, `app/(auth)/signin.tsx`, `app/(auth)/signup.tsx`, `app/(auth)/otp.tsx`).

@@ -3,8 +3,13 @@ import { useCallback, useState } from "react";
 import type { OtpRequestPayload, OtpVerifyPayload } from "../services/auth";
 import * as authService from "../services/auth";
 import * as firebaseEmailAuth from "../services/firebaseEmailAuth";
+import * as notificationService from "../services/notification";
+import { notificationWs } from "../services/websocket";
 import { useAuthStore } from "../stores/authStore";
 import { useCartStore } from "../stores/cartStore";
+import { useNotificationStore } from "../stores/notificationStore";
+import type { AuthResponse } from "../types";
+import { getStoredDeviceToken } from "./usePushNotifications";
 
 export function useAuth() {
   const {
@@ -13,11 +18,40 @@ export function useAuth() {
     login,
     logout: storeLogout,
     updateUser,
+    completeReferralOnboarding,
   } = useAuthStore();
   const clearCartLocal = useCartStore((s) => s.clearLocal);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const completePostSignupReferral = useCallback(() => {
+    completeReferralOnboarding();
+  }, [completeReferralOnboarding]);
+
+  const completeAuthFlow = useCallback(
+    (
+      result: AuthResponse,
+      options?: { forceSkipReferralOnboarding?: boolean },
+    ) => {
+      const shouldShowReferralOnboarding =
+        Boolean(result.isNewUser) && !options?.forceSkipReferralOnboarding;
+
+      login(result.user, result.accessToken, {
+        needsReferralOnboarding: shouldShowReferralOnboarding,
+      });
+      void useCartStore.getState().fetchCart();
+
+      if (shouldShowReferralOnboarding) {
+        router.replace("/(app)/onboarding/referral");
+      } else {
+        router.replace("/(app)");
+      }
+
+      return result.user;
+    },
+    [login],
+  );
 
   const requestOtp = useCallback(async (payload: OtpRequestPayload) => {
     setIsLoading(true);
@@ -44,10 +78,14 @@ export function useAuth() {
       try {
         const { accessToken, user: userData } =
           await authService.verifyOtp(payload);
-        login(userData, accessToken);
-        void useCartStore.getState().fetchCart();
-        router.replace("/(app)");
-        return userData;
+        return completeAuthFlow(
+          {
+            accessToken,
+            isNewUser: false,
+            user: userData,
+          },
+          { forceSkipReferralOnboarding: true },
+        );
       } catch (err: any) {
         const msg = getAuthErrorMessage(err, "Invalid OTP. Please try again.");
         setError(msg);
@@ -56,7 +94,7 @@ export function useAuth() {
         setIsLoading(false);
       }
     },
-    [login],
+    [completeAuthFlow],
   );
 
   const signUpWithEmail = useCallback(
@@ -64,22 +102,19 @@ export function useAuth() {
       email: string,
       password: string,
       name?: string,
-      _referralCode?: string,
+      referralCode?: string,
     ) => {
       setIsLoading(true);
       setError(null);
       try {
         const user = await firebaseEmailAuth.signUpWithEmail(email, password);
         const idToken = await firebaseEmailAuth.getIdToken(user);
-        const { accessToken, user: userData } =
-          await authService.verifyFirebaseToken({
-            idToken,
-            name: name ?? user.displayName ?? undefined,
-          });
-        login(userData, accessToken);
-        void useCartStore.getState().fetchCart();
-        router.replace("/(app)");
-        return userData;
+        const result = await authService.verifyFirebaseToken({
+          idToken,
+          name: name ?? user.displayName ?? undefined,
+          referralCode: referralCode?.trim() || undefined,
+        });
+        return completeAuthFlow(result);
       } catch (err: any) {
         const msg = getAuthErrorMessage(
           err,
@@ -91,7 +126,7 @@ export function useAuth() {
         setIsLoading(false);
       }
     },
-    [login],
+    [completeAuthFlow],
   );
 
   const signInWithEmail = useCallback(
@@ -101,14 +136,10 @@ export function useAuth() {
       try {
         const user = await firebaseEmailAuth.signInWithEmail(email, password);
         const idToken = await firebaseEmailAuth.getIdToken(user);
-        const { accessToken, user: userData } =
-          await authService.verifyFirebaseToken({
-            idToken,
-          });
-        login(userData, accessToken);
-        void useCartStore.getState().fetchCart();
-        router.replace("/(app)");
-        return userData;
+        const result = await authService.verifyFirebaseToken({
+          idToken,
+        });
+        return completeAuthFlow(result, { forceSkipReferralOnboarding: true });
       } catch (err: any) {
         const msg = getAuthErrorMessage(
           err,
@@ -120,7 +151,7 @@ export function useAuth() {
         setIsLoading(false);
       }
     },
-    [login],
+    [completeAuthFlow],
   );
 
   const signInWithGoogle = useCallback(async () => {
@@ -129,15 +160,11 @@ export function useAuth() {
     try {
       const user = await firebaseEmailAuth.signInWithGoogle();
       const idToken = await firebaseEmailAuth.getIdToken(user);
-      const { accessToken, user: userData } =
-        await authService.verifyFirebaseToken({
-          idToken,
-          name: user.displayName ?? undefined,
-        });
-      login(userData, accessToken);
-      void useCartStore.getState().fetchCart();
-      router.replace("/(app)");
-      return userData;
+      const result = await authService.verifyFirebaseToken({
+        idToken,
+        name: user.displayName ?? undefined,
+      });
+      return completeAuthFlow(result);
     } catch (err: any) {
       if (
         mapGoogleSignInError(err) === null &&
@@ -155,9 +182,18 @@ export function useAuth() {
     } finally {
       setIsLoading(false);
     }
-  }, [login]);
+  }, [completeAuthFlow]);
 
   const handleLogout = useCallback(async () => {
+    const deviceToken = getStoredDeviceToken();
+    if (deviceToken) {
+      try {
+        await notificationService.removeDeviceToken(deviceToken);
+      } catch {
+        // Non-critical -- token will expire server-side
+      }
+    }
+
     try {
       await authService.logout();
     } catch {
@@ -170,6 +206,8 @@ export function useAuth() {
       // Provider sign-out failures should not block local logout.
     }
 
+    notificationWs.disconnect();
+    useNotificationStore.getState().reset();
     clearCartLocal();
     storeLogout();
     router.replace("/(auth)");
@@ -188,6 +226,7 @@ export function useAuth() {
     logout: handleLogout,
     updateUser,
     clearError: () => setError(null),
+    completePostSignupReferral,
   };
 }
 

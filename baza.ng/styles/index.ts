@@ -1037,3 +1037,30 @@ export const addMoreButton = {
     "mt-4 mb-2 mx-auto w-full py-[14px] bg-transparent border border-dashed items-center justify-center",
   text: "text-xxs tracking-wide-xl font-mono font-bold",
 };
+
+// ─── NOTIFICATION PANEL ─────────────────────────────────────────────────────
+
+export const notificationPanel = {
+  backdrop: "absolute inset-0 z-[90]",
+  container: "absolute left-0 right-0 z-[100] mx-4 overflow-hidden",
+  header: "flex-row justify-between items-center px-4 pt-4 pb-2.5",
+  headerLabel: "text-3xs tracking-wide-2xl font-mono font-bold",
+  clearAllBtn: "py-1 px-2.5",
+  clearAllText: "text-3xs tracking-wide-lg font-mono",
+  list: "max-h-[400px]",
+  item: "flex-row items-start px-4 py-3 gap-3",
+  itemDot: "w-2 h-2 rounded-full mt-1.5 shrink-0",
+  itemContent: "flex-1",
+  itemTitle: "text-[13px] font-serif",
+  itemBody: "text-[11px] font-mono mt-0.5 leading-[15px]",
+  itemTime: "text-3xs tracking-wide-md font-mono mt-1",
+  itemDismiss: "p-1.5 shrink-0 mt-0.5",
+  itemDismissText: "text-xs font-mono",
+  emptyContainer: "items-center py-8",
+  emptyText: "text-xxs tracking-wide-2xl font-mono",
+  loadMoreBtn: "py-3 items-center",
+  loadMoreText: "text-3xs tracking-wide-lg font-mono",
+  bellBadge:
+    "absolute -top-2 -right-2.5 min-w-[16px] h-4 rounded-full px-[3px] items-center justify-center border",
+  bellBadgeText: "text-[8px] font-serif leading-[10px]",
+};

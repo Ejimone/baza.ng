@@ -1,13 +1,13 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { getThemePalette } from "../../constants/appTheme";
 import { useAuth } from "../../hooks/useAuth";
@@ -26,7 +26,6 @@ export default function SignUpEmailScreen() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [refCode, setRefCode] = useState("");
-  const [refApplied, setRefApplied] = useState(false);
   const { signUpWithEmail, signInWithGoogle, isLoading, error, clearError } =
     useAuth();
   const palette = getThemePalette("light");
@@ -47,15 +46,11 @@ export default function SignUpEmailScreen() {
         email.trim().toLowerCase(),
         password,
         name.trim(),
-        refApplied ? refCode : undefined,
+        refCode.trim() || undefined,
       );
     } catch {
       // error state is set by the hook
     }
-  };
-
-  const handleApplyRef = () => {
-    if (refCode.length >= 4) setRefApplied(true);
   };
 
   return (
@@ -121,37 +116,21 @@ export default function SignUpEmailScreen() {
         <Text className={s.signupRefLabel}>
           REFERRAL CODE <Text className={s.signupRefOptional}>(OPTIONAL)</Text>
         </Text>
-        <View className={s.signupRefRow}>
-          <TextInput
-            value={refCode}
-            onChangeText={(val) => {
-              setRefCode(val.toUpperCase());
-              setRefApplied(false);
-            }}
-            placeholder="e.g. THRIVE200"
-            placeholderTextColor={palette.textSecondary}
-            maxLength={12}
-            autoCapitalize="characters"
-            className={`${s.signupRefInput} ${refApplied ? s.signupRefInputApplied : ""}`}
-          />
-          <Pressable
-            onPress={handleApplyRef}
-            className={`${s.signupApplyBtn} ${refApplied ? s.signupApplyActive : s.signupApplyInactive}`}
-          >
-            <Text
-              className={`text-3xs tracking-wide-md font-mono ${refApplied ? "text-baza-green" : ""}`}
-              style={!refApplied ? { color: palette.textSecondary } : undefined}
-            >
-              {refApplied ? "✓ APPLIED" : "APPLY"}
-            </Text>
-          </Pressable>
-        </View>
+        <TextInput
+          value={refCode}
+          onChangeText={(val) => {
+            setRefCode(val.toUpperCase());
+          }}
+          placeholder="e.g. THRIVE200"
+          placeholderTextColor={palette.textSecondary}
+          maxLength={12}
+          autoCapitalize="characters"
+          className={s.signupInput}
+        />
 
-        {refApplied ? (
-          <Text className={s.signupRefCredit}>
-            ₦1,000 credit will be added after your first order.
-          </Text>
-        ) : null}
+        <Text className={s.signupHint}>
+          You can also skip now and add a referral code right after signup.
+        </Text>
 
         <Text className={`${s.signupHint} mt-5`}>
           Create an account with your email and password.
